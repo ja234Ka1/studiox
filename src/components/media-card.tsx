@@ -1,9 +1,10 @@
+
 "use client";
 
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Plus, Check, Star } from "lucide-react";
+import { Plus, Check, Star, PlayCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import type { Media } from "@/types/tmdb";
@@ -24,6 +25,8 @@ export function MediaCard({ item }: MediaCardProps) {
   const fallbackImage = PlaceHolderImages.find(p => p.id === 'media-fallback');
   const imageUrl = item.poster_path ? getTmdbImageUrl(item.poster_path) : fallbackImage?.imageUrl;
   const title = item.title || item.name;
+
+  const streamPath = item.media_type === 'tv' ? `/stream/tv/${item.id}/1/1` : `/stream/movie/${item.id}`;
 
   useEffect(() => {
     const watchlist = getWatchlist();
@@ -85,8 +88,11 @@ export function MediaCard({ item }: MediaCardProps) {
               </div>
             )}
             <div className="flex gap-2">
-                <Button size="sm" className="flex-1">
+                <Button size="sm" className="flex-1" asChild onClick={(e) => e.stopPropagation()}>
+                  <Link href={streamPath}>
+                    <PlayCircle className="mr-2 h-4 w-4" />
                     Watch
+                  </Link>
                 </Button>
                 <Button size="sm" variant="secondary" onClick={handleWatchlistToggle}>
                     {isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}

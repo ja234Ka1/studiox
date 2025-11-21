@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from "next/image";
@@ -57,6 +58,8 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
   };
 
   const trailer = item.videos?.results?.find(v => v.type === 'Trailer' && v.official);
+  const streamPath = item.media_type === 'tv' ? `/stream/tv/${item.id}/1/1` : `/stream/movie/${item.id}`;
+
 
   return (
     <div className="relative w-full h-[60vh] lg:h-[85vh]">
@@ -91,9 +94,11 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
           </h1>
           
           <div className="flex items-center gap-4">
-            <Button size="lg" onClick={handlePlayTrailer}>
+            <Button size="lg" asChild>
+              <Link href={streamPath}>
                 <PlayCircle className="mr-2" />
                 Watch
+              </Link>
             </Button>
             {trailer && (
                 <Button size="lg" variant="secondary" onClick={handlePlayTrailer}>
