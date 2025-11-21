@@ -4,7 +4,6 @@ import type { MediaType } from "@/types/tmdb";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { getMediaDetails } from "@/lib/tmdb";
 
 type Props = {
   params: {
@@ -16,7 +15,7 @@ type Props = {
    searchParams: { [key: string]: string | string[] | undefined };
 };
 
-export default async function StreamPage({ params, searchParams }: Props) {
+export default function StreamPage({ params, searchParams }: Props) {
   const { mediaType, id, season, episode } = params;
 
   if (mediaType !== "tv" && mediaType !== "movie") {
