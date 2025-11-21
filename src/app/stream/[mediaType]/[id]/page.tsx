@@ -9,14 +9,12 @@ type Props = {
   params: {
     mediaType: MediaType;
     id: string;
-    season?: string;
-    episode?: string;
   };
    searchParams: { [key: string]: string | string[] | undefined };
 };
 
 export default function StreamPage({ params, searchParams }: Props) {
-  const { mediaType, id, season, episode } = params;
+  const { mediaType, id } = params;
 
   if (mediaType !== "tv" && mediaType !== "movie") {
     notFound();
@@ -26,25 +24,15 @@ export default function StreamPage({ params, searchParams }: Props) {
   if (isNaN(numericId)) {
     notFound();
   }
-
-  let seasonNumber: number | undefined;
-  let episodeNumber: number | undefined;
-
-  if (mediaType === "tv") {
-    seasonNumber = parseInt(season || "1", 10);
-    episodeNumber = parseInt(episode || "1", 10);
-    if (isNaN(seasonNumber) || isNaN(episodeNumber)) {
-      notFound();
-    }
-  }
+  
+  const title = typeof searchParams.title === 'string' ? searchParams.title : 'Stream';
 
   const streamUrl = mediaType === 'tv'
-    ? `https://cinemaos.tech/player/${id}/${seasonNumber}/${episodeNumber}`
+    ? `https://cinemaos.tech/player/${id}/1/1`
     : `https://cinemaos.tech/player/${id}`;
     
-  const title = typeof searchParams.title === 'string' ? searchParams.title : 'Stream';
-  const itemTitle = mediaType === 'tv' && seasonNumber && episodeNumber
-    ? `${title} - S${seasonNumber} E${episodeNumber}`
+  const itemTitle = mediaType === 'tv'
+    ? `${title} - S1 E1`
     : title;
 
   return (

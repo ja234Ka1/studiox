@@ -60,6 +60,10 @@ export function MediaCard({ item }: MediaCardProps) {
   };
   
   const handleCardClick = (e: React.MouseEvent) => {
+    // Check if the click target is the watchlist button, if so, don't navigate
+    if ((e.target as HTMLElement).closest('button[data-watchlist-toggle]')) {
+        return;
+    }
     e.preventDefault();
     router.push(detailPath);
   }
@@ -107,7 +111,7 @@ export function MediaCard({ item }: MediaCardProps) {
                 Details
               </Link>
             </Button>
-            <Button size="sm" variant="secondary" onClick={handleWatchlistToggle}>
+            <Button size="sm" variant="secondary" onClick={handleWatchlistToggle} data-watchlist-toggle>
                 {isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
             </Button>
         </div>

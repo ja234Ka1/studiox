@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Info, PlayCircle, Plus, Check } from "lucide-react";
+import { PlayCircle, Plus, Check } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import type { MediaDetails } from "@/types/tmdb";
@@ -58,9 +58,8 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
   };
 
   const trailer = item.videos?.results?.find(v => v.type === 'Trailer' && v.official);
-  const streamPath = item.media_type === 'tv' 
-    ? `/stream/tv/${item.id}/1/1?title=${encodeURIComponent(title || '')}` 
-    : `/stream/movie/${item.id}/-1/-1?title=${encodeURIComponent(title || '')}`;
+  
+  const streamPath = `/stream/${item.media_type}/${item.id}?title=${encodeURIComponent(title || '')}`;
 
 
   return (
