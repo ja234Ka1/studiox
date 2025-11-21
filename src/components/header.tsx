@@ -1,0 +1,76 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Clapperboard, Film, Search, Settings, Tv } from "lucide-react";
+import { usePathname } from "next/navigation";
+
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+const navItems = [
+  { href: "/movies", label: "Movies", icon: Film },
+  { href: "/tv-shows", label: "TV Shows", icon: Tv },
+  { href: "/settings", label: "Settings", icon: Settings },
+];
+
+export function Header() {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return (
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full transition-all duration-300",
+        isScrolled ? "bg-background/80 backdrop-blur-sm border-b border-border" : "bg-transparent"
+      )}
+    >
+      <div className="container flex h-16 items-center px-4 md:px-8">
+        <Link href="/" className="mr-6 flex items-center space-x-2">
+          <Clapperboard className="h-6 w-6 text-accent" />
+          <span className="hidden font-bold sm:inline-block text-lg">Willow</span>
+        </Link>
+        <nav className="hidden md:flex items-center space-x-1">
+          {navItems.map((item) => (
+            <Button
+              key={item.label}
+              variant="ghost"
+              asChild
+              className={cn(
+                "text-sm font-medium",
+                pathname.startsWith(item.href)
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-primary"
+              )}
+            >
+              <Link href={item.href}>
+                <item.icon className="mr-2 h-4 w-4" />
+                {item.label}
+              </Link>
+            </Button>
+          ))}
+        </nav>
+        <div className="flex flex-1 items-center justify-end space-x-4">
+          <div className="relative w-full max-w-xs">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search movies & shows..."
+              className="pl-9"
+            />
+          </div>
+          <Button variant="ghost">Login</Button>
+        </div>
+      </div>
+    </header>
+  );
+}
