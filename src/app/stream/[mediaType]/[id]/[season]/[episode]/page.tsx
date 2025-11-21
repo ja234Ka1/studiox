@@ -1,10 +1,10 @@
 
 import { notFound } from "next/navigation";
-import { getMediaDetails } from "@/lib/tmdb";
 import type { MediaType } from "@/types/tmdb";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { getMediaDetails } from "@/lib/tmdb";
 
 type Props = {
   params: {
@@ -13,9 +13,10 @@ type Props = {
     season?: string;
     episode?: string;
   };
+   searchParams: { [key: string]: string | string[] | undefined };
 };
 
-export default async function StreamPage({ params }: Props) {
+export default async function StreamPage({ params, searchParams }: Props) {
   const { mediaType, id, season, episode } = params;
 
   if (mediaType !== "tv" && mediaType !== "movie") {
@@ -38,15 +39,14 @@ export default async function StreamPage({ params }: Props) {
     }
   }
 
-  const item = await getMediaDetails(numericId, mediaType);
-  
   const streamUrl = mediaType === 'tv'
-    ? `https://cinemaos.tech/player/${item.id}/${seasonNumber}/${episodeNumber}`
-    : `https://cinemaos.tech/player/${item.id}`;
-
-  const title = mediaType === 'tv' 
-    ? `${item.title || item.name} - S${seasonNumber} E${episodeNumber}`
-    : item.title || item.name;
+    ? `https://cinemaos.tech/player/${id}/${seasonNumber}/${episodeNumber}`
+    : `https://cinemaos.tech/player/${id}`;
+    
+  const title = typeof searchParams.title === 'string' ? searchParams.title : 'Stream';
+  const itemTitle = mediaType === 'tv' && seasonNumber && episodeNumber
+    ? `${title} - S${seasonNumber} E${episodeNumber}`
+    : title;
 
   return (
     <div className="w-full h-screen bg-black flex flex-col">
@@ -56,7 +56,7 @@ export default async function StreamPage({ params }: Props) {
             <ArrowLeft className="mr-2" /> Back to details
           </Link>
         </Button>
-        <h1 className="text-xl font-bold text-white truncate">{title}</h1>
+        <h1 className="text-xl font-bold text-white truncate">{itemTitle}</h1>
       </div>
       <iframe
         src={streamUrl}

@@ -28,7 +28,9 @@ export function MediaCard({ item }: MediaCardProps) {
   const imageUrl = item.poster_path ? getTmdbImageUrl(item.poster_path) : fallbackImage?.imageUrl;
   const title = item.title || item.name;
 
-  const streamPath = item.media_type === 'tv' ? `/stream/tv/${item.id}/1/1` : `/stream/movie/${item.id}/-1/-1`;
+  const streamPath = item.media_type === 'tv' 
+    ? `/stream/tv/${item.id}/1/1?title=${encodeURIComponent(title || '')}` 
+    : `/stream/movie/${item.id}/-1/-1?title=${encodeURIComponent(title || '')}`;
   const detailPath = `/media/${item.media_type}/${item.id}`;
 
   useEffect(() => {
@@ -59,10 +61,13 @@ export function MediaCard({ item }: MediaCardProps) {
   const handlePrefetch = () => {
     router.prefetch(detailPath);
   };
+  
+  const handleCardClick = () => {
+    router.push(detailPath);
+  }
 
   return (
     <motion.div
-      onClick={() => router.push(detailPath)}
       onMouseEnter={handlePrefetch}
       whileHover="hover"
       className="relative aspect-[2/3] rounded-lg overflow-hidden group cursor-pointer"
@@ -75,20 +80,22 @@ export function MediaCard({ item }: MediaCardProps) {
       }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
-      {imageUrl && (
-        <Image
-          src={imageUrl}
-          alt={title || "Media poster"}
-          fill
-          sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
-          className="object-cover"
-          data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
-        />
-      )}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+        <div onClick={handleCardClick} className="absolute inset-0">
+          {imageUrl && (
+            <Image
+              src={imageUrl}
+              alt={title || "Media poster"}
+              fill
+              sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
+              className="object-cover"
+              data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+        </div>
 
       <div className="absolute inset-0 flex flex-col justify-end p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
-        <h3 className="font-bold text-sm text-white truncate mb-1">{title}</h3>
+        <h3 className="font-bold text-sm text-white truncate mb-1" onClick={handleCardClick}>{title}</h3>
         {item.vote_average > 0 && (
           <div className="flex items-center text-xs text-amber-400 mb-2">
             <Star className="w-3 h-3 mr-1 fill-current" />
