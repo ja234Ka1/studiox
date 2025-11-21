@@ -9,41 +9,42 @@ import { Skeleton } from "./ui/skeleton";
 
 interface Category {
   title: string;
+  fetcher: () => Promise<Media[]>;
   items: Media[];
 }
 
+const categoriesConfig: Omit<Category, 'items'>[] = [
+    { title: "Popular Movies", fetcher: () => getPopular("movie") },
+    { title: "Top Rated Movies", fetcher: () => getTopRated("movie") },
+    { title: "Popular TV Shows", fetcher: () => getPopular("tv") },
+    { title: "Top Rated TV Shows", fetcher: () => getTopRated("tv") },
+    { title: "Hollywood Hits", fetcher: () => getPopular("movie", { with_original_language: 'en' }) },
+    { title: "Must-Watch Anime", fetcher: () => getPopular("tv", { with_genres: '16', with_keywords: '210024|287501' }) },
+];
+
+
 export function HomePageLoader() {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<Category[]>(
+    categoriesConfig.map(c => ({...c, items: []}))
+  );
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadCategories = async () => {
       setIsLoading(true);
       try {
-        const [
-          popularMovies,
-          topRatedMovies,
-          popularTv,
-          topRatedTv,
-          hollywood,
-          anime,
-        ] = await Promise.all([
-          getPopular("movie"),
-          getTopRated("movie"),
-          getPopular("tv"),
-          getTopRated("tv"),
-          getPopular("movie", { with_original_language: 'en' }),
-          getPopular("tv", { with_genres: '16', with_keywords: '210024|287501' }) // Anime genre and keywords
-        ]);
+        const results = await Promise.allSettled(
+            categoriesConfig.map(c => c.fetcher())
+        );
 
-        const newCategories: Category[] = [
-          { title: "Popular Movies", items: popularMovies },
-          { title: "Top Rated Movies", items: topRatedMovies },
-          { title: "Popular TV Shows", items: popularTv },
-          { title: "Top Rated TV Shows", items: topRatedTv },
-          { title: "Hollywood Hits", items: hollywood },
-          { title: "Must-Watch Anime", items: anime },
-        ].filter(category => category.items.length > 0);
+        const newCategories = categoriesConfig.map((category, index) => {
+            const result = results[index];
+            if (result.status === 'fulfilled') {
+                return { ...category, items: result.value };
+            }
+            console.error(`Failed to load category "${category.title}":`, result.reason);
+            return { ...category, items: [] };
+        }).filter(c => c.items.length > 0);
 
         setCategories(newCategories);
       } catch (error) {
@@ -62,15 +63,19 @@ export function HomePageLoader() {
             {[...Array(4)].map((_, i) => (
                 <div key={i}>
                     <Skeleton className="h-8 w-1/4 mb-4" />
-                    <div className="flex space-x-4">
+                    <div className="flex space-x-4 overflow-hidden">
                         {[...Array(6)].map((_, j) => (
-                            <Skeleton key={j} className="h-64 w-44 rounded-lg" />
+                            <Skeleton key={j} className="h-64 w-44 rounded-lg flex-shrink-0" />
                         ))}
                     </div>
                 </div>
             ))}
         </div>
     );
+  }
+
+  if (categories.length === 0) {
+    return null; // Don't show anything if all categories failed to load or are empty
   }
 
   return (

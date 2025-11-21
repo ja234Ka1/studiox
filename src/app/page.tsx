@@ -4,9 +4,18 @@ import MediaCarousel from "@/components/media-carousel";
 import { HomePageLoader } from "@/components/home-page-loader";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Image from "next/image";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Clapperboard } from "lucide-react";
 
 export default async function Home() {
-  const trendingItems = await getTrending("all", "week");
+  let trendingItems: Awaited<ReturnType<typeof getTrending>> | null = null;
+  let error: string | null = null;
+  try {
+    trendingItems = await getTrending("all", "week");
+  } catch (e: any) {
+    error = e.message || "Failed to fetch trending data.";
+  }
+  
   const heroItem = trendingItems?.[0];
   const heroFallbackImage = PlaceHolderImages.find(p => p.id === 'hero-fallback');
 
@@ -31,7 +40,16 @@ export default async function Home() {
       )}
 
       <div className="container px-4 md:px-8 lg:px-16 space-y-12 py-12 pb-24 mx-auto">
-        {trendingItems && trendingItems.length > 0 && (
+        {error && (
+            <Alert variant="destructive">
+                <Clapperboard className="h-4 w-4" />
+                <AlertTitle>Error Loading Content</AlertTitle>
+                <AlertDescription>
+                    There was a problem loading the content from the data provider. Please make sure your API key is correct and try again later.
+                </AlertDescription>
+            </Alert>
+        )}
+        {trendingItems && trendingItems.length > 1 && (
           <MediaCarousel title="Trending This Week" items={trendingItems.slice(1)} />
         )}
         <HomePageLoader />
