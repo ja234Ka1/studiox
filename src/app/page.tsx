@@ -30,7 +30,7 @@ export default async function Home() {
         </div>
       )}
 
-      <div className="container px-4 md:px-8 lg:px-16 -mt-16 md:-mt-24 lg:-mt-48 z-10 space-y-12 pb-24">
+      <div className="container px-4 md:px-8 lg:px-16 -mt-16 md:-mt-24 lg:-mt-48 z-10 space-y-12 pb-24 mx-auto">
         {trendingItems && trendingItems.length > 0 && (
           <MediaCarousel title="Trending This Week" items={trendingItems.slice(1)} />
         )}

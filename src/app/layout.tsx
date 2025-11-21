@@ -32,7 +32,7 @@ export default function RootLayout({
           <Background />
           <div className="relative z-10 flex min-h-screen flex-col">
             <Header />
-            <main className="flex-1">{children}</main>
+            <main className="flex-1 w-full mx-auto">{children}</main>
           </div>
           <VideoPlayer />
           <Toaster />

@@ -34,7 +34,7 @@ export function Header() {
         isScrolled ? "bg-background/80 backdrop-blur-sm border-b border-border" : "bg-transparent"
       )}
     >
-      <div className="container flex h-16 items-center px-4 md:px-8">
+      <div className="container flex h-16 items-center px-4 md:px-8 mx-auto">
         <Link href="/" className="mr-6 flex items-center space-x-2">
           <Clapperboard className="h-6 w-6 text-accent" />
           <span className="hidden font-bold sm:inline-block text-lg">Willow</span>
