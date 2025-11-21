@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
 import MediaCarousel from "@/components/media-carousel";
 import { getPopular, getTopRated } from "@/lib/tmdb";
 import type { Media } from "@/types/tmdb";
@@ -14,12 +13,12 @@ interface Category {
 }
 
 const categoriesConfig: Omit<Category, 'items'>[] = [
-    { title: "Popular Movies", fetcher: () => getPopular("movie") },
-    { title: "Top Rated Movies", fetcher: () => getTopRated("movie") },
-    { title: "Popular TV Shows", fetcher: () => getPopular("tv") },
-    { title: "Top Rated TV Shows", fetcher: () => getTopRated("tv") },
-    { title: "Hollywood Hits", fetcher: () => getPopular("movie", { with_original_language: 'en' }) },
-    { title: "Must-Watch Anime", fetcher: () => getPopular("tv", { with_genres: '16', with_keywords: '210024|287501' }) },
+  { title: "Popular Movies", fetcher: () => getPopular("movie") },
+  { title: "Top Rated Movies", fetcher: () => getTopRated("movie") },
+  { title: "Popular TV Shows", fetcher: () => getPopular("tv") },
+  { title: "Top Rated TV Shows", fetcher: () => getTopRated("tv") },
+  { title: "Hollywood Hits", fetcher: () => getPopular("movie", { with_original_language: 'en' }) },
+  { title: "Must-Watch Anime", fetcher: () => getPopular("tv", { with_genres: '16', with_keywords: '210024|287501' }) },
 ];
 
 
@@ -54,7 +53,12 @@ export function HomePageLoader() {
       }
     };
 
-    loadCategories();
+    // A small delay to allow the main trending section to render first
+    const timer = setTimeout(() => {
+        loadCategories();
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, []);
 
   if (isLoading) {
