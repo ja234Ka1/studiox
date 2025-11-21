@@ -17,8 +17,8 @@ const categoriesConfig: Omit<Category, 'items'>[] = [
   { title: "Top Rated Movies", fetcher: () => getTopRated("movie") },
   { title: "Popular TV Shows", fetcher: () => getPopular("tv") },
   { title: "Top Rated TV Shows", fetcher: () => getTopRated("tv") },
-  { title: "Hollywood Hits", fetcher: () => getPopular("movie", { with_original_language: 'en' }) },
-  { title: "Must-Watch Anime", fetcher: () => getPopular("tv", { with_genres: '16', with_keywords: '210024|287501' }) },
+  { title: "Hollywood Hits", fetcher: () => getTopRated("movie", { with_original_language: 'en' }) },
+  { title: "Must-Watch Anime", fetcher: () => getPopular("tv", { with_genres: '16', with_keywords: '210024' }) },
 ];
 
 
