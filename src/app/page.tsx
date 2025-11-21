@@ -1,11 +1,12 @@
 import { getTrending } from "@/lib/tmdb";
 import { Hero } from "@/components/hero";
 import MediaCarousel from "@/components/media-carousel";
-import { HomePageLoader } from "@/components/home-page-loader";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Image from "next/image";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Clapperboard } from "lucide-react";
+import { HomePageLoader } from "@/components/home-page-loader";
+
 
 export default async function Home() {
   let trendingItems: Awaited<ReturnType<typeof getTrending>> | null = null;
@@ -39,7 +40,7 @@ export default async function Home() {
         </div>
       )}
 
-      <div className="container px-4 md:px-8 lg:px-16 space-y-12 py-12 pb-24 mx-auto">
+      <div className="container px-4 md:px-8 lg:px-16 space-y-12 py-12 pb-24">
         {error && (
             <Alert variant="destructive">
                 <Clapperboard className="h-4 w-4" />
