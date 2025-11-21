@@ -1,16 +1,18 @@
 "use client"
 
 import * as React from "react"
-import { type ThemeProviderProps } from "next-themes/dist/types"
 
 type BackgroundEffects = {
   blobs: boolean;
   starfield: boolean;
 };
 
-type CustomThemeProviderProps = ThemeProviderProps & {
+type CustomThemeProviderProps = {
   children: React.ReactNode;
-}
+  defaultTheme?: string;
+  enableSystem?: boolean;
+  attribute?: string;
+};
 
 type ThemeProviderState = {
   theme?: string;
@@ -21,27 +23,29 @@ type ThemeProviderState = {
 
 const ThemeProviderContext = React.createContext<ThemeProviderState | undefined>(undefined);
 
-// Dummy implementation for next-themes compatibility.
-const NextThemesProvider = ({ children }: { children: React.ReactNode }) => <>{children}</>;
-
-export function ThemeProvider({ children, ...props }: CustomThemeProviderProps) {
-  const [theme, setThemeState] = React.useState<string>(props.defaultTheme || 'dark');
+export function ThemeProvider({ 
+    children, 
+    defaultTheme = 'system', 
+    enableSystem = true,
+    ...props 
+}: CustomThemeProviderProps) {
+  const [theme, setThemeState] = React.useState<string>(defaultTheme);
   const [backgroundEffects, setBackgroundEffectsState] = React.useState<BackgroundEffects>({
     blobs: true,
     starfield: false,
   });
 
    React.useEffect(() => {
-    const storedTheme = localStorage.getItem("willow-theme") || props.defaultTheme || 'dark';
+    const storedTheme = localStorage.getItem("willow-theme") || defaultTheme;
     setTheme(storedTheme);
     const storedBlobs = localStorage.getItem("willow-bg-blobs") !== "false";
     const storedStarfield = localStorage.getItem("willow-bg-starfield") === "true";
     setBackgroundEffectsState({ blobs: storedBlobs, starfield: storedStarfield });
-  }, []);
+  }, [defaultTheme]);
 
   const setTheme = (newTheme: string) => {
     const root = window.document.documentElement;
-    const isSystem = newTheme === 'system';
+    const isSystem = newTheme === 'system' && enableSystem;
 
     const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     const resolvedTheme = isSystem ? systemTheme : newTheme;
@@ -57,13 +61,13 @@ export function ThemeProvider({ children, ...props }: CustomThemeProviderProps) 
   React.useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = () => {
-        if (theme === 'system') {
+        if (theme === 'system' && enableSystem) {
             setTheme('system');
         }
     };
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [theme]);
+  }, [theme, enableSystem]);
 
 
   const setBackgroundEffects = (effects: Partial<BackgroundEffects>) => {
@@ -85,7 +89,7 @@ export function ThemeProvider({ children, ...props }: CustomThemeProviderProps) 
 
   return (
     <ThemeProviderContext.Provider value={value}>
-      <NextThemesProvider {...props}>{children}</NextThemesProvider>
+      {children}
     </ThemeProviderContext.Provider>
   )
 }
