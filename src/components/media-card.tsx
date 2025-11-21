@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Plus, Check, Eye, Star } from "lucide-react";
+import { Plus, Check, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import type { Media } from "@/types/tmdb";
@@ -86,7 +86,6 @@ export function MediaCard({ item }: MediaCardProps) {
             )}
             <div className="flex gap-2">
                 <Button size="sm" className="flex-1">
-                    <Eye className="w-4 h-4 mr-1" />
                     Watch
                 </Button>
                 <Button size="sm" variant="secondary" onClick={handleWatchlistToggle}>
