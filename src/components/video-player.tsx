@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -19,6 +20,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 const VIDEO_SOURCE_BASE_URLS = {
   YouTube: "https://www.youtube.com/embed/",
@@ -84,6 +86,15 @@ export default function VideoPlayer() {
   return (
     <Dialog open={isPlaying} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-4xl w-full h-auto p-0 border-0 bg-card">
+        <DialogHeader>
+          <DialogTitle>
+            {selectedVideo?.name ? (
+              <span className="sr-only">{selectedVideo.name}</span>
+            ) : (
+              <VisuallyHidden>Video Player</VisuallyHidden>
+            )}
+          </DialogTitle>
+        </DialogHeader>
         <div className="aspect-video relative bg-black">
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center">
@@ -108,17 +119,15 @@ export default function VideoPlayer() {
             />
           )}
         </div>
-        {(videos.length > 1 || selectedVideo) && (
-            <div className="p-4 flex items-center justify-between">
-                <DialogHeader className="w-full">
-                    <DialogTitle className="truncate">{selectedVideo?.name}</DialogTitle>
-                </DialogHeader>
+        {(videos.length > 1 || selectedVideo) && !isLoading && !error && (
+            <div className="p-4 pt-0 flex items-center justify-between">
+                <p className="font-semibold truncate mr-4">{selectedVideo?.name}</p>
                 {videos.length > 1 && (
                     <Select
                         onValueChange={(key) => setSelectedVideo(videos.find(v => v.key === key) || null)}
                         defaultValue={selectedVideo?.key}
                     >
-                        <SelectTrigger className="w-[180px]">
+                        <SelectTrigger className="w-[220px] flex-shrink-0">
                             <SelectValue placeholder="Select a video" />
                         </SelectTrigger>
                         <SelectContent>
@@ -134,3 +143,4 @@ export default function VideoPlayer() {
     </Dialog>
   );
 }
+
