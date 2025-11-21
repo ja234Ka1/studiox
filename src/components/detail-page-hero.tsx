@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useVideo } from "@/context/video-provider";
 import { useToast } from "@/hooks/use-toast";
 import { addToWatchlist, getWatchlist, removeFromWatchlist } from "@/lib/userData";
+import Link from "next/link";
 
 interface DetailPageHeroProps {
   item: MediaDetails;
@@ -79,7 +80,7 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
           className="max-w-2xl"
         >
           <div className="flex flex-wrap items-center gap-4 mb-4">
-            <Badge variant="secondary">{item.media_type?.toUpperCase()}</Badge>
+            {item.media_type && <Badge variant="secondary">{item.media_type.toUpperCase()}</Badge>}
             <Badge variant="outline">{year}</Badge>
             {item.genres?.slice(0, 3).map(genre => (
                 <Badge key={genre.id} variant="outline">{genre.name}</Badge>
@@ -90,9 +91,12 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
           </h1>
           
           <div className="flex items-center gap-4">
+            <Button size="lg" onClick={handlePlayTrailer}>
+                <PlayCircle className="mr-2" />
+                Watch
+            </Button>
             {trailer && (
-                <Button size="lg" onClick={handlePlayTrailer}>
-                  <PlayCircle className="mr-2" />
+                <Button size="lg" variant="secondary" onClick={handlePlayTrailer}>
                   Play Trailer
                 </Button>
             )}
