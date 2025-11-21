@@ -56,9 +56,14 @@ export function MediaCard({ item }: MediaCardProps) {
     }
   };
   
+  const handlePrefetch = () => {
+    router.prefetch(detailPath);
+  };
+
   return (
     <motion.div
       onClick={() => router.push(detailPath)}
+      onMouseEnter={handlePrefetch}
       whileHover="hover"
       className="relative aspect-[2/3] rounded-lg overflow-hidden group cursor-pointer"
       variants={{
