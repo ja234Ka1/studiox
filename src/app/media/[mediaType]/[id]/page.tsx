@@ -34,6 +34,9 @@ export default async function MediaDetailsPage({ params }: Props) {
      notFound();
   }
   
+  // Manually add media_type to the item object, as it's not in the API response for details
+  const itemWithMediaType = { ...item, media_type: mediaType };
+
   const director = item.credits.crew.find(
     (person) => person.job === "Director"
   );
@@ -42,7 +45,7 @@ export default async function MediaDetailsPage({ params }: Props) {
 
   return (
     <div className="flex flex-col">
-      <DetailPageHero item={item} />
+      <DetailPageHero item={itemWithMediaType} />
       
       <div className="container mx-auto px-4 md:px-8 lg:px-16 space-y-12 py-12 pb-24">
         

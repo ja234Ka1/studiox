@@ -48,7 +48,9 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
       removeFromWatchlist(item.id);
       toast({ title: `Removed from Watchlist`, description: `"${title}" has been removed.` });
     } else {
-      addToWatchlist(item);
+      // Ensure media_type is passed when adding to watchlist
+      const itemToAdd = { ...item, media_type: item.media_type || (item.title ? 'movie' : 'tv') };
+      addToWatchlist(itemToAdd);
       toast({ title: 'Added to Watchlist', description: `"${title}" has been added.` });
     }
   };
@@ -77,7 +79,7 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
           className="max-w-2xl"
         >
           <div className="flex flex-wrap items-center gap-4 mb-4">
-            <Badge variant="secondary">{item.media_type.toUpperCase()}</Badge>
+            <Badge variant="secondary">{item.media_type?.toUpperCase()}</Badge>
             <Badge variant="outline">{year}</Badge>
             {item.genres?.slice(0, 3).map(genre => (
                 <Badge key={genre.id} variant="outline">{genre.name}</Badge>
