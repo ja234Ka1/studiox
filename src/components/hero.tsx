@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from "next/image";
@@ -20,6 +21,8 @@ export function Hero({ item }: HeroProps) {
   const title = item.title || item.name;
   const releaseDate = item.release_date || item.first_air_date;
   const year = releaseDate ? new Date(releaseDate).getFullYear() : 'N/A';
+  const detailPath = `/media/${item.media_type}/${item.id}`;
+
 
   const handlePlay = () => {
     playVideo(item.id, item.media_type);
@@ -62,15 +65,15 @@ export function Hero({ item }: HeroProps) {
             {item.overview}
           </p>
           <div className="flex gap-4">
-            <Button size="lg" onClick={handlePlay}>
-              <PlayCircle className="mr-2" />
-              Play Trailer
-            </Button>
-            <Button size="lg" variant="secondary" asChild>
-              <Link href={`/media/${item.media_type}/${item.id}`}>
-                <Info className="mr-2" />
-                More Info
+            <Button size="lg" asChild>
+              <Link href={detailPath}>
+                <PlayCircle className="mr-2" />
+                Watch Now
               </Link>
+            </Button>
+            <Button size="lg" variant="secondary" onClick={handlePlay}>
+              <Info className="mr-2" />
+              Play Trailer
             </Button>
           </div>
         </motion.div>

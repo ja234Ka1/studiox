@@ -4,7 +4,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Plus, Check, Star, PlayCircle } from "lucide-react";
+import { Plus, Check, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -28,9 +28,6 @@ export function MediaCard({ item }: MediaCardProps) {
   const imageUrl = item.poster_path ? getTmdbImageUrl(item.poster_path) : fallbackImage?.imageUrl;
   const title = item.title || item.name;
 
-  const streamPath = item.media_type === 'tv' 
-    ? `/stream/tv/${item.id}/1/1?title=${encodeURIComponent(title || '')}` 
-    : `/stream/movie/${item.id}/-1/-1?title=${encodeURIComponent(title || '')}`;
   const detailPath = `/media/${item.media_type}/${item.id}`;
 
   useEffect(() => {
@@ -62,7 +59,8 @@ export function MediaCard({ item }: MediaCardProps) {
     router.prefetch(detailPath);
   };
   
-  const handleCardClick = () => {
+  const handleCardClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     router.push(detailPath);
   }
 
@@ -104,10 +102,9 @@ export function MediaCard({ item }: MediaCardProps) {
           </div>
         )}
         <div className="flex gap-2">
-            <Button size="sm" className="flex-1" asChild onClick={(e) => e.stopPropagation()}>
-              <Link href={streamPath}>
-                <PlayCircle className="mr-2 h-4 w-4" />
-                Watch
+            <Button size="sm" className="flex-1" asChild>
+              <Link href={detailPath}>
+                Details
               </Link>
             </Button>
             <Button size="sm" variant="secondary" onClick={handleWatchlistToggle}>
