@@ -28,7 +28,7 @@ export function MediaCard({ item }: MediaCardProps) {
   const imageUrl = item.poster_path ? getTmdbImageUrl(item.poster_path) : fallbackImage?.imageUrl;
   const title = item.title || item.name;
 
-  const streamPath = item.media_type === 'tv' ? `/stream/tv/${item.id}/1/1` : `/stream/movie/${item.id}`;
+  const streamPath = item.media_type === 'tv' ? `/stream/tv/${item.id}/1/1` : `/stream/movie/${item.id}/-1/-1`;
   const detailPath = `/media/${item.media_type}/${item.id}`;
 
   useEffect(() => {

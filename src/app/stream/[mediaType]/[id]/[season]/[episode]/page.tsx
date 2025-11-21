@@ -10,27 +10,43 @@ type Props = {
   params: {
     mediaType: MediaType;
     id: string;
-    season: string;
-    episode: string;
+    season?: string;
+    episode?: string;
   };
 };
 
-export default async function TVStreamPage({ params }: Props) {
+export default async function StreamPage({ params }: Props) {
   const { mediaType, id, season, episode } = params;
-  if (mediaType !== "tv") {
+
+  if (mediaType !== "tv" && mediaType !== "movie") {
     notFound();
   }
 
   const numericId = parseInt(id, 10);
-  const seasonNumber = parseInt(season, 10);
-  const episodeNumber = parseInt(episode, 10);
-
-  if (isNaN(numericId) || isNaN(seasonNumber) || isNaN(episodeNumber)) {
+  if (isNaN(numericId)) {
     notFound();
   }
 
+  let seasonNumber: number | undefined;
+  let episodeNumber: number | undefined;
+
+  if (mediaType === "tv") {
+    seasonNumber = parseInt(season || "1", 10);
+    episodeNumber = parseInt(episode || "1", 10);
+    if (isNaN(seasonNumber) || isNaN(episodeNumber)) {
+      notFound();
+    }
+  }
+
   const item = await getMediaDetails(numericId, mediaType);
-  const streamUrl = `https://cinemaos.tech/player/${item.id}/${seasonNumber}/${episodeNumber}`;
+  
+  const streamUrl = mediaType === 'tv'
+    ? `https://cinemaos.tech/player/${item.id}/${seasonNumber}/${episodeNumber}`
+    : `https://cinemaos.tech/player/${item.id}`;
+
+  const title = mediaType === 'tv' 
+    ? `${item.title || item.name} - S${seasonNumber} E${episodeNumber}`
+    : item.title || item.name;
 
   return (
     <div className="w-full h-screen bg-black flex flex-col">
@@ -40,7 +56,7 @@ export default async function TVStreamPage({ params }: Props) {
             <ArrowLeft className="mr-2" /> Back to details
           </Link>
         </Button>
-        <h1 className="text-xl font-bold text-white truncate">{item.title || item.name} - S{seasonNumber} E{episodeNumber}</h1>
+        <h1 className="text-xl font-bold text-white truncate">{title}</h1>
       </div>
       <iframe
         src={streamUrl}

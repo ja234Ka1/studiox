@@ -58,7 +58,7 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
   };
 
   const trailer = item.videos?.results?.find(v => v.type === 'Trailer' && v.official);
-  const streamPath = item.media_type === 'tv' ? `/stream/tv/${item.id}/1/1` : `/stream/movie/${item.id}`;
+  const streamPath = item.media_type === 'tv' ? `/stream/tv/${item.id}/1/1` : `/stream/movie/${item.id}/-1/-1`;
 
 
   return (
