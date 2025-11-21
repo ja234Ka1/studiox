@@ -28,7 +28,7 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
         }}
         className="w-full"
       >
-        <CarouselContent>
+        <CarouselContent className="mx-auto">
           {items.map((item) => (
             <CarouselItem
               key={item.id}
