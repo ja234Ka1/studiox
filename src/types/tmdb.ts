@@ -46,3 +46,41 @@ export interface Video {
     published_at: string;
     id: string;
 }
+
+// --- Detailed interfaces ---
+
+export interface Genre {
+  id: number;
+  name: string;
+}
+
+export interface CastMember {
+  id: number;
+  name: string;
+  character: string;
+  profile_path: string | null;
+}
+
+export interface CrewMember {
+  id: number;
+  name: string;
+  job: string;
+}
+
+export interface MediaDetails extends Media {
+  genres: Genre[];
+  credits: {
+    cast: CastMember[];
+    crew: CrewMember[];
+  };
+  recommendations: ApiResponse<Media>;
+  videos: {
+    results: Video[];
+  };
+  // Movie specific
+  runtime?: number;
+  // TV specific
+  episode_run_time?: number[];
+  number_of_seasons?: number;
+  number_of_episodes?: number;
+}

@@ -1,15 +1,15 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { Plus, Check, Play, Star } from "lucide-react";
+import { Plus, Check, Eye, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import type { Media } from "@/types/tmdb";
 import { getTmdbImageUrl } from "@/lib/utils";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Button } from "./ui/button";
-import { useVideo } from "@/context/video-provider";
 import { addToWatchlist, getWatchlist, removeFromWatchlist } from "@/lib/userData";
 import { useToast } from "@/hooks/use-toast";
 
@@ -18,7 +18,6 @@ interface MediaCardProps {
 }
 
 export function MediaCard({ item }: MediaCardProps) {
-  const { playVideo } = useVideo();
   const { toast } = useToast();
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   
@@ -41,6 +40,7 @@ export function MediaCard({ item }: MediaCardProps) {
 
   const handleWatchlistToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
     if (isInWatchlist) {
       removeFromWatchlist(item.id);
       toast({ title: `Removed from Watchlist`, description: `"${title}" has been removed.` });
@@ -49,55 +49,52 @@ export function MediaCard({ item }: MediaCardProps) {
       toast({ title: 'Added to Watchlist', description: `"${title}" has been added.` });
     }
   };
-
-  const handlePlay = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    playVideo(item.id, item.media_type);
-  };
   
   return (
-    <motion.div
-      whileHover="hover"
-      className="relative aspect-[2/3] rounded-lg overflow-hidden group"
-      variants={{
-        hover: {
-          scale: 1.05,
-          boxShadow: "0px 10px 30px -5px rgba(0, 0, 0, 0.3)",
-          y: -8,
-        },
-      }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-    >
-      {imageUrl && (
-        <Image
-          src={imageUrl}
-          alt={title || "Media poster"}
-          fill
-          sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
-          className="object-cover"
-          data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
-        />
-      )}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+    <Link href={`/media/${item.media_type}/${item.id}`} className="block">
+        <motion.div
+          whileHover="hover"
+          className="relative aspect-[2/3] rounded-lg overflow-hidden group"
+          variants={{
+            hover: {
+              scale: 1.05,
+              boxShadow: "0px 10px 30px -5px rgba(0, 0, 0, 0.3)",
+              y: -8,
+            },
+          }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        >
+          {imageUrl && (
+            <Image
+              src={imageUrl}
+              alt={title || "Media poster"}
+              fill
+              sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
+              className="object-cover"
+              data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
-      <div className="absolute inset-0 flex flex-col justify-end p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
-        <h3 className="font-bold text-sm text-white truncate mb-1">{title}</h3>
-        {item.vote_average > 0 && (
-          <div className="flex items-center text-xs text-amber-400 mb-2">
-            <Star className="w-3 h-3 mr-1 fill-current" />
-            <span>{item.vote_average.toFixed(1)}</span>
+          <div className="absolute inset-0 flex flex-col justify-end p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
+            <h3 className="font-bold text-sm text-white truncate mb-1">{title}</h3>
+            {item.vote_average > 0 && (
+              <div className="flex items-center text-xs text-amber-400 mb-2">
+                <Star className="w-3 h-3 mr-1 fill-current" />
+                <span>{item.vote_average.toFixed(1)}</span>
+              </div>
+            )}
+            <div className="flex gap-2">
+                <Button size="sm" className="flex-1">
+                    <Eye className="w-4 h-4 mr-1" />
+                    Watch
+                </Button>
+                <Button size="sm" variant="secondary" onClick={handleWatchlistToggle}>
+                    {isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                </Button>
+            </div>
           </div>
-        )}
-        <div className="flex gap-2">
-            <Button size="sm" className="flex-1" onClick={handlePlay}>
-                <Play className="w-4 h-4 mr-1" />
-                Play
-            </Button>
-            <Button size="sm" variant="secondary" onClick={handleWatchlistToggle}>
-                {isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-            </Button>
-        </div>
-      </div>
-    </motion.div>
+        </motion.div>
+    </Link>
   );
 }

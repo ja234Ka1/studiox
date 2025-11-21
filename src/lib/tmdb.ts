@@ -1,4 +1,4 @@
-import type { ApiResponse, Media, MediaType, TimeRange, Video } from "@/types/tmdb";
+import type { ApiResponse, Media, MediaDetails, MediaType, TimeRange, Video } from "@/types/tmdb";
 
 const API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
 const BASE_URL = "https://api.themoviedb.org/3";
@@ -14,7 +14,8 @@ async function fetcher<T>(path: string, params: Record<string, string> = {}): Pr
 
   try {
     const res = await fetch(url.toString(), {
-      next: { revalidate: 86400 }, // Cache for 24 hours
+      // Use a shorter revalidation for details page, but keep longer for lists
+      next: { revalidate: path.match(/\/\d+$/) ? 3600 : 86400 },
     });
 
     if (!res.ok) {
@@ -65,4 +66,12 @@ export async function getVideos(mediaId: number, mediaType: MediaType): Promise<
     } catch (error) {
         return [];
     }
+}
+
+export async function getMediaDetails(mediaId: number, mediaType: MediaType): Promise<MediaDetails> {
+    const params = {
+        append_to_response: 'credits,recommendations,videos'
+    }
+    const data = await fetcher<MediaDetails>(`/${mediaType}/${mediaId}`, params);
+    return data;
 }

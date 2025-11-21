@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { Info, PlayCircle } from "lucide-react";
 
@@ -63,11 +64,13 @@ export function Hero({ item }: HeroProps) {
           <div className="flex gap-4">
             <Button size="lg" onClick={handlePlay}>
               <PlayCircle className="mr-2" />
-              Play
+              Play Trailer
             </Button>
-            <Button size="lg" variant="secondary">
-              <Info className="mr-2" />
-              More Info
+            <Button size="lg" variant="secondary" asChild>
+              <Link href={`/media/${item.media_type}/${item.id}`}>
+                <Info className="mr-2" />
+                More Info
+              </Link>
             </Button>
           </div>
         </motion.div>
