@@ -65,39 +65,19 @@ export function MediaCard({ item }: MediaCardProps) {
     router.push(detailPath);
   }
 
-  const cardVariants = {
-    initial: { scale: 1, zIndex: 10, y: 0 },
-    hover: { 
-      scale: 1.15, 
-      zIndex: 20, 
-      y: -10,
-      transition: { type: "spring", stiffness: 300, damping: 20, delay: 0.2 },
-    },
-  };
-
-  const detailsVariants = {
-    hidden: { opacity: 0, height: 0 },
-    visible: { 
-      opacity: 1, 
-      height: 'auto',
-      transition: { duration: 0.3, delay: 0.2 }
-    },
-  };
-
   return (
     <motion.div
       layout
       className="relative aspect-[2/3]"
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
+      transition={{ layout: { duration: 0.2, ease: "easeOut" } }}
     >
       <motion.div
-        variants={cardVariants}
-        animate={isHovered ? "hover" : "initial"}
+        layout="position"
         className="w-full h-full rounded-lg shadow-lg bg-card overflow-hidden cursor-pointer"
         onClick={handleCardClick}
       >
-        {/* Main Card Content (Always Visible Part) */}
         <div className="w-full h-full">
             {posterUrl && (
                 <Image
@@ -111,28 +91,27 @@ export function MediaCard({ item }: MediaCardProps) {
             )}
         </div>
         
-        {/* Expanded Details - Absolutely Positioned */}
         <AnimatePresence>
         {isHovered && (
           <motion.div
-            variants={detailsVariants}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            className="absolute top-full left-0 right-0 w-full bg-card rounded-b-lg shadow-lg"
+            layoutId={`details-${item.id}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { delay: 0.2 } }}
+            exit={{ opacity: 0, transition: { duration: 0.1 } }}
+            className="absolute top-0 left-0 right-0 bottom-0 flex flex-col"
           >
             <div className="relative w-full aspect-video">
-              {backdropUrl && (
-                  <Image
-                      src={backdropUrl}
-                      alt={`${title} backdrop`}
-                      fill
-                      className="object-cover"
-                  />
-              )}
-               <div className="absolute inset-0 bg-gradient-to-t from-card via-card/80 to-transparent" />
+                {backdropUrl && (
+                    <Image
+                        src={backdropUrl}
+                        alt={`${title} backdrop`}
+                        fill
+                        className="object-cover rounded-t-lg"
+                    />
+                )}
+               <div className="absolute inset-0 bg-gradient-to-t from-card via-card/80 to-transparent rounded-t-lg" />
             </div>
-            <div className="p-3 space-y-2">
+            <div className="p-3 space-y-2 bg-card rounded-b-lg flex-grow">
               <h3 className="font-bold text-base text-card-foreground truncate">{title}</h3>
               {item.vote_average > 0 && (
                   <div className="flex items-center text-xs text-amber-400">
