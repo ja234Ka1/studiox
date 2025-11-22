@@ -3,6 +3,7 @@
 
 import type { ReactNode } from "react";
 import React from "react";
+import { Inter } from 'next/font/google';
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { AppProviders } from "@/components/providers";
@@ -13,6 +14,8 @@ import VideoPlayer from "@/components/video-player";
 import LoadingScreen from "@/components/loading-screen";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
 import { useTheme } from "@/context/theme-provider";
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 function ThemedBodyContent({ children }: { children: ReactNode }) {
   const { radius } = useTheme();
@@ -49,16 +52,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
         <meta name="description" content="A sophisticated, ultra-luxurious content discovery experience." />
         <title>Willow</title>
       </head>
-      <body className={cn("antialiased font-sans")}>
+      <body className={cn("antialiased font-sans", inter.variable)}>
         <AppProviders>
           <ThemedBodyContent>
             {children}
