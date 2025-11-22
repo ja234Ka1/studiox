@@ -2,13 +2,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { Clapperboard, Film, List, Search, Settings, Tv } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import LoadingLink from "./loading-link";
 
 const navItems = [
   { href: "/tv-shows", label: "Shows", icon: Tv },
@@ -53,10 +53,10 @@ export function Header() {
       )}
     >
       <div className="container flex h-16 items-center px-4 md:px-8 mx-auto">
-        <Link href="/" className="mr-6 flex items-center space-x-2">
+        <LoadingLink href="/" className="mr-6 flex items-center space-x-2">
           <Clapperboard className="h-6 w-6 text-accent" />
           <span className="hidden font-bold sm:inline-block text-lg">Willow</span>
-        </Link>
+        </LoadingLink>
         <nav className="hidden md:flex items-center space-x-1">
           {navItems.map((item) => (
             <Button
@@ -70,10 +70,9 @@ export function Header() {
                   : "text-muted-foreground hover:text-primary"
               )}
             >
-              <Link href={item.href}>
-                
+              <LoadingLink href={item.href}>
                 {item.label}
-              </Link>
+              </LoadingLink>
             </Button>
           ))}
         </nav>
@@ -88,9 +87,9 @@ export function Header() {
             />
           </div>
           <Button asChild variant="ghost" size="icon">
-             <Link href="/settings">
+             <LoadingLink href="/settings">
                 <Settings />
-             </Link>
+             </LoadingLink>
           </Button>
           <Button variant="ghost">Login</Button>
         </div>

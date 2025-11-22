@@ -2,7 +2,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { motion } from "framer-motion";
 import { Info, PlayCircle } from "lucide-react";
 
@@ -11,6 +10,7 @@ import { getTmdbImageUrl } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useVideo } from "@/context/video-provider";
+import LoadingLink from "./loading-link";
 
 interface HeroProps {
   item: Media;
@@ -66,10 +66,10 @@ export function Hero({ item }: HeroProps) {
           </p>
           <div className="flex gap-4">
             <Button size="lg" asChild>
-              <Link href={detailPath}>
+              <LoadingLink href={detailPath}>
                 <PlayCircle className="mr-2" />
                 Watch Now
-              </Link>
+              </LoadingLink>
             </Button>
             <Button size="lg" variant="secondary" onClick={handlePlay}>
               <Info className="mr-2" />

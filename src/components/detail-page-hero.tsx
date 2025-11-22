@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import Image from "next/image";
@@ -15,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { useVideo } from "@/context/video-provider";
 import { useToast } from "@/hooks/use-toast";
 import { addToWatchlist, getWatchlist, removeFromWatchlist } from "@/lib/userData";
-import Link from "next/link";
+import LoadingLink from "./loading-link";
 import YouTubeEmbed from "./youtube-embed";
 
 interface DetailPageHeroProps {
@@ -59,10 +58,7 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
 
   const handleMouseLeave = () => {
     setShowTrailer(false);
-    if (playerRef.current) {
-      playerRef.current.mute();
-    }
-    setIsMuted(true);
+    setIsMuted(true); // Always reset to muted when preview ends
   };
 
 
@@ -122,6 +118,7 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
               >
                   <YouTubeEmbed 
                     videoId={trailer.key} 
+                    isMuted={isMuted}
                     onReady={(event) => {
                       playerRef.current = event.target;
                     }}
@@ -155,10 +152,10 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
           
           <div className="flex items-center gap-4">
             <Button size="lg" asChild>
-              <Link href={streamPath}>
+              <LoadingLink href={streamPath}>
                 <PlayCircle className="mr-2" />
                 Watch
-              </Link>
+              </LoadingLink>
             </Button>
             {trailer && (
                 <Button size="lg" variant="secondary" onClick={handlePlayTrailer}>
@@ -185,14 +182,7 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
             variant="secondary"
             onClick={(e) => {
               e.stopPropagation();
-              if (playerRef.current) {
-                if (isMuted) {
-                    playerRef.current.unMute();
-                } else {
-                    playerRef.current.mute();
-                }
-                setIsMuted((prev) => !prev);
-              }
+              setIsMuted((prev) => !prev);
             }}
             className="rounded-full h-12 w-12"
           >

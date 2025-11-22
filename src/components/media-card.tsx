@@ -3,7 +3,6 @@
 
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
 import { Plus, PlayCircle, Star, Check } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +13,7 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import { addToWatchlist, getWatchlist, removeFromWatchlist } from "@/lib/userData";
+import LoadingLink from "./loading-link";
 
 
 interface MediaCardProps {
@@ -67,7 +67,7 @@ export function MediaCard({ item }: MediaCardProps) {
   };
   
   return (
-    <Link href={detailPath} className="w-full h-full block">
+    <LoadingLink href={detailPath} className="w-full h-full block">
       <motion.div
         layout
         onHoverStart={() => setIsHovered(true)}
@@ -115,6 +115,6 @@ export function MediaCard({ item }: MediaCardProps) {
           )}
         </AnimatePresence>
       </motion.div>
-    </Link>
+    </LoadingLink>
   );
 }
