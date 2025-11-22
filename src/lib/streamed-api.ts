@@ -6,15 +6,16 @@ const BASE_URL = 'https://streamed.pk/api';
 async function fetchStreamed<T>(path: string, tags: string[] = []): Promise<T> {
   try {
     const res = await fetch(`${BASE_URL}${path}`, {
-      next: { revalidate: 60, tags: ['streamed', ...tags] }, // Revalidate every 60 seconds
+      next: { revalidate: 3600, tags: ['streamed', ...tags] }, // Revalidate every hour
     });
     if (!res.ok) {
-      const errorBody = await res.json().catch(() => ({}));
-      throw new Error(`Failed to fetch from Streamed API: ${res.statusText} - ${JSON.stringify(errorBody)}`);
+      const errorBody = await res.json().catch(() => ({ message: 'No error body' }));
+      throw new Error(`Failed to fetch from Streamed API (${res.status}): ${errorBody.message || res.statusText}`);
     }
     return res.json();
   } catch (error) {
     console.error(`Error in Streamed API fetcher for path ${path}:`, error);
+    // Re-throw the error to be caught by the calling component
     throw error;
   }
 }

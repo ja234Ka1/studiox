@@ -11,6 +11,8 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 
 const MatchCard = ({ match }: { match: StreamedMatch }) => {
     // The match object needs to be modified to be passed as a search param
@@ -63,7 +65,19 @@ const MatchCard = ({ match }: { match: StreamedMatch }) => {
     );
 };
 
-const MatchCategory = ({ title, matches }: { title: string, matches: StreamedMatch[] }) => {
+const MatchCategory = ({ title, matches, error }: { title: string, matches: StreamedMatch[], error?: string | null }) => {
+    if (error) {
+        return (
+            <div className="space-y-4">
+                <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
+                 <Alert variant="destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>Error Loading Matches</AlertTitle>
+                    <AlertDescription>{error}</AlertDescription>
+                </Alert>
+            </div>
+        )
+    }
     if (matches.length === 0) return null;
     return (
         <div className="space-y-4">
@@ -76,16 +90,34 @@ const MatchCategory = ({ title, matches }: { title: string, matches: StreamedMat
 }
 
 export default async function LiveTvPage() {
-    const sports = await getSports();
-    const liveMatches = await getLiveMatches();
-    const popularMatches = await getPopularMatches();
+    let sports: StreamedSport[] = [];
+    let liveMatches: StreamedMatch[] = [];
+    let popularMatches: StreamedMatch[] = [];
+    let matchesBySport: Record<string, { matches: StreamedMatch[], error: string | null }> = {};
+    let initialError: string | null = null;
+    
+    try {
+        [sports, liveMatches, popularMatches] = await Promise.all([
+            getSports(),
+            getLiveMatches(),
+            getPopularMatches(),
+        ]);
+    } catch(e: any) {
+        initialError = e.message || "Failed to load initial live TV data.";
+    }
 
     const sportTabs = ['football', 'basketball', 'tennis', 'hockey', 'baseball', 'mma', 'boxing'];
     const sportsToShow = sports.filter(s => sportTabs.includes(s.id));
 
-    const matchesBySport: Record<string, StreamedMatch[]> = {};
-    for (const sport of sportsToShow) {
-        matchesBySport[sport.id] = await getMatches(sport.id);
+    if (!initialError) {
+        for (const sport of sportsToShow) {
+            try {
+                const matches = await getMatches(sport.id);
+                matchesBySport[sport.id] = { matches, error: null };
+            } catch (e: any) {
+                 matchesBySport[sport.id] = { matches: [], error: e.message || `Failed to load ${sport.name} matches.` };
+            }
+        }
     }
     
     return (
@@ -97,30 +129,44 @@ export default async function LiveTvPage() {
                 </p>
             </header>
 
-            <Tabs defaultValue="overview">
-                <div className="flex justify-center mb-8">
-                     <TabsList>
-                        <TabsTrigger value="overview">Overview</TabsTrigger>
-                        {sportsToShow.map(sport => (
-                            <TabsTrigger key={sport.id} value={sport.id}>
-                                {sport.name}
-                            </TabsTrigger>
-                        ))}
-                    </TabsList>
-                </div>
+            {initialError && (
+                 <Alert variant="destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>Could Not Load Live TV</AlertTitle>
+                    <AlertDescription>{initialError}</AlertDescription>
+                </Alert>
+            )}
 
-                <TabsContent value="overview" className="space-y-12">
-                    <MatchCategory title="Live Now" matches={liveMatches} />
-                    <Separator />
-                    <MatchCategory title="Popular Today" matches={popularMatches} />
-                </TabsContent>
+            {!initialError && (
+                <Tabs defaultValue="overview">
+                    <div className="flex justify-center mb-8">
+                        <TabsList>
+                            <TabsTrigger value="overview">Overview</TabsTrigger>
+                            {sportsToShow.map(sport => (
+                                <TabsTrigger key={sport.id} value={sport.id}>
+                                    {sport.name}
+                                </TabsTrigger>
+                            ))}
+                        </TabsList>
+                    </div>
 
-                {sportsToShow.map(sport => (
-                    <TabsContent key={sport.id} value={sport.id}>
-                        <MatchCategory title={`${sport.name} Matches`} matches={matchesBySport[sport.id] || []} />
+                    <TabsContent value="overview" className="space-y-12">
+                        <MatchCategory title="Live Now" matches={liveMatches} />
+                        <Separator />
+                        <MatchCategory title="Popular Today" matches={popularMatches} />
                     </TabsContent>
-                ))}
-            </Tabs>
+
+                    {sportsToShow.map(sport => (
+                        <TabsContent key={sport.id} value={sport.id}>
+                            <MatchCategory 
+                                title={`${sport.name} Matches`} 
+                                matches={matchesBySport[sport.id]?.matches || []}
+                                error={matchesBySport[sport.id]?.error}
+                            />
+                        </TabsContent>
+                    ))}
+                </Tabs>
+            )}
         </div>
     );
 }

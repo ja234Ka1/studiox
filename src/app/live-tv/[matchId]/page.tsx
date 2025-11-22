@@ -50,7 +50,7 @@ export default function MatchStreamPage() {
                                 setError('No playable streams found for this match.');
                             }
                         })
-                        .catch(() => setError('Failed to load stream information.'))
+                        .catch((e) => setError(e.message || 'Failed to load stream information.'))
                         .finally(() => setIsLoading(false));
                 } else {
                     setError('No stream sources available for this match.');
@@ -103,6 +103,13 @@ export default function MatchStreamPage() {
                                 className="w-full h-full border-0"
                             ></iframe>
                         )}
+                         {!isLoading && !error && !selectedStream?.embedUrl && (
+                             <div className="flex flex-col items-center justify-center h-full p-4">
+                                <AlertTriangle className="w-12 h-12 text-yellow-500" />
+                                <p className="mt-4 text-yellow-500 font-semibold">No Stream Selected</p>
+                                <p className="text-sm text-center text-muted-foreground mt-1">Select an available stream from the list.</p>
+                            </div>
+                        )}
                     </Card>
                 </div>
                 <div className="lg:col-span-1">
@@ -128,7 +135,7 @@ export default function MatchStreamPage() {
                                     ))}
                                 </div>
                             )}
-                             {!isLoading && streams.length === 0 && <p className="text-sm text-muted-foreground">No streams found.</p>}
+                             {!isLoading && streams.length === 0 && <p className="text-sm text-muted-foreground">No streams found for this match.</p>}
                         </CardContent>
                     </Card>
                 </div>
