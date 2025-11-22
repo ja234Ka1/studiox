@@ -53,11 +53,9 @@ export default function RootLayout({
       </head>
       <body className={cn("antialiased font-sans", inter.variable)}>
         <AppProviders>
-          <WatchlistProvider>
-            <ThemedBodyContent>
-              {children}
-            </ThemedBodyContent>
-          </WatchlistProvider>
+          <ThemedBodyContent>
+            {children}
+          </ThemedBodyContent>
         </AppProviders>
       </body>
     </html>
