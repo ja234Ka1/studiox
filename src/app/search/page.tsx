@@ -10,9 +10,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search as SearchIcon, Loader2 } from 'lucide-react';
-import { useDebounce } from 'use-debounce';
-import { SearchSuggestions } from '@/components/search-suggestions';
-
 
 const SearchPage = () => {
   const searchParams = useSearchParams();
@@ -22,26 +19,17 @@ const SearchPage = () => {
   const initialQuery = searchParams.get('q') || '';
   
   const [searchTerm, setSearchTerm] = useState(initialQuery);
-  const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
-
+  
   const [results, setResults] = useState<Media[]>([]);
-  const [suggestions, setSuggestions] = useState<Media[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [isSuggestionsLoading, setIsSuggestionsLoading] = useState(false);
-
+  
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
 
   const inputRef = useRef<HTMLInputElement>(null);
-  
-  // This ref helps to distinguish between a search triggered by submitting
-  // the input vs. one triggered by the debounced search term changing.
-  const submittedSearchTermRef = useRef<string | null>(initialQuery);
 
-
-  // Focus the input field on page load
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
@@ -76,27 +64,6 @@ const SearchPage = () => {
       });
   }, []);
   
-  // Effect for fetching suggestions as user types
-  useEffect(() => {
-    if (debouncedSearchTerm && debouncedSearchTerm !== submittedSearchTermRef.current) {
-        setIsSuggestionsLoading(true);
-        searchMedia(debouncedSearchTerm, 1, 8) // Fetch a small number for suggestions
-            .then(data => {
-                setSuggestions(data.results);
-            })
-            .catch(() => {
-                setSuggestions([]);
-            })
-            .finally(() => {
-                setIsSuggestionsLoading(false);
-            });
-    } else {
-        setSuggestions([]);
-    }
-  }, [debouncedSearchTerm]);
-
-
-  // Effect for fetching full search results when the query is submitted
   useEffect(() => {
     const query = searchParams.get('q');
     if (query) {
@@ -109,8 +76,6 @@ const SearchPage = () => {
 
   const handleSearchSubmit = (query: string) => {
     if (query.trim()) {
-      submittedSearchTermRef.current = query;
-      setSuggestions([]); // Hide suggestions on submit
       const newUrl = `${pathname}?q=${encodeURIComponent(query)}`;
       router.push(newUrl); // Use push to add to history
     }
@@ -128,13 +93,6 @@ const SearchPage = () => {
   return (
     <div className="container px-4 md:px-8 lg:px-16 space-y-8 py-12 pb-24 mx-auto">
       <div className="relative w-full max-w-xl mx-auto">
-        <SearchSuggestions
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          suggestions={suggestions}
-          isLoading={isSuggestionsLoading}
-          onSearchSubmit={handleSearchSubmit}
-        >
           <div className="relative w-full">
             <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
@@ -150,11 +108,7 @@ const SearchPage = () => {
                 }
               }}
             />
-            {isSuggestionsLoading && (
-                <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground animate-spin" />
-            )}
           </div>
-        </SearchSuggestions>
       </div>
       
       {error && <p className="text-destructive text-center">{error}</p>}
@@ -190,7 +144,7 @@ const SearchPage = () => {
       {page < totalPages && (
         <div className="flex justify-center mt-8">
           <Button onClick={loadMore} disabled={isLoadingMore}>
-            {isLoadingMore ? 'Loading...' : 'Load More'}
+            {isLoadingMore ? <Loader2 className="animate-spin" /> : 'Load More'}
           </Button>
         </div>
       )}
