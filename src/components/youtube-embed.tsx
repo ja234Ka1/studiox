@@ -30,7 +30,7 @@ const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({ videoId, onReady }) => {
         videoId={videoId}
         opts={opts}
         onReady={onReady}
-        className="absolute top-1/2 left-1/2 w-auto h-auto min-w-full min-h-full -translate-x-1/2 -translate-y-1/2"
+        className="absolute top-1/2 left-1/2 w-[177.77vh] min-w-[100vw] h-[56.25vw] min-h-[100vh] -translate-x-1/2 -translate-y-1/2"
       />
     </div>
   );
