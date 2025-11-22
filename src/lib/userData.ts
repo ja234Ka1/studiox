@@ -1,10 +1,22 @@
 
+'use client'
+
 import type { Media } from "@/types/tmdb";
-import { useUser } from "@/firebase/auth/use-user";
+import { getSdks, useUser } from "@/firebase";
+import { 
+  collection, 
+  doc, 
+  getDocs, 
+  writeBatch,
+  setDoc,
+  deleteDoc
+} from "firebase/firestore";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError } from "@/firebase/errors";
 
 const WATCHLIST_KEY = "willow-watchlist";
 
-// --- Local Storage Implementation ---
+// --- Local Storage Implementation (for guest users) ---
 
 const getLocalWatchlist = (): Media[] => {
   if (typeof window === "undefined") return [];
@@ -39,42 +51,70 @@ const removeFromLocalWatchlist = (itemId: number) => {
   setLocalWatchlist(watchlist.filter(item => item.id !== itemId));
 };
 
-// --- Firebase Implementation (Placeholder) ---
+// --- Firebase Implementation (for logged-in users) ---
 
-// In a real app, you would get the user from a hook like this.
-// const { user } = useUser();
-const isUserLoggedIn = () => {
-    // This is a placeholder. We will replace this with real auth state.
-    const { user } = useUser.getState();
-    return !!user;
+const getFirebaseWatchlist = async (userId: string): Promise<Media[]> => {
+    const { firestore } = getSdks();
+    const watchlistCol = collection(firestore, 'users', userId, 'watchlists');
+    const snapshot = await getDocs(watchlistCol);
+    return snapshot.docs.map(doc => doc.data() as Media);
 }
+
+const addToFirebaseWatchlist = (userId: string, item: Media) => {
+    const { firestore } = getSdks();
+    const watchlistItemRef = doc(firestore, 'users', userId, 'watchlists', String(item.id));
+    
+    // Non-blocking write
+    setDoc(watchlistItemRef, item).catch(error => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: watchlistItemRef.path,
+            operation: 'create',
+            requestResourceData: item,
+        }));
+    });
+};
+
+const removeFromFirebaseWatchlist = (userId: string, itemId: number) => {
+    const { firestore } = getSdks();
+    const watchlistItemRef = doc(firestore, 'users', userId, 'watchlists', String(itemId));
+
+    // Non-blocking delete
+    deleteDoc(watchlistItemRef).catch(error => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: watchlistItemRef.path,
+            operation: 'delete'
+        }));
+    });
+};
 
 
 // --- Public API ---
 
 export const getWatchlist = (): Media[] => {
-  if (isUserLoggedIn()) {
-    // TODO: Implement Firestore logic
-    // For now, we still use local storage even if logged in.
-    return getLocalWatchlist();
+  const { user } = useUser.getState();
+  if (user) {
+    // This function is now mostly for local state, as firebase data is fetched via useCollection.
+    // However, it could be used for an initial server-side fetch if needed.
+    // For now, we return empty array, relying on the hook.
+    return [];
   } else {
     return getLocalWatchlist();
   }
 };
 
 export const addToWatchlist = (item: Media) => {
-  if (isUserLoggedIn()) {
-    // TODO: Implement Firestore logic
-     addToLocalWatchlist(item);
+  const { user } = useUser.getState();
+  if (user) {
+    addToFirebaseWatchlist(user.uid, item);
   } else {
     addToLocalWatchlist(item);
   }
 };
 
 export const removeFromWatchlist = (itemId: number) => {
-  if (isUserLoggedIn()) {
-    // TODO: Implement Firestore logic
-    removeFromLocalWatchlist(itemId);
+  const { user } = useUser.getState();
+  if (user) {
+    removeFromFirebaseWatchlist(user.uid, itemId);
   } else {
     removeFromLocalWatchlist(itemId);
   }
@@ -87,20 +127,36 @@ export const mergeLocalWatchlistToFirebase = async () => {
     const localWatchlist = getLocalWatchlist();
     if (localWatchlist.length === 0) return;
 
-    // TODO: Get existing firebase watchlist
-    const firebaseWatchlist: Media[] = []; // placeholder
+    console.log('Merging local watchlist to Firebase...');
 
-    const itemsToMerge = localWatchlist.filter(localItem => 
-        !firebaseWatchlist.some(firebaseItem => firebaseItem.id === localItem.id)
-    );
+    const { firestore } = getSdks();
+    const watchlistCol = collection(firestore, 'users', user.uid, 'watchlists');
 
-    if (itemsToMerge.length > 0) {
-        // TODO: Implement batch write to firestore
-        console.log('Merging items to Firebase:', itemsToMerge);
+    try {
+        const firebaseWatchlistSnapshot = await getDocs(watchlistCol);
+        const firebaseWatchlist = firebaseWatchlistSnapshot.docs.map(d => d.data() as Media);
+
+        const itemsToMerge = localWatchlist.filter(localItem => 
+            !firebaseWatchlist.some(firebaseItem => firebaseItem.id === localItem.id)
+        );
+
+        if (itemsToMerge.length > 0) {
+            const batch = writeBatch(firestore);
+            itemsToMerge.forEach(item => {
+                const docRef = doc(firestore, 'users', user.uid, 'watchlists', String(item.id));
+                batch.set(docRef, item);
+            });
+            await batch.commit();
+            console.log(`${itemsToMerge.length} items merged to Firebase.`);
+        }
+        
+        // Clear local watchlist after successful merge
+        localStorage.removeItem(WATCHLIST_KEY);
+        // Dispatch event to update any components listening to local storage changes (e.g., watchlist page if viewed while logged out)
+        window.dispatchEvent(new CustomEvent('willow-watchlist-change'));
+        console.log('Local watchlist cleared after merge.');
+
+    } catch (error) {
+        console.error("Error merging watchlist to Firebase:", error);
     }
-    
-    // Clear local watchlist after merging
-    // localStorage.removeItem(WATCHLIST_KEY);
-    // window.dispatchEvent(new CustomEvent('willow-watchlist-change'));
-     console.log('Local watchlist merged to Firebase.');
-}
+};

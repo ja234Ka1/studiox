@@ -2,31 +2,92 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getWatchlist } from "@/lib/userData";
+import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
+import { getWatchlist as getLocalWatchlist } from "@/lib/userData";
 import type { Media } from "@/types/tmdb";
 import { MediaCard } from "@/components/media-card";
+import { collection } from "firebase/firestore";
+import { Skeleton } from "@/components/ui/skeleton";
+
+function WatchlistGrid({ items }: { items: Media[] }) {
+  if (items.length === 0) {
+    return (
+      <p className="text-muted-foreground text-center col-span-full">
+        Your watchlist is empty. Add some movies and shows to see them here.
+      </p>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4">
+      {items.map((item) => (
+        <MediaCard key={item.id} item={item} />
+      ))}
+    </div>
+  );
+}
+
+function WatchlistSkeleton() {
+    return (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4">
+        {Array.from({ length: 7 }).map((_, i) => (
+            <div key={i} className="aspect-[2/3] w-full">
+            <Skeleton className="w-full h-full" />
+            </div>
+        ))}
+        </div>
+    );
+}
 
 export default function WatchlistPage() {
-  const [watchlist, setWatchlist] = useState<Media[]>([]);
+  const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
+
+  // Local state for guest watchlist
+  const [localWatchlist, setLocalWatchlist] = useState<Media[]>([]);
   const [isMounted, setIsMounted] = useState(false);
+
+  // Firestore state for logged-in user
+  const watchlistQuery = useMemoFirebase(
+    () => (user && firestore ? collection(firestore, 'users', user.uid, 'watchlists') : null),
+    [user, firestore]
+  );
+  
+  const { data: firebaseWatchlist, isLoading: isFirestoreLoading } = useCollection<Media>(watchlistQuery);
 
   useEffect(() => {
     setIsMounted(true);
-    setWatchlist(getWatchlist());
+    // For guest users, or as an initial state before auth is resolved
+    if (!user) {
+      setLocalWatchlist(getLocalWatchlist());
 
-    const handleWatchlistChange = () => {
-      setWatchlist(getWatchlist());
-    };
+      const handleWatchlistChange = () => {
+        setLocalWatchlist(getLocalWatchlist());
+      };
 
-    window.addEventListener('willow-watchlist-change', handleWatchlistChange);
-    return () => {
-      window.removeEventListener('willow-watchlist-change', handleWatchlistChange);
-    };
-  }, []);
+      window.addEventListener('willow-watchlist-change', handleWatchlistChange);
+      return () => {
+        window.removeEventListener('willow-watchlist-change', handleWatchlistChange);
+      };
+    }
+  }, [user]);
 
-  if (!isMounted) {
-    return null; // or a loading skeleton
+  if (!isMounted || isUserLoading) {
+    return (
+        <div className="container px-4 md:px-8 lg:px-16 space-y-12 py-12 pb-24 mx-auto">
+             <header className="mb-8">
+                <h1 className="text-3xl font-bold tracking-tight">My Watchlist</h1>
+                <p className="text-muted-foreground mt-1">
+                Your saved movies and TV shows.
+                </p>
+            </header>
+            <WatchlistSkeleton />
+        </div>
+    );
   }
+
+  const isLoading = user ? isFirestoreLoading : false;
+  const watchlist = user ? firebaseWatchlist : localWatchlist;
 
   return (
     <div className="container px-4 md:px-8 lg:px-16 space-y-12 py-12 pb-24 mx-auto">
@@ -36,17 +97,10 @@ export default function WatchlistPage() {
           Your saved movies and TV shows.
         </p>
       </header>
-      {watchlist.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4">
-          {watchlist.map((item) => (
-            <MediaCard key={item.id} item={item} />
-          ))}
-        </div>
-      ) : (
-        <p className="text-muted-foreground text-center col-span-full">
-          Your watchlist is empty. Add some movies and shows to see them here.
-        </p>
-      )}
+      
+      {isLoading && <WatchlistSkeleton />}
+      {!isLoading && watchlist && <WatchlistGrid items={watchlist} />}
+      
     </div>
   );
 }

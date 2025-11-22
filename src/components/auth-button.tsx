@@ -1,10 +1,9 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LogOut, User as UserIcon, List } from 'lucide-react';
-import { useUser } from '@/firebase/auth/use-user';
-import { useAuth } from '@/firebase/provider';
+import { useUser, useAuth } from '@/firebase';
 import { signOut } from 'firebase/auth';
 
 import { Button } from '@/components/ui/button';
@@ -19,13 +18,21 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LoginDialog } from './login-dialog';
 import LoadingLink from './loading-link';
+import { mergeLocalWatchlistToFirebase } from '@/lib/userData';
 
 export function AuthButton() {
-  const { user, loading } = useUser();
+  const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
 
-  if (loading) {
+  useEffect(() => {
+    // When user logs in, merge local watchlist to firebase
+    if (user) {
+      mergeLocalWatchlistToFirebase();
+    }
+  }, [user]);
+
+  if (isUserLoading) {
     return <Button variant="ghost" size="sm">Loading...</Button>;
   }
 
