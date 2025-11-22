@@ -29,7 +29,7 @@ const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({ videoId, isMuted }) => {
         frameBorder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;"
         allowFullScreen
-        className="absolute top-1/2 left-1/2 w-full h-full min-w-[177.77vh] min-h-[56.25vw] -translate-x-1/2 -translate-y-1/2"
+        className="absolute top-1/2 left-1/2 w-full h-full min-w-[177.77vh] min-h-[56.25vw] -translate-x-1/2 -translate-y-1/2 scale-110"
       ></iframe>
     </div>
   );

@@ -24,9 +24,8 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
   const { playVideo } = useVideo();
   const { toast } = useToast();
   const [isInWatchlist, setIsInWatchlist] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
   const [showTrailer, setShowTrailer] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false); // Default to unmuted
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const title = item.title || item.name;
@@ -52,7 +51,6 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
   
   const handleMouseEnter = () => {
     if (trailer) {
-      setIsHovering(true);
       hoverTimeout.current = setTimeout(() => {
         setShowTrailer(true);
       }, 3000);
@@ -60,12 +58,11 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
   };
 
   const handleMouseLeave = () => {
-    setIsHovering(false);
     if (hoverTimeout.current) {
       clearTimeout(hoverTimeout.current);
     }
     setShowTrailer(false);
-    setIsMuted(true);
+    setIsMuted(true); // Mute again when not hovering
   };
 
 
