@@ -1,19 +1,15 @@
 
-'use client'
-
-import { notFound, useParams } from "next/navigation";
+import { notFound } from "next/navigation";
 import Image from "next/image";
 import { getMediaDetails } from "@/lib/tmdb";
-import type { MediaType, MediaDetails as MediaDetailsType } from "@/types/tmdb";
+import type { MediaType } from "@/types/tmdb";
 import { getTmdbImageUrl } from "@/lib/utils";
 import { Star } from "lucide-react";
 import MediaCarousel from "@/components/media-carousel";
 import { DetailPageHero } from "@/components/detail-page-hero";
 import { EpisodeSelector } from "@/components/episode-selector";
-import { useEffect, useState } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { motion } from "framer-motion";
 import LoadingLink from "@/components/loading-link";
+import { motion } from "framer-motion";
 
 const castVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -28,67 +24,35 @@ const castVariants = {
   }),
 };
 
+interface MediaDetailsPageProps {
+    params: {
+        mediaType: MediaType;
+        id: string;
+    }
+}
 
-export default function MediaDetailsPage() {
-  const params = useParams();
-  const mediaType = params.mediaType as MediaType;
-  const id = params.id as string;
+export default async function MediaDetailsPage({ params }: MediaDetailsPageProps) {
+  const { mediaType, id } = params;
   
-  const [item, setItem] = useState<MediaDetailsType | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    if (mediaType !== "movie" && mediaType !== "tv") {
-      notFound();
-    }
-    const numericId = parseInt(id, 10);
-    if (isNaN(numericId)) {
-      notFound();
-    }
-
-    async function fetchDetails() {
-      setIsLoading(true);
-      try {
-        const details = await getMediaDetails(numericId, mediaType);
-        setItem(details);
-      } catch (error) {
-        console.error("Failed to fetch media details:", error);
-        setItem(null);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchDetails();
-  }, [mediaType, id]);
-
-
-  if (isLoading) {
-    return (
-        <div className="flex flex-col">
-            {/* Skeleton for Hero */}
-            <div className="w-full h-[60vh] lg:h-[85vh] bg-muted animate-pulse" />
-            <div className="container mx-auto px-4 md:px-8 lg:px-16 space-y-12 py-12 pb-24">
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                    <div className="lg:col-span-3 lg:col-start-2 space-y-8">
-                        <Skeleton className="h-24 w-full" />
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <Skeleton className="h-12 w-full" />
-                            <Skeleton className="h-12 w-full" />
-                            <Skeleton className="h-12 w-full" />
-                            <Skeleton className="h-12 w-full" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    )
+  if (mediaType !== "movie" && mediaType !== "tv") {
+    notFound();
   }
-
-  if (!item) {
+  const numericId = parseInt(id, 10);
+  if (isNaN(numericId)) {
     notFound();
   }
 
+  let item;
+  try {
+    item = await getMediaDetails(numericId, mediaType);
+  } catch (error) {
+    console.error("Failed to fetch media details:", error);
+    notFound();
+  }
+  
+  if (!item) {
+    notFound();
+  }
 
   // Manually add media_type to the item object, as it's not in the API response for details
   const itemWithMediaType = { ...item, media_type: mediaType };
