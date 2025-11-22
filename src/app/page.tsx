@@ -9,6 +9,7 @@ import { Clapperboard } from "lucide-react";
 import type { Media } from "@/types/tmdb";
 import VidfastContinueWatching from "@/components/vidfast-continue-watching";
 import TopTenCarousel from "@/components/top-ten-carousel";
+import VidifyContinueWatching from "@/components/vidify-continue-watching";
 
 interface Category {
   title: string;
@@ -33,18 +34,15 @@ const categoriesConfig = [
 
 export default async function Home() {
   let trendingWeekly: Media[] = [];
-  let topTenMovies: Media[] = [];
   let categories: Category[] = [];
   let error: string | null = null;
   
   try {
     const trendingWeeklyPromise = getTrending("all", "week");
-    const topTenMoviesPromise = getPopular("movie");
     const categoriesPromises = categoriesConfig.map(c => c.fetcher());
 
-    const [trendingWeeklyResult, topTenMoviesResult, ...categoriesResults] = await Promise.allSettled([
+    const [trendingWeeklyResult, ...categoriesResults] = await Promise.allSettled([
       trendingWeeklyPromise,
-      topTenMoviesPromise,
       ...categoriesPromises
     ]);
 
@@ -55,13 +53,6 @@ export default async function Home() {
       throw new Error("Failed to fetch trending data.");
     }
     
-    if (topTenMoviesResult.status === 'fulfilled') {
-        topTenMovies = topTenMoviesResult.value.slice(0, 10);
-      } else {
-        console.error('Failed to fetch top ten movies:', topTenMoviesResult.reason);
-        // Don't throw error, carousel will just be hidden
-      }
-
     categories = categoriesConfig.map((config, index) => {
         const result = categoriesResults[index];
         if (result.status === 'fulfilled') {
@@ -115,8 +106,9 @@ export default async function Home() {
 
         {!error && (
           <div className="space-y-16">
-            {topTenMovies.length > 0 && <TopTenCarousel items={topTenMovies} />}
+            <TopTenCarousel />
             <VidfastContinueWatching />
+            <VidifyContinueWatching />
             {trendingWeekly.length > 0 && (
               <MediaCarousel title="Trending This Week" items={trendingWeekly} />
             )}
