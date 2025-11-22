@@ -67,13 +67,9 @@ export function Hero({ item }: HeroProps) {
           <div className="flex gap-4">
             <Button size="lg" asChild>
               <LoadingLink href={detailPath}>
-                <PlayCircle className="mr-2" />
-                Watch Now
+                <Info className="mr-2" />
+                More Info
               </LoadingLink>
-            </Button>
-            <Button size="lg" variant="secondary" onClick={handlePlay}>
-              <Info className="mr-2" />
-              Play Trailer
             </Button>
           </div>
         </motion.div>

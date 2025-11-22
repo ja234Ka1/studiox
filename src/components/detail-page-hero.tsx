@@ -161,11 +161,6 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
                 </LoadingLink>
               </Button>
             )}
-            {trailer && (
-                <Button size="lg" variant="secondary" onClick={handlePlayTrailer}>
-                  Play Trailer
-                </Button>
-            )}
             <Button size="lg" variant="secondary" onClick={handleWatchlistToggle}>
                 {isInWatchlist ? <Check className="w-5 h-5 mr-2" /> : <Plus className="w-5 h-5 mr-2" />}
               {isInWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
