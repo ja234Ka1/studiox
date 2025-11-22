@@ -86,10 +86,10 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
                 layout
                 variants={itemVariants}
               >
-                <span className="absolute -left-16 bottom-0 text-[18rem] font-black text-transparent text-outline leading-none select-none -z-10 transition-all duration-300 group-hover:scale-105 group-hover:text-glow">
+                <span className="absolute -left-16 bottom-0 text-[18rem] font-black text-transparent text-outline leading-none select-none transition-all duration-300 group-hover:scale-105 group-hover:text-glow">
                   {index + 1}
                 </span>
-                <div className="w-full">
+                <div className="w-full relative z-10">
                     <MediaCard item={item} />
                 </div>
               </motion.div>
