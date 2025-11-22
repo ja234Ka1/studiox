@@ -16,16 +16,6 @@ const LoadingLink = ({ children, href, className, onClick, ...props }: LoadingLi
   const { startLoading, stopLoading } = useLoading();
   const pathname = usePathname();
 
-  // On route change, the new page will be rendered, and the loading screen
-  // will be removed by the Template component's animation completing.
-  // We should ensure the loading stops if the component unmounts for any reason.
-  useEffect(() => {
-    return () => {
-      stopLoading();
-    };
-  }, [stopLoading]);
-
-
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (onClick) {
       onClick(e);
@@ -33,7 +23,7 @@ const LoadingLink = ({ children, href, className, onClick, ...props }: LoadingLi
     
     const targetUrl = href.toString();
     const isSamePage = pathname === targetUrl;
-    const isStreamLink = targetUrl.startsWith('/stream') || targetUrl.startsWith('/live-tv/');
+    const isStreamLink = targetUrl.startsWith('/stream');
     const isExternal = targetUrl.startsWith('http');
 
     // Only start loading for internal, non-streaming, different-page navigations.
