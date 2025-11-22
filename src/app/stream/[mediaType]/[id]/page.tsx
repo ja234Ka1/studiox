@@ -6,6 +6,7 @@ import type { MediaType } from "@/types/tmdb";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { useEffect, useRef } from "react";
 
 type Props = {
   params: {
@@ -17,6 +18,15 @@ type Props = {
 export default function StreamPage({ params }: Props) {
   const { mediaType, id } = params;
   const searchParams = useSearchParams();
+  const fullscreenRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (fullscreenRef.current) {
+      fullscreenRef.current.requestFullscreen().catch(err => {
+        console.error("Error attempting to enable full-screen mode:", err.message);
+      });
+    }
+  }, []);
 
   if (mediaType !== "tv" && mediaType !== "movie") {
     notFound();
@@ -38,7 +48,7 @@ export default function StreamPage({ params }: Props) {
     : title;
 
   return (
-    <div className="w-full flex flex-col pt-16">
+    <div ref={fullscreenRef} className="w-full h-full flex flex-col pt-16 bg-background">
        <div className="container px-4 md:px-8 mx-auto py-4 flex items-center justify-between">
         <Button asChild variant="ghost">
           <Link href={`/media/${mediaType}/${id}`}>
@@ -47,7 +57,7 @@ export default function StreamPage({ params }: Props) {
         </Button>
         <h1 className="text-xl font-bold truncate">{itemTitle}</h1>
       </div>
-      <div className="w-full aspect-video bg-black">
+      <div className="w-full flex-1 aspect-video bg-black">
         <iframe
             src={streamUrl}
             allow="autoplay; fullscreen"
