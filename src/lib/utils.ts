@@ -12,7 +12,14 @@ type ImageSize = "w500" | "original";
 
 export function getTmdbImageUrl(path: string | null | undefined, size: ImageSize = "w500"): string {
   if (path) {
-    return `${TMDB_IMAGE_BASE_URL}${size}${path}`;
+    let finalSize = size;
+    // Check if data saver is enabled from localStorage
+    if (typeof window !== 'undefined' && localStorage.getItem('willow-data-saver') === 'true') {
+        if (size === 'original') {
+            finalSize = 'w500';
+        }
+    }
+    return `${TMDB_IMAGE_BASE_URL}${finalSize}${path}`;
   }
   
   const fallbackImageId = size === 'original' ? 'hero-fallback' : 'media-fallback';

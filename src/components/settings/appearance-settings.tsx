@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Check, Monitor, Gamepad2 } from "lucide-react";
+import { Check, Monitor, Gamepad2, User, Run } from "lucide-react";
 import { useTheme } from "@/context/theme-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -21,7 +21,7 @@ const themes = [
 ];
 
 export function AppearanceSettings() {
-  const { theme, setTheme, backgroundEffects, setBackgroundEffects, animationsEnabled, setAnimationsEnabled, blobSpeed, setBlobSpeed } = useTheme();
+  const { theme, setTheme, backgroundEffects, setBackgroundEffects, animationsEnabled, setAnimationsEnabled, blobSpeed, setBlobSpeed, dataSaver, setDataSaver } = useTheme();
 
   return (
     <div className="space-y-6">
@@ -158,6 +158,33 @@ export function AppearanceSettings() {
             </div>
           </div>
         </div>
+
+        <Separator />
+        
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Run className="w-5 h-5 text-muted-foreground" />
+            <Label className="text-base">Data Saver</Label>
+          </div>
+          <div className="space-y-4 rounded-md border p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="data-saver-switch" className="font-medium">
+                  Data Saver Mode
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Reduce image quality and disable video autoplay to save data.
+                </p>
+              </div>
+              <Switch
+                id="data-saver-switch"
+                checked={dataSaver}
+                onCheckedChange={setDataSaver}
+              />
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );

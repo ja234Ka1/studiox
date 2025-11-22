@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { addToWatchlist, getWatchlist, removeFromWatchlist } from "@/lib/userData";
 import LoadingLink from "./loading-link";
 import YouTubeEmbed from "./youtube-embed";
+import { useTheme } from "@/context/theme-provider";
 
 interface DetailPageHeroProps {
   item: MediaDetails;
@@ -28,6 +29,7 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
   const [showTrailer, setShowTrailer] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const playerRef = useRef<YouTubePlayer | null>(null);
+  const { dataSaver } = useTheme();
 
   const title = item.title || item.name;
   const releaseDate = item.release_date || item.first_air_date;
@@ -51,7 +53,7 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
   }, [item.id]);
 
   const handleMouseEnter = () => {
-    if (trailer) {
+    if (trailer && !dataSaver) {
       setShowTrailer(true);
     }
   };

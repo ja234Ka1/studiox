@@ -24,6 +24,8 @@ type ThemeProviderState = {
   setAnimationsEnabled: (enabled: boolean) => void;
   blobSpeed: number;
   setBlobSpeed: (speed: number) => void;
+  dataSaver: boolean;
+  setDataSaver: (enabled: boolean) => void;
 };
 
 const ThemeProviderContext = React.createContext<ThemeProviderState | undefined>(undefined);
@@ -43,6 +45,7 @@ export function ThemeProvider({
 
   const [animationsEnabled, setAnimationsEnabledState] = React.useState<boolean>(true);
   const [blobSpeed, setBlobSpeedState] = React.useState<number>(30);
+  const [dataSaver, setDataSaverState] = React.useState<boolean>(false);
 
 
   const [isMounted, setIsMounted] = React.useState(false);
@@ -62,6 +65,7 @@ export function ThemeProvider({
     setAnimationsEnabledState(localStorage.getItem("willow-animations-enabled") !== "false");
     const storedBlobSpeed = localStorage.getItem("willow-blob-speed");
     setBlobSpeedState(storedBlobSpeed ? parseInt(storedBlobSpeed, 10) : 30);
+    setDataSaverState(localStorage.getItem("willow-data-saver") === "true");
 
   }, [isMounted, defaultTheme]);
 
@@ -130,6 +134,14 @@ export function ThemeProvider({
     }
   };
 
+  const setDataSaver = (enabled: boolean) => {
+    setDataSaverState(enabled);
+    if (typeof window !== 'undefined' && isMounted) {
+      localStorage.setItem("willow-data-saver", String(enabled));
+      window.dispatchEvent(new CustomEvent("willow-storage-change", { detail: { key: 'dataSaver' } }));
+    }
+  };
+
   const value = {
     theme,
     setTheme,
@@ -138,7 +150,9 @@ export function ThemeProvider({
     animationsEnabled,
     setAnimationsEnabled,
     blobSpeed,
-    setBlobSpeed
+    setBlobSpeed,
+    dataSaver,
+    setDataSaver
   };
 
   if (!isMounted) {
