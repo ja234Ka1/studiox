@@ -3,8 +3,8 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { PlayCircle, Plus, Check } from "lucide-react";
-import { useEffect, useState } from "react";
+import { PlayCircle, Plus, Check, VolumeX, Volume2 } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
 
 import type { MediaDetails } from "@/types/tmdb";
 import { getTmdbImageUrl } from "@/lib/utils";
@@ -14,6 +14,7 @@ import { useVideo } from "@/context/video-provider";
 import { useToast } from "@/hooks/use-toast";
 import { addToWatchlist, getWatchlist, removeFromWatchlist } from "@/lib/userData";
 import Link from "next/link";
+import YouTubeEmbed from "./youtube-embed";
 
 interface DetailPageHeroProps {
   item: MediaDetails;
@@ -23,10 +24,18 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
   const { playVideo } = useVideo();
   const { toast } = useToast();
   const [isInWatchlist, setIsInWatchlist] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
+  const [showTrailer, setShowTrailer] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const title = item.title || item.name;
   const releaseDate = item.release_date || item.first_air_date;
   const year = releaseDate ? new Date(releaseDate).getFullYear() : 'N/A';
+
+  const trailer = item.videos?.results?.find(v => v.type === 'Trailer' && v.official) 
+                  || item.videos?.results?.find(v => v.type === 'Trailer');
+
 
   useEffect(() => {
     const watchlist = getWatchlist();
@@ -40,6 +49,25 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
     window.addEventListener('willow-watchlist-change', handleWatchlistChange);
     return () => window.removeEventListener('willow-watchlist-change', handleWatchlistChange);
   }, [item.id]);
+  
+  const handleMouseEnter = () => {
+    if (trailer) {
+      setIsHovering(true);
+      hoverTimeout.current = setTimeout(() => {
+        setShowTrailer(true);
+      }, 3000);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovering(false);
+    if (hoverTimeout.current) {
+      clearTimeout(hoverTimeout.current);
+    }
+    setShowTrailer(false);
+    setIsMuted(true);
+  };
+
 
   const handlePlayTrailer = () => {
     playVideo(item.id, item.media_type);
@@ -50,28 +78,57 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
       removeFromWatchlist(item.id);
       toast({ title: `Removed from Watchlist`, description: `"${title}" has been removed.` });
     } else {
-      // Ensure media_type is passed when adding to watchlist
       const itemToAdd = { ...item, media_type: item.media_type || (item.title ? 'movie' : 'tv') };
       addToWatchlist(itemToAdd);
       toast({ title: 'Added to Watchlist', description: `"${title}" has been added.` });
     }
   };
-
-  const trailer = item.videos?.results?.find(v => v.type === 'Trailer' && v.official);
   
   const streamPath = `/stream/${item.media_type}/${item.id}?title=${encodeURIComponent(title || '')}`;
 
 
   return (
-    <div className="relative w-full h-[60vh] lg:h-[85vh]">
+    <div 
+      className="relative w-full h-[60vh] lg:h-[85vh]"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <div className="absolute inset-0">
-        <Image
-          src={getTmdbImageUrl(item.backdrop_path, "original")}
-          alt={title || "Hero backdrop"}
-          fill
-          priority
-          className="object-cover"
-        />
+        <AnimatePresence>
+            <motion.div
+              key="image"
+              initial={{ opacity: 1 }}
+              animate={{ opacity: showTrailer ? 0 : 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              className="absolute inset-0"
+            >
+                <Image
+                src={getTmdbImageUrl(item.backdrop_path, "original")}
+                alt={title || "Hero backdrop"}
+                fill
+                priority
+                className="object-cover"
+                />
+          </motion.div>
+        </AnimatePresence>
+        
+        <AnimatePresence>
+          {showTrailer && trailer && (
+             <motion.div
+                key="video"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+                className="absolute inset-0"
+              >
+                  <YouTubeEmbed videoId={trailer.key} isMuted={isMuted} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/20 to-transparent" />
       </div>
@@ -113,6 +170,28 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
           </div>
         </motion.div>
       </div>
+
+      {showTrailer && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="absolute z-20 right-8 bottom-24"
+        >
+          <Button
+            size="icon"
+            variant="secondary"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsMuted((prev) => !prev);
+            }}
+            className="rounded-full h-12 w-12"
+          >
+            {isMuted ? <VolumeX /> : <Volume2 />}
+            <span className="sr-only">Toggle mute</span>
+          </Button>
+        </motion.div>
+      )}
     </div>
   );
 }
