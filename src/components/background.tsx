@@ -76,7 +76,7 @@ export function Background() {
           return (
             <motion.div
               key={blob.id}
-              className="absolute bg-accent/10 blur-3xl animate-morph"
+              className="absolute bg-accent/10 blur-3xl animate-morph animate-blob-move"
               style={{
                 width: blob.size,
                 height: blob.size,
