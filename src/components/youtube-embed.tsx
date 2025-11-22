@@ -22,14 +22,14 @@ const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({ videoId, isMuted }) => {
   embedUrl.searchParams.append('playsinline', '1');
   
   return (
-    <div className="absolute inset-0 w-full h-full pointer-events-none">
+    <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden">
        <iframe
         src={embedUrl.toString()}
         title="YouTube video player"
         frameBorder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;"
         allowFullScreen
-        className="w-full h-full scale-[1.2]"
+        className="absolute top-1/2 left-1/2 w-full h-full min-w-[177.77vh] min-h-[56.25vw] -translate-x-1/2 -translate-y-1/2"
       ></iframe>
     </div>
   );
