@@ -104,9 +104,9 @@ export default function MediaDetailsPage() {
 
       <div className="container mx-auto px-4 md:px-8 lg:px-16 space-y-12 py-12 pb-24">
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <div className="lg:col-span-3">
-            <p className="text-muted-foreground text-lg mb-8">{item.overview}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+          <div className="lg:col-span-3 lg:col-start-2">
+            <p className="text-muted-foreground text-lg mb-8 text-center">{item.overview}</p>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-8">
               <div>
@@ -146,10 +146,6 @@ export default function MediaDetailsPage() {
                     title={item.name || item.title || ''}
                 />
             )}
-          </div>
-
-          <div className="lg:col-span-1">
-            {/* Additional info could go here */}
           </div>
         </div>
 
