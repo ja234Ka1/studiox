@@ -9,7 +9,7 @@ import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-type StreamSource = 'vidzee' | 'rivestream';
+type StreamSource = 'vidzee' | 'mapple';
 
 export default function StreamPage() {
   const params = useParams<{ mediaType: MediaType; id: string }>();
@@ -62,10 +62,10 @@ export default function StreamPage() {
   }
 
   const getStreamUrl = (selectedSource: StreamSource) => {
-    if (selectedSource === 'rivestream') {
+    if (selectedSource === 'mapple') {
       return mediaType === 'tv' && season && episode
-        ? `https://rivestream.org/embed?type=tv&id=${id}&season=${season}&episode=${episode}`
-        : `https://rivestream.org/embed?type=movie&id=${id}`;
+        ? `https://mapple.uk/watch/tv/${id}-${season}-${episode}`
+        : `https://mapple.uk/watch/movie/${id}`;
     }
     // Default to vidzee
     return (mediaType === 'tv' && season && episode)
@@ -106,10 +106,10 @@ export default function StreamPage() {
                 </Button>
                  <Button
                     size="sm"
-                    onClick={() => setSource('rivestream')}
-                    className={cn("rounded-full", source === 'rivestream' ? 'bg-primary text-primary-foreground' : 'bg-transparent text-secondary-foreground hover:bg-secondary/50')}
+                    onClick={() => setSource('mapple')}
+                    className={cn("rounded-full", source === 'mapple' ? 'bg-primary text-primary-foreground' : 'bg-transparent text-secondary-foreground hover:bg-secondary/50')}
                 >
-                    Rivestream
+                    Mapple
                 </Button>
             </div>
         </motion.div>
