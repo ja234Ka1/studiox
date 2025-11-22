@@ -35,7 +35,7 @@ async function fetcher<T>(path: string, params: Record<string, string> = {}): Pr
 export async function getTrending(mediaType: MediaType | "all" = "all", timeRange: TimeRange = "day"): Promise<Media[]> {
     try {
         const data = await fetcher<ApiResponse<Media>>(`/trending/${mediaType}/${timeRange}`);
-        return data.results;
+        return data.results.map(item => ({...item, media_type: item.media_type || mediaType}));
     } catch (error) {
         return [];
     }
@@ -44,7 +44,7 @@ export async function getTrending(mediaType: MediaType | "all" = "all", timeRang
 export async function getPopular(mediaType: MediaType, params: Record<string, string> = {}): Promise<Media[]> {
     try {
         const data = await fetcher<ApiResponse<Media>>(`/${mediaType}/popular`, params);
-        return data.results;
+        return data.results.map(item => ({...item, media_type: mediaType}));
     } catch (error) {
         return [];
     }
@@ -53,11 +53,21 @@ export async function getPopular(mediaType: MediaType, params: Record<string, st
 export async function getTopRated(mediaType: MediaType, params: Record<string, string> = {}): Promise<Media[]> {
     try {
         const data = await fetcher<ApiResponse<Media>>(`/${mediaType}/top_rated`, params);
-        return data.results;
+        return data.results.map(item => ({...item, media_type: mediaType}));
     } catch (error) {
         return [];
     }
 }
+
+export async function getDiscover(mediaType: MediaType, params: Record<string, string> = {}): Promise<Media[]> {
+    try {
+        const data = await fetcher<ApiResponse<Media>>(`/discover/${mediaType}`, params);
+        return data.results.map(item => ({...item, media_type: mediaType}));
+    } catch (error) {
+        return [];
+    }
+}
+
 
 export async function getVideos(mediaId: number, mediaType: MediaType): Promise<Video[]> {
     try {

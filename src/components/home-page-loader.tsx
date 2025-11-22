@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import MediaCarousel from "@/components/media-carousel";
-import { getPopular, getTopRated } from "@/lib/tmdb";
+import { getPopular, getTopRated, getDiscover } from "@/lib/tmdb";
 import type { Media } from "@/types/tmdb";
 import { Skeleton } from "./ui/skeleton";
 
@@ -17,13 +17,12 @@ const categoriesConfig: Omit<Category, 'items'>[] = [
   { title: "Top Rated Movies", fetcher: () => getTopRated("movie") },
   { title: "Popular TV Shows", fetcher: () => getPopular("tv") },
   { title: "Top Rated TV Shows", fetcher: () => getTopRated("tv") },
-  { title: "Action & Adventure", fetcher: () => getPopular("movie", { with_genres: '28,12' }) },
-  { title: "Comedy", fetcher: () => getPopular("movie", { with_genres: '35' }) },
-  { title: "Horror", fetcher: () => getPopular("movie", { with_genres: '27' }) },
-  { title: "Sci-Fi & Fantasy", fetcher: () => getPopular("movie", { with_genres: '878,14' }) },
-  { title: "Documentaries", fetcher: () => getPopular("movie", { with_genres: '99' }) },
-  { title: "Hollywood Hits", fetcher: () => getTopRated("movie", { with_original_language: 'en' }) },
-  { title: "Must-Watch Anime", fetcher: () => getPopular("tv", { with_genres: '16', with_keywords: '210024' }) },
+  { title: "Action & Adventure", fetcher: () => getDiscover("movie", { with_genres: '28' }) },
+  { title: "Comedy", fetcher: () => getDiscover("movie", { with_genres: '35' }) },
+  { title: "Horror", fetcher: () => getDiscover("movie", { with_genres: '27' }) },
+  { title: "Sci-Fi & Fantasy", fetcher: () => getDiscover("movie", { with_genres: '878,14' }) },
+  { title: "Documentaries", fetcher: () => getDiscover("movie", { with_genres: '99' }) },
+  { title: "Must-Watch Anime", fetcher: () => getDiscover("tv", { with_genres: '16', with_keywords: '210024' }) },
 ];
 
 
