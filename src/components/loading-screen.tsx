@@ -12,6 +12,9 @@ export default function LoadingScreen() {
   const [percentage, setPercentage] = useState(0);
 
   useEffect(() => {
+    // Ensure the element is mounted before trying to animate it
+    if (!scope.current) return;
+
     if (isLoading) {
       // Start loading: animate to 90% and hold
       animate(scope.current, { value: 90 }, { duration: 10, ease: "easeOut" });
