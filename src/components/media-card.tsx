@@ -28,12 +28,6 @@ export function MediaCard({ item }: MediaCardProps) {
   const detailPath = `/media/${item.media_type}/${item.id}`;
   const year = item.release_date || item.first_air_date ? new Date(item.release_date || item.first_air_date!).getFullYear() : 'N/A';
 
-  const handlePlayClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    router.push(`/stream/${item.media_type}/${item.id}?title=${encodeURIComponent(title || '')}`);
-  }
-
   const handleMoreInfoClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -78,7 +72,7 @@ export function MediaCard({ item }: MediaCardProps) {
                   <span>{year}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Button size="icon" className="h-8 w-8 rounded-full" onClick={handlePlayClick}>
+                <Button size="icon" className="h-8 w-8 rounded-full" onClick={handleMoreInfoClick}>
                     <PlayCircle className="w-4 h-4" />
                 </Button>
                 <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full" onClick={(e) => {e.preventDefault(); e.stopPropagation(); /* TODO: Add to watchlist */}}>
