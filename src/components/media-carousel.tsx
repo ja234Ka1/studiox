@@ -22,7 +22,7 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
   }
 
   return (
-    <section>
+    <section className="text-left">
       <h2 className="text-2xl font-bold mb-4">{title}</h2>
       
       <Carousel
@@ -30,13 +30,13 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
           align: "start",
           dragFree: true,
         }}
-        className="w-full group"
+        className="w-full"
       >
-        <CarouselContent className="-ml-4">
+        <CarouselContent>
           {items.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
-              className="basis-1/3 sm:basis-1/4 md:basis-1/5 lg:basis-1/6 xl:basis-1/7 2xl:basis-1/8 pl-4"
+              className="basis-1/3 sm:basis-1/4 md:basis-1/5 lg:basis-1/6 xl:basis-1/7 2xl:basis-1/8 pl-4 first:pl-0"
             >
               <motion.div layout>
                 <MediaCard item={item} />

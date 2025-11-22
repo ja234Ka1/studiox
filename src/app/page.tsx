@@ -79,9 +79,9 @@ export default async function Home() {
         )
       )}
 
-      <div className="container mx-auto px-4 md:px-8 lg:px-16 space-y-12 py-12 pb-24 text-center">
+      <div className="container mx-auto px-4 md:px-8 lg:px-16 space-y-12 py-12 pb-24">
         {error && (
-            <Alert variant="destructive">
+            <Alert variant="destructive" className="text-left">
                 <Clapperboard className="h-4 w-4" />
                 <AlertTitle>Error Loading Content</AlertTitle>
                 <AlertDescription>
