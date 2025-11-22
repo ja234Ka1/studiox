@@ -9,7 +9,7 @@ import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-type StreamSource = 'vidzee' | 'vidking';
+type StreamSource = 'vidzee' | 'rivestream';
 
 export default function StreamPage() {
   const params = useParams<{ mediaType: MediaType; id: string }>();
@@ -62,10 +62,10 @@ export default function StreamPage() {
   }
 
   const getStreamUrl = (selectedSource: StreamSource) => {
-    if (selectedSource === 'vidking') {
-        return (mediaType === 'tv' && season && episode)
-            ? `https://www.vidking.net/embed/tv/${id}/${season}/${episode}`
-            : `https://www.vidking.net/embed/movie/${id}`;
+    if (selectedSource === 'rivestream') {
+      return mediaType === 'tv' && season && episode
+        ? `https://rivestream.org/embed?type=tv&id=${id}&season=${season}&episode=${episode}`
+        : `https://rivestream.org/embed?type=movie&id=${id}`;
     }
     // Default to vidzee
     return (mediaType === 'tv' && season && episode)
@@ -106,10 +106,10 @@ export default function StreamPage() {
                 </Button>
                  <Button
                     size="sm"
-                    onClick={() => setSource('vidking')}
-                    className={cn("rounded-full", source === 'vidking' ? 'bg-primary text-primary-foreground' : 'bg-transparent text-secondary-foreground hover:bg-secondary/50')}
+                    onClick={() => setSource('rivestream')}
+                    className={cn("rounded-full", source === 'rivestream' ? 'bg-primary text-primary-foreground' : 'bg-transparent text-secondary-foreground hover:bg-secondary/50')}
                 >
-                    VidKing
+                    Rivestream
                 </Button>
             </div>
         </motion.div>
