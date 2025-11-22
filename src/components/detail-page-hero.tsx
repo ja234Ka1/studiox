@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import Image from "next/image";
@@ -50,13 +51,6 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
     return () => window.removeEventListener('willow-watchlist-change', handleWatchlistChange);
   }, [item.id]);
 
-  useEffect(() => {
-    if (showTrailer && playerRef.current) {
-        playerRef.current.unMute();
-        setIsMuted(false);
-    }
-  }, [showTrailer]);
-  
   const handleMouseEnter = () => {
     if (trailer) {
       setShowTrailer(true);
