@@ -1,17 +1,23 @@
 
 'use client'
 
-import { notFound } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 import type { MediaType } from "@/types/tmdb";
 
 type Props = {
+  // Params are no longer passed as props in this client component
+  // but we keep the type for structure.
   params: {
     mediaType: MediaType;
     id: string;
   };
 };
 
-export default function StreamPage({ params: { mediaType, id } }: Props) {
+export default function StreamPage({}: Props) {
+  // Use the hook to get params on the client
+  const params = useParams<{ mediaType: MediaType; id: string }>();
+  const { mediaType, id } = params;
+
   if (mediaType !== "tv" && mediaType !== "movie") {
     notFound();
   }
