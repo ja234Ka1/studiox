@@ -79,11 +79,29 @@ export default {
         'twinkle': {
           '0%, 100%': { opacity: '0.5' },
           '50%': { opacity: '1' },
-        }
+        },
+        'blob-move': {
+          '0%': {
+            transform: 'translate(0, 0) scale(1)',
+          },
+          '25%': {
+            transform: 'translate(20px, -30px) scale(1.1)',
+          },
+          '50%': {
+            transform: 'translate(-20px, 30px) scale(0.9)',
+          },
+          '75%': {
+            transform: 'translate(30px, 20px) scale(1.05)',
+          },
+          '100%': {
+            transform: 'translate(0, 0) scale(1)',
+          },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'blob-move': 'blob-move 20s ease-in-out infinite',
       },
     },
   },

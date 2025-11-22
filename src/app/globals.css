@@ -102,6 +102,23 @@
       transform: translateY(0);
     }
   }
-}
 
-    
+  .animate-blob-move {
+    animation: blob-move 30s linear infinite;
+  }
+
+  @keyframes blob-move {
+    0%, 100% {
+      transform: translate(-10%, -10%) scale(1);
+    }
+    25% {
+      transform: translate(calc(100vw - 90%), calc(100vh - 90%)) scale(1.1);
+    }
+    50% {
+      transform: translate(calc(100vw - 80%), 15%) scale(0.9);
+    }
+    75% {
+      transform: translate(20%, calc(100vh - 80%)) scale(1.2);
+    }
+  }
+}
