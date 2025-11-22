@@ -6,8 +6,6 @@ import { Loader2, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
 } from "@/components/ui/dialog";
 import { useVideo } from "@/context/video-provider";
 import { getVideos } from "@/lib/tmdb";
@@ -20,7 +18,6 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 const VIDEO_SOURCE_BASE_URLS = {
   YouTube: "https://www.youtube.com/embed/",
@@ -85,16 +82,10 @@ export default function VideoPlayer() {
   
   return (
     <Dialog open={isPlaying} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-4xl w-full h-auto p-0 border-0 bg-card">
-        <DialogHeader>
-          <DialogTitle>
-            {selectedVideo?.name ? (
-              <span className="sr-only">{selectedVideo.name}</span>
-            ) : (
-              <VisuallyHidden>Video Player</VisuallyHidden>
-            )}
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent 
+        className="max-w-4xl w-full h-auto p-0 border-0 bg-card"
+        aria-label={selectedVideo?.name || "Video Player"}
+      >
         <div className="aspect-video relative bg-black">
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center">
@@ -120,7 +111,7 @@ export default function VideoPlayer() {
           )}
         </div>
         {(videos.length > 1 || selectedVideo) && !isLoading && !error && (
-            <div className="p-4 pt-0 flex items-center justify-between">
+            <div className="p-4 pt-2 flex items-center justify-between">
                 <p className="font-semibold truncate mr-4">{selectedVideo?.name}</p>
                 {videos.length > 1 && (
                     <Select
@@ -143,4 +134,3 @@ export default function VideoPlayer() {
     </Dialog>
   );
 }
-
