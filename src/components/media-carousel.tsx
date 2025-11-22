@@ -26,7 +26,7 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
 
   return (
     <section>
-      <h2 className="text-2xl font-bold mb-4">{title}</h2>
+       <h2 className="text-2xl font-bold mb-4">{title === "Trending This Week" ? title : `Only on Willow: ${title}`}</h2>
       <Carousel
         opts={{
           align: "start",
@@ -35,13 +35,17 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
         }}
         className="w-full"
       >
-        <CarouselContent className="-ml-4 py-4 px-2">
-          {items.map((item, index) => (
+        <CarouselContent className="-ml-4 py-8 px-2">
+          {items.map((item) => (
             <CarouselItem
-              key={`${item.id}-${index}`}
+              key={item.id}
               className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-[15%] pl-4"
             >
-              <div onMouseLeave={() => setHoveredCard(null)}>
+              <div 
+                className="h-full"
+                onMouseEnter={() => setHoveredCard(item.id)}
+                onMouseLeave={() => setHoveredCard(null)}
+              >
                 <MediaCard 
                   item={item} 
                   isHovered={hoveredCard === item.id}
