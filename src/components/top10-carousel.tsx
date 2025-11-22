@@ -46,9 +46,6 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
     return null;
   }
 
-  const [mainTitle, ...subTitleParts] = title.split(" ");
-  const subTitle = subTitleParts.join(" ");
-
   return (
     <motion.section
       className="w-full group/carousel"
@@ -58,11 +55,13 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
       variants={carouselVariants}
     >
       <motion.div
-        className="text-left px-4 md:px-8 flex items-baseline gap-4"
+        className="text-left px-4 md:px-8"
         variants={itemVariants}
       >
-        <h2 className="text-3xl font-bold tracking-tight text-primary">{mainTitle}</h2>
-        <p className="text-lg font-semibold text-muted-foreground">{subTitle}</p>
+        <h2 className="flex items-baseline gap-3">
+          <span className="text-3xl font-bold tracking-tight text-primary">TOP 10</span>
+          <span className="text-lg font-semibold text-muted-foreground">Movies Today</span>
+        </h2>
       </motion.div>
 
       <Carousel
@@ -72,7 +71,7 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
         }}
         className="w-full mt-4"
       >
-        <CarouselContent className="-ml-4 md:-ml-8">
+        <CarouselContent className="-ml-4 md:px-4">
           {items.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
@@ -83,7 +82,7 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
                 layout
                 variants={itemVariants}
               >
-                <span className="absolute -left-24 bottom-0 text-[14rem] font-black text-transparent text-outline leading-none select-none z-0 transition-all duration-300 group-hover:scale-105 group-hover:text-glow">
+                <span className="absolute -left-28 bottom-0 text-[14rem] font-black text-transparent text-outline leading-none select-none z-0 transition-all duration-300 group-hover:scale-105 group-hover:text-glow">
                   {index + 1}
                 </span>
                 <div className="relative z-10 w-full">
@@ -93,13 +92,9 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300 ml-12" />
-        <CarouselNext className="opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300 mr-12" />
+        <CarouselPrevious className="opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300 ml-16" />
+        <CarouselNext className="opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300 mr-16" />
       </Carousel>
     </motion.section>
   );
 }
-
-
-
-
