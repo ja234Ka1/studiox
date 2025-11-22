@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { type ReactNode } from "react";
+import React, { type ReactNode, useState, useCallback, useMemo } from "react";
 import { ThemeProvider } from "@/context/theme-provider";
 import { VideoProvider } from "@/context/video-provider";
 import { LoadingProvider } from "@/context/loading-provider";
@@ -26,9 +26,9 @@ function genId() {
 }
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
-  const [toasts, setToasts] = React.useState<ToasterToast[]>([]);
+  const [toasts, setToasts] = useState<ToasterToast[]>([]);
 
-  const toast = React.useCallback((props: Omit<ToasterToast, "id">) => {
+  const toast: ToastFn = useCallback((props) => {
     const id = genId();
     const newToast: ToasterToast = {
       ...props,
@@ -53,13 +53,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const dismiss = React.useCallback((toastId?: string) => {
+  const dismiss = useCallback((toastId?: string) => {
     setToasts((prev) =>
       toastId ? prev.filter((t) => t.id !== toastId) : []
     );
   }, []);
 
-  const value = React.useMemo(() => ({ toasts, toast, dismiss }), [toasts, toast, dismiss]);
+  const value = useMemo(() => ({ toasts, toast, dismiss }), [toasts, toast, dismiss]);
 
   return (
     <ToastContext.Provider value={value}>
