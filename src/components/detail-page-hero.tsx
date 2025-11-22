@@ -27,7 +27,6 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [showTrailer, setShowTrailer] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
-  const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
   const playerRef = useRef<YouTubePlayer | null>(null);
 
   const title = item.title || item.name;
@@ -60,17 +59,15 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
   
   const handleMouseEnter = () => {
     if (trailer) {
-      hoverTimeout.current = setTimeout(() => {
-        setShowTrailer(true);
-      }, 3000);
+      setShowTrailer(true);
     }
   };
 
   const handleMouseLeave = () => {
-    if (hoverTimeout.current) {
-      clearTimeout(hoverTimeout.current);
-    }
     setShowTrailer(false);
+    if (playerRef.current) {
+      playerRef.current.mute();
+    }
     setIsMuted(true);
   };
 
