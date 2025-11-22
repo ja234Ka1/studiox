@@ -1,8 +1,9 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Clapperboard, Film, Search, Settings, Tv } from "lucide-react";
+import { Clapperboard, Film, Gamepad2, Home, Search, Settings, Tv } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
@@ -10,9 +11,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 const navItems = [
+  { href: "/", label: "Home", icon: Home },
+  { href: "/tv-shows", label: "Shows", icon: Tv },
   { href: "/movies", label: "Movies", icon: Film },
-  { href: "/tv-shows", label: "TV Shows", icon: Tv },
-  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "#", label: "Games", icon: Gamepad2 },
 ];
 
 export function Header() {
@@ -47,7 +49,7 @@ export function Header() {
               asChild
               className={cn(
                 "text-sm font-medium",
-                pathname.startsWith(item.href)
+                pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href))
                   ? "text-primary"
                   : "text-muted-foreground hover:text-primary"
               )}
@@ -64,10 +66,15 @@ export function Header() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search movies & shows..."
-              className="pl-9"
+              placeholder="Search..."
+              className="pl-9 rounded-full"
             />
           </div>
+          <Button asChild variant="ghost">
+             <Link href="/settings">
+                <Settings />
+             </Link>
+          </Button>
           <Button variant="ghost">Login</Button>
         </div>
       </div>

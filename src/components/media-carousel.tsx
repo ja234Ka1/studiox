@@ -21,7 +21,7 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
 
   return (
     <section>
-      <h2 className="text-2xl font-bold mb-4">{title}</h2>
+      <h2 className="text-xl font-bold mb-4">Only on Willow: {title}</h2>
       <Carousel
         opts={{
           align: "start",
