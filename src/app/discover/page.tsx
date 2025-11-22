@@ -1,4 +1,6 @@
 
+'use client'
+
 import { GENRES } from "@/lib/genres";
 import LoadingLink from "@/components/loading-link";
 import { Button } from "@/components/ui/button";
