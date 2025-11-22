@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from "next/image";
@@ -10,6 +11,7 @@ import type { Media } from "@/types/tmdb";
 import { getTmdbImageUrl } from "@/lib/utils";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Button } from "./ui/button";
+import { useRouter } from "next/navigation";
 
 interface MediaCardProps {
   item: Media;
@@ -17,6 +19,7 @@ interface MediaCardProps {
 
 export function MediaCard({ item }: MediaCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const router = useRouter();
 
   const fallbackImage = PlaceHolderImages.find(p => p.id === 'media-fallback');
   const posterUrl = item.poster_path ? getTmdbImageUrl(item.poster_path, 'w500') : fallbackImage?.imageUrl;
@@ -25,6 +28,12 @@ export function MediaCard({ item }: MediaCardProps) {
   const title = item.title || item.name;
   const detailPath = `/media/${item.media_type}/${item.id}`;
   const year = item.release_date || item.first_air_date ? new Date(item.release_date || item.first_air_date!).getFullYear() : 'N/A';
+
+  const handlePlayClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push(detailPath);
+  }
 
   return (
     <motion.div
@@ -94,10 +103,8 @@ export function MediaCard({ item }: MediaCardProps) {
                 <span>{year}</span>
             </div>
             <div className="flex items-center gap-2">
-              <Button size="icon" className="h-8 w-8 rounded-full" asChild>
-                <Link href={detailPath} onClick={(e) => e.stopPropagation()}>
+              <Button size="icon" className="h-8 w-8 rounded-full" onClick={handlePlayClick}>
                   <PlayCircle className="w-4 h-4" />
-                </Link>
               </Button>
               <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full" onClick={(e) => {e.preventDefault(); e.stopPropagation(); /* Add to watchlist */}}>
                 <Plus className="w-4 h-4" />
