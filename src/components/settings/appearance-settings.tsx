@@ -1,12 +1,21 @@
 "use client";
 
-import { Monitor, Moon, Sun } from "lucide-react";
+import { Check, Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "@/context/theme-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
+const themes = [
+  { name: "light", label: "Light", icon: Sun, accentColor: "hsl(45 90% 55%)" },
+  { name: "dark", label: "Dark", icon: Moon, accentColor: "hsl(45 90% 55%)" },
+  { name: "theme-rose", label: "Rose", accentColor: "hsl(346.8 77.2% 49.8%)" },
+  { name: "theme-blue", label: "Blue", accentColor: "hsl(217.2 91.2% 59.8%)" },
+  { name: "theme-green", label: "Green", accentColor: "hsl(142.1 76.2% 36.3%)" },
+  { name: "theme-orange", label: "Orange", accentColor: "hsl(25.3 92.5% 53.1%)" },
+];
 
 export function AppearanceSettings() {
   const { theme, setTheme, backgroundEffects, setBackgroundEffects } = useTheme();
@@ -21,34 +30,40 @@ export function AppearanceSettings() {
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-2">
-          <Label>Theme</Label>
-          <div className="grid grid-cols-3 gap-2 rounded-lg bg-muted p-1">
-            <Button
-              variant={theme === "light" ? "primary" : "ghost"}
-              size="sm"
-              onClick={() => setTheme("light")}
-              className={cn(theme === "light" && "bg-background shadow-sm text-foreground")}
-            >
-              <Sun className="mr-2 h-4 w-4" />
-              Light
-            </Button>
-            <Button
-              variant={theme === "dark" ? "primary" : "ghost"}
-              size="sm"
-              onClick={() => setTheme("dark")}
-              className={cn(theme === "dark" && "bg-background shadow-sm text-foreground")}
-            >
-              <Moon className="mr-2 h-4 w-4" />
-              Dark
-            </Button>
-            <Button
+          <Label>Color Scheme</Label>
+          <div className="grid grid-cols-3 gap-2">
+            {themes.map((t) => (
+              <Button
+                key={t.name}
+                variant={"outline"}
+                className={cn(
+                  "justify-start h-12",
+                  theme === t.name && "border-2 border-primary"
+                )}
+                onClick={() => setTheme(t.name)}
+              >
+                <div
+                  className="w-4 h-4 rounded-full mr-2"
+                  style={{ backgroundColor: t.accentColor }}
+                />
+                <span className="flex-1 text-left">{t.label}</span>
+                {theme === t.name && <Check className="h-4 w-4" />}
+              </Button>
+            ))}
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label>System Preference</Label>
+           <div className="grid grid-cols-3 gap-2 rounded-lg bg-muted p-1">
+             <Button
               variant={theme === "system" ? "primary" : "ghost"}
               size="sm"
               onClick={() => setTheme("system")}
-              className={cn(theme === "system" && "bg-background shadow-sm text-foreground")}
+              className={cn("col-span-3", theme === "system" && "bg-background shadow-sm text-foreground")}
             >
               <Monitor className="mr-2 h-4 w-4" />
-              System
+              Sync with System
             </Button>
           </div>
         </div>

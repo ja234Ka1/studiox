@@ -29,7 +29,11 @@ export function ThemeProvider({
     enableSystem = true,
     ...props 
 }: CustomThemeProviderProps) {
-  const [theme, setThemeState] = React.useState<string>(defaultTheme);
+  const [theme, setThemeState] = React.useState<string>(() => {
+    if (typeof window === 'undefined') return defaultTheme;
+    return localStorage.getItem("willow-theme") || defaultTheme;
+  });
+  
   const [backgroundEffects, setBackgroundEffectsState] = React.useState<BackgroundEffects>({
     blobs: true,
     starfield: false,
@@ -50,8 +54,12 @@ export function ThemeProvider({
     const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     const resolvedTheme = isSystem ? systemTheme : newTheme;
     
-    root.classList.remove("light", "dark");
-    root.classList.add(resolvedTheme);
+    root.classList.remove("light", "dark", "theme-rose", "theme-blue", "theme-green", "theme-orange");
+    
+    if (resolvedTheme !== 'system') {
+        root.classList.add(resolvedTheme);
+    }
+    
     localStorage.setItem("willow-theme", newTheme);
     setThemeState(newTheme);
 
@@ -59,6 +67,9 @@ export function ThemeProvider({
   };
   
   React.useEffect(() => {
+    // Apply the theme on initial load
+    setTheme(theme);
+    
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = () => {
         if (theme === 'system' && enableSystem) {
