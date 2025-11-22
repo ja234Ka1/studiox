@@ -59,7 +59,7 @@ export function ThemeProvider({
 
     const root = window.document.documentElement;
     
-    root.classList.remove("light", "dark", "theme-rose", "theme-nintendo", "theme-playstation", "theme-xbox");
+    root.classList.remove("light", "dark", "theme-rose", "theme-nintendo", "theme-playstation", "theme-xbox", "theme-ghibli", "theme-ghibli-dark");
 
     let effectiveTheme = theme;
     if (theme === 'system' && enableSystem) {
@@ -91,17 +91,17 @@ export function ThemeProvider({
 
   const value = {
     theme,
-    setTheme,
+    setTheme: (newTheme: string) => setTheme(newTheme),
     backgroundEffects,
-    setBackgroundEffects: handleSetBackgroundEffects,
+    setBackgroundEffects: (effects: Partial<BackgroundEffects>) => setBackgroundEffects(prev => ({...prev, ...effects})),
     animationsEnabled,
-    setAnimationsEnabled,
+    setAnimationsEnabled: (enabled: boolean) => setAnimationsEnabled(enabled),
     blobSpeed,
-    setBlobSpeed,
+    setBlobSpeed: (speed: number) => setBlobSpeed(speed),
     dataSaver,
-    setDataSaver,
+    setDataSaver: (enabled: boolean) => setDataSaver(enabled),
     radius,
-    setRadius,
+    setRadius: (newRadius: number) => setRadius(newRadius),
   };
 
   if (!isMounted) {

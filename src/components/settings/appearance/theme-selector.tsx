@@ -12,6 +12,8 @@ const themes = [
   { name: 'dark', label: 'Willow', palette: ['#000000', '#ffffff', '#ffffff'] },
   { name: 'light', label: 'Willow Light', palette: ['#ffffff', '#000000', '#000000'] },
   { name: 'theme-rose', label: 'Rose', palette: ['#fef2f2', '#e11d48', '#e11d48'] },
+  { name: 'theme-ghibli', label: 'Studio Ghibli', palette: ['#f5f8f5', '#4db6ac', '#d2b48c'] },
+  { name: 'theme-ghibli-dark', label: 'Studio Ghibli Dark', palette: ['#263238', '#4db6ac', '#d2b48c'] },
   { name: 'theme-nintendo', label: 'Nintendo', palette: ['#f8f9fa', '#e60012', '#000000'] },
   { name: 'theme-playstation', label: 'PlayStation', palette: ['#232323', '#0055d4', '#e60012'] },
   { name: 'theme-xbox', label: 'XBOX', palette: ['#101010', '#107c10', '#9bf00b'] },
