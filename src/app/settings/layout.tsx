@@ -14,6 +14,10 @@ const settingsNavItems = [
       title: "Appearance",
       href: "/settings/appearance",
     },
+    {
+      title: "Playback",
+      href: "/settings/playback",
+    },
 ]
 
 interface SettingsLayoutProps {

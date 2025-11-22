@@ -7,6 +7,7 @@ import type { MediaType } from "@/types/tmdb";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTheme } from "@/context/theme-provider";
 
 const vidfastOrigins = [
     'https://vidfast.pro',
@@ -22,6 +23,7 @@ export default function StreamPage() {
   const params = useParams<{ mediaType: MediaType; id: string }>();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { streamSource } = useTheme();
 
   const [isHovered, setIsHovered] = useState(false);
   
@@ -58,6 +60,13 @@ export default function StreamPage() {
   }
 
   const getStreamUrl = () => {
+    if (streamSource === 'vidify') {
+        return mediaType === 'tv' && season && episode
+        ? `https://player.vidify.top/embed/tv/${id}?s=${season}&e=${episode}`
+        : `https://player.vidify.top/embed/movie/${id}`;
+    }
+
+    // Default to vidfast
     return mediaType === 'tv' && season && episode
       ? `https://vidfast.pro/tv/${id}/${season}/${episode}`
       : `https://vidfast.pro/movie/${id}`;
