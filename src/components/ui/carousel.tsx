@@ -5,10 +5,8 @@ import * as React from "react"
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react"
-import { ArrowLeft, ArrowRight } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 
 type CarouselApi = UseEmblaCarouselType[1]
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>
@@ -158,7 +156,7 @@ const CarouselContent = React.forwardRef<
   const { carouselRef, orientation } = useCarousel()
 
   return (
-    <div ref={carouselRef} className="overflow-visible">
+    <div ref={carouselRef} className="overflow-hidden px-4 md:px-8">
       <div
         ref={ref}
         className={cn(
@@ -199,7 +197,7 @@ const CarouselPrevious = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<typeof Button>
 >(({ className, variant = "outline", size = "icon", ...props }, ref) => {
-  const { orientation, scrollPrev, canScrollPrev } = useCarousel()
+  const { scrollPrev, canScrollPrev } = useCarousel()
 
   return (
     <Button
@@ -207,10 +205,8 @@ const CarouselPrevious = React.forwardRef<
       variant={variant}
       size={size}
       className={cn(
-        "absolute rounded-full",
-        orientation === "horizontal"
-          ? "-left-14 top-1/2 -translate-y-1/2"
-          : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
+        "absolute rounded-full h-12 w-12",
+        "left-0 top-1/2 -translate-y-1/2 z-10",
         className
       )}
       disabled={!canScrollPrev}
@@ -228,7 +224,7 @@ const CarouselNext = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<typeof Button>
 >(({ className, variant = "outline", size = "icon", ...props }, ref) => {
-  const { orientation, scrollNext, canScrollNext } = useCarousel()
+  const { scrollNext, canScrollNext } = useCarousel()
 
   return (
     <Button
@@ -236,10 +232,8 @@ const CarouselNext = React.forwardRef<
       variant={variant}
       size={size}
       className={cn(
-        "absolute rounded-full",
-        orientation === "horizontal"
-          ? "-right-14 top-1/2 -translate-y-1/2"
-          : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
+        "absolute rounded-full h-12 w-12",
+        "right-0 top-1/2 -translate-y-1/2 z-10",
         className
       )}
       disabled={!canScrollNext}
@@ -261,3 +255,5 @@ export {
   CarouselPrevious,
   CarouselNext,
 }
+export { Button } from "@/components/ui/button"
+export { ArrowLeft, ArrowRight } from "lucide-react"

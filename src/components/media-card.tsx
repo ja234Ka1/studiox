@@ -31,22 +31,25 @@ export function MediaCard({ item }: MediaCardProps) {
   const handlePlayClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    router.push(detailPath);
+    router.push(`/stream/${item.media_type}/${item.id}?title=${encodeURIComponent(title || '')}`);
   }
 
+  const handleMoreInfoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push(detailPath);
+  };
+  
   return (
-    <motion.div
-      layout
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
-      className="relative aspect-[2/3] w-full rounded-md overflow-hidden bg-card shadow-md cursor-pointer group"
-    >
-      <Link href={detailPath} className="w-full h-full">
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          transition={{ duration: 0.3 }}
-          className="w-full h-full"
-        >
+    <Link href={detailPath} className="w-full h-full block">
+      <motion.div
+        layout
+        onHoverStart={() => setIsHovered(true)}
+        onHoverEnd={() => setIsHovered(false)}
+        className="relative aspect-[2/3] w-full rounded-md overflow-hidden bg-card shadow-md cursor-pointer group"
+        whileHover={{ scale: 1.05, zIndex: 10 }}
+        transition={{ duration: 0.3 }}
+      >
           <Image
               src={posterUrl!}
               alt={title || "Media"}
@@ -55,7 +58,6 @@ export function MediaCard({ item }: MediaCardProps) {
               className="object-cover"
               data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
           />
-        </motion.div>
 
         <AnimatePresence>
           {isHovered && (
@@ -64,9 +66,9 @@ export function MediaCard({ item }: MediaCardProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="absolute inset-0 p-3 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/60 to-transparent"
+              className="absolute inset-0 p-3 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent"
             >
-              <h3 className="text-white font-bold text-sm truncate mb-2">{title}</h3>
+              <h3 className="text-white font-bold text-base truncate mb-2">{title}</h3>
               <div className="flex items-center text-xs text-muted-foreground mb-3 gap-2">
                   <div className="flex items-center gap-1 text-amber-400">
                       <Star className="w-3 h-3 fill-current"/>
@@ -86,7 +88,7 @@ export function MediaCard({ item }: MediaCardProps) {
             </motion.div>
           )}
         </AnimatePresence>
-      </Link>
-    </motion.div>
+      </motion.div>
+    </Link>
   );
 }

@@ -79,8 +79,9 @@ export default async function Home() {
         )
       )}
 
-      <div className="container mx-auto px-4 md:px-8 lg:px-16 space-y-12 py-12 pb-24">
+      <div className="w-full space-y-12 py-12 pb-24">
         {error && (
+          <div className="container mx-auto px-4 md:px-8">
             <Alert variant="destructive" className="text-left">
                 <Clapperboard className="h-4 w-4" />
                 <AlertTitle>Error Loading Content</AlertTitle>
@@ -88,6 +89,7 @@ export default async function Home() {
                     {error} Please make sure your TMDB API key is correct and try again later.
                 </AlertDescription>
             </Alert>
+          </div>
         )}
 
         {!error && (

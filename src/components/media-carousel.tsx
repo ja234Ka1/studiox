@@ -22,8 +22,8 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
   }
 
   return (
-    <section className="text-left">
-      <h2 className="text-2xl font-bold mb-4">{title}</h2>
+    <section className="text-left w-full">
+      <h2 className="text-2xl font-bold mb-4 px-4 md:px-8">{title}</h2>
       
       <Carousel
         opts={{
@@ -32,11 +32,11 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
         }}
         className="w-full"
       >
-        <CarouselContent>
+        <CarouselContent className="-ml-2">
           {items.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
-              className="basis-1/3 sm:basis-1/4 md:basis-1/5 lg:basis-1/6 xl:basis-1/7 2xl:basis-1/8 pl-4 first:pl-0"
+              className="basis-1/3 sm:basis-1/4 md:basis-1/5 lg:basis-1/6 xl:basis-1/7 2xl:basis-[11%] pl-4 pr-2"
             >
               <motion.div layout>
                 <MediaCard item={item} />

@@ -26,24 +26,24 @@ export function Background() {
           backgroundEffects.blobs ? "opacity-100" : "opacity-0"
         )}
       >
-        <div className="absolute bottom-0 left-0 right-0 top-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]"></div>
+        <div className="absolute bottom-0 left-0 right-0 top-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-20"></div>
         <div
           className={cn(
-            "absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-accent/20 blur-3xl",
+            "absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-accent/10 blur-3xl",
             "animate-[spin_20s_linear_infinite]"
           )}
           style={{ animationDelay: '0s' }}
         />
         <div
           className={cn(
-            "absolute -top-40 -right-40 h-96 w-96 rounded-full bg-accent/20 blur-3xl",
+            "absolute -top-40 -right-40 h-96 w-96 rounded-full bg-accent/10 blur-3xl",
             "animate-[spin_22s_linear_infinite]"
           )}
           style={{ animationDelay: '-5s' }}
         />
          <div
           className={cn(
-            "absolute -bottom-40 -right-20 h-80 w-80 rounded-full bg-primary/10 blur-3xl",
+            "absolute -bottom-40 -right-20 h-80 w-80 rounded-full bg-primary/5 blur-3xl",
             "animate-[spin_25s_linear_infinite]"
           )}
           style={{ animationDelay: '-10s' }}
@@ -87,5 +87,3 @@ const Starfield = () => {
 
     return <div className="absolute inset-0 z-0">{stars}</div>
 }
-
-
