@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Clapperboard, Film, Gamepad2, Home, Search, Settings, Tv } from "lucide-react";
+import { Clapperboard, Film, Gamepad2, Home, List, Search, Settings, Tv } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
@@ -14,7 +14,7 @@ const navItems = [
   { href: "/", label: "Home", icon: Home },
   { href: "/tv-shows", label: "Shows", icon: Tv },
   { href: "/movies", label: "Movies", icon: Film },
-  { href: "#", label: "Games", icon: Gamepad2 },
+  { href: "/watchlist", label: "Watchlist", icon: List },
 ];
 
 export function Header() {
@@ -23,17 +23,25 @@ export function Header() {
 
   useEffect(() => {
     const handleScroll = () => {
+      // Don't apply scroll effect on stream page
+      if (pathname.startsWith('/stream')) {
+        setIsScrolled(true);
+        return;
+      }
       setIsScrolled(window.scrollY > 10);
     };
+    
+    handleScroll();
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [pathname]);
 
   return (
     <header
       className={cn(
         "sticky top-0 z-50 w-full transition-all duration-300",
-        isScrolled ? "bg-background/80 backdrop-blur-sm border-b border-border" : "bg-transparent"
+        isScrolled ? "bg-background/80 backdrop-blur-sm border-b border-border" : "bg-transparent",
+        pathname.startsWith('/stream') && "bg-background/95 backdrop-blur-sm border-b border-border"
       )}
     >
       <div className="container flex h-16 items-center px-4 md:px-8 mx-auto">

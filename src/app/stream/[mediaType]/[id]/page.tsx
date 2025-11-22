@@ -1,5 +1,7 @@
 
-import { notFound } from "next/navigation";
+'use client'
+
+import { notFound, useSearchParams } from "next/navigation";
 import type { MediaType } from "@/types/tmdb";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -10,11 +12,11 @@ type Props = {
     mediaType: MediaType;
     id: string;
   };
-   searchParams: { [key: string]: string | string[] | undefined };
 };
 
-export default function StreamPage({ params, searchParams }: Props) {
+export default function StreamPage({ params }: Props) {
   const { mediaType, id } = params;
+  const searchParams = useSearchParams();
 
   if (mediaType !== "tv" && mediaType !== "movie") {
     notFound();
@@ -25,7 +27,7 @@ export default function StreamPage({ params, searchParams }: Props) {
     notFound();
   }
   
-  const title = typeof searchParams.title === 'string' ? searchParams.title : 'Stream';
+  const title = searchParams.get('title') || 'Stream';
 
   const streamUrl = mediaType === 'tv'
     ? `https://cinemaos.tech/player/${id}/1/1`
@@ -36,21 +38,23 @@ export default function StreamPage({ params, searchParams }: Props) {
     : title;
 
   return (
-    <div className="w-full h-screen bg-black flex flex-col">
-       <div className="p-4 flex items-center justify-between bg-black/50 absolute top-0 left-0 right-0 z-10">
+    <div className="w-full flex flex-col pt-16">
+       <div className="container px-4 md:px-8 mx-auto py-4 flex items-center justify-between">
         <Button asChild variant="ghost">
           <Link href={`/media/${mediaType}/${id}`}>
             <ArrowLeft className="mr-2" /> Back to details
           </Link>
         </Button>
-        <h1 className="text-xl font-bold text-white truncate">{itemTitle}</h1>
+        <h1 className="text-xl font-bold truncate">{itemTitle}</h1>
       </div>
-      <iframe
-        src={streamUrl}
-        allow="autoplay; fullscreen"
-        allowFullScreen
-        className="w-full h-full border-0"
-      />
+      <div className="w-full aspect-video bg-black">
+        <iframe
+            src={streamUrl}
+            allow="autoplay; fullscreen"
+            allowFullScreen
+            className="w-full h-full border-0"
+        />
+      </div>
     </div>
   );
 }

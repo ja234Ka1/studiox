@@ -4,7 +4,6 @@ import Image from "next/image";
 import { getMediaDetails } from "@/lib/tmdb";
 import type { MediaType } from "@/types/tmdb";
 import { getTmdbImageUrl } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 import { Star } from "lucide-react";
 import MediaCarousel from "@/components/media-carousel";
 import { DetailPageHero } from "@/components/detail-page-hero";
@@ -83,7 +82,7 @@ export default async function MediaDetailsPage({ params }: Props) {
 
                 <div>
                     <h2 className="text-2xl font-bold mb-4">Top Cast</h2>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-6">
                         {topCast.map(member => (
                             <div key={member.id} className="text-center">
                                 <div className="relative aspect-[2/3] rounded-lg overflow-hidden mb-2 bg-muted">
