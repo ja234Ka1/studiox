@@ -35,7 +35,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       open: true,
       onOpenChange: (open) => {
         if (!open) {
-          setToasts((prevToasts) => prevToasts.filter((t) => t.id !== id));
+          dismiss(id);
         }
       },
     };
@@ -44,7 +44,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
     return {
       id: id,
-      dismiss: () => setToasts((prev) => prev.filter((t) => t.id !== id)),
+      dismiss: () => dismiss(id),
       update: (props: Partial<ToasterToast>) =>
         setToasts((prev) =>
           prev.map((t) => (t.id === id ? { ...t, ...props } : t))
