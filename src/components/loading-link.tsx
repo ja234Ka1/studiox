@@ -9,9 +9,10 @@ import React, { useEffect } from "react";
 interface LoadingLinkProps extends LinkProps {
   children: React.ReactNode;
   className?: string;
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
-const LoadingLink = ({ children, href, className, ...props }: LoadingLinkProps) => {
+const LoadingLink = ({ children, href, className, onClick, ...props }: LoadingLinkProps) => {
   const { startLoading, stopLoading } = useLoading();
   const pathname = usePathname();
 
@@ -21,8 +22,13 @@ const LoadingLink = ({ children, href, className, ...props }: LoadingLinkProps) 
   }, [pathname, stopLoading]);
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (onClick) {
+      onClick(e);
+    }
     const isSamePage = pathname === href.toString();
-    if (!isSamePage) {
+    const isStreamLink = href.toString().startsWith('/stream');
+
+    if (!isSamePage && !isStreamLink) {
       startLoading();
     }
   };
