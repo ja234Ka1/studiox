@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Plus, Check, PlayCircle, ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -23,7 +23,6 @@ export function MediaCard({ item }: MediaCardProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [isInWatchlist, setIsInWatchlist] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
   
   const fallbackImage = PlaceHolderImages.find(p => p.id === 'media-fallback');
   const posterUrl = item.poster_path ? getTmdbImageUrl(item.poster_path) : fallbackImage?.imageUrl;
@@ -68,13 +67,19 @@ export function MediaCard({ item }: MediaCardProps) {
 
   return (
     <motion.div
-      layout
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
+      layoutId={`card-${item.id}`}
+      whileHover="hover"
+      initial="initial"
       onClick={handleCardClick}
       className="relative aspect-[2/3] rounded-lg bg-card shadow-lg cursor-pointer"
-      transition={{ layout: { duration: 0.2, ease: "easeOut" } }}
     >
+      <motion.div
+        variants={{
+          initial: { opacity: 1 },
+          hover: { opacity: 0, transition: { duration: 0.2 } },
+        }}
+        className="absolute inset-0"
+      >
         <Image
           src={posterUrl!}
           alt={title || "Media poster"}
@@ -83,57 +88,61 @@ export function MediaCard({ item }: MediaCardProps) {
           className="object-cover rounded-lg"
           data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
         />
-
-      <AnimatePresence>
-        {isHovered && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1.1, transition: { delay: 0.2, duration: 0.3 } }}
-            exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-            style={{ originX: 0.5, originY: 0 }}
-            className="absolute top-0 left-0 w-full h-auto bg-card rounded-lg shadow-2xl"
-          >
-             <div className="relative w-full aspect-video">
-                <Image
-                    src={backdropUrl!}
-                    alt={`${title} backdrop`}
-                    fill
-                    className="object-cover rounded-t-lg"
-                />
-                 <div className="absolute inset-0 bg-gradient-to-t from-card via-card/50 to-transparent rounded-t-lg" />
-            </div>
-            <div className="p-3">
-                 <div className="flex items-center justify-between gap-2 mb-2">
-                    <div className="flex items-center gap-2">
-                        <Button size="icon" className="h-8 w-8 rounded-full" asChild>
-                            <Link href={detailPath} onClick={e => e.stopPropagation()}>
-                                <PlayCircle className="w-4 h-4 fill-current" />
-                            </Link>
-                        </Button>
-                        <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full" onClick={handleWatchlistToggle}>
-                            {isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                        </Button>
-                    </div>
-                    <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full" asChild>
-                        <Link href={detailPath} onClick={e => e.stopPropagation()}>
-                            <ChevronDown className="w-4 h-4" />
-                        </Link>
-                    </Button>
-                </div>
-                <p className="font-bold text-sm truncate mb-1">{title}</p>
-                <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                    {item.vote_average > 0 && (
-                        <span className="text-green-400 font-semibold">{Math.round(item.vote_average * 10)}% Match</span>
-                    )}
-                    <span className="border px-1 py-0.5 rounded">{year}</span>
-                    <span className="uppercase text-[0.6rem] border px-1 py-0.5 rounded">{item.media_type}</span>
-                </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      </motion.div>
+      
+      <motion.div
+        variants={{
+          initial: { opacity: 0 },
+          hover: { opacity: 1, transition: { delay: 0.2, duration: 0.3 } },
+        }}
+        className="absolute top-0 left-0 w-full h-full pointer-events-none"
+      >
+        <motion.div 
+          className="absolute inset-0 w-full h-full bg-card rounded-lg shadow-2xl overflow-hidden"
+          variants={{
+            initial: { scale: 1, y: 0 },
+            hover: { scale: 1.5, y: -20, zIndex: 10, transition: { delay: 0.2 } },
+          }}
+        >
+          <div className="relative w-full aspect-video">
+              <Image
+                  src={backdropUrl!}
+                  alt={`${title} backdrop`}
+                  fill
+                  className="object-cover"
+              />
+               <div className="absolute inset-0 bg-gradient-to-t from-card via-card/50 to-transparent" />
+          </div>
+          <div className="p-3 pointer-events-auto">
+               <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2">
+                      <Button size="icon" className="h-8 w-8 rounded-full" asChild>
+                          <Link href={detailPath} onClick={e => e.stopPropagation()}>
+                              <PlayCircle className="w-4 h-4 fill-current" />
+                          </Link>
+                      </Button>
+                      <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full" onClick={handleWatchlistToggle}>
+                          {isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                      </Button>
+                  </div>
+                  <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full" asChild>
+                      <Link href={detailPath} onClick={e => e.stopPropagation()}>
+                          <ChevronDown className="w-4 h-4" />
+                      </Link>
+                  </Button>
+              </div>
+              <p className="font-bold text-sm truncate mb-1">{title}</p>
+              <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                  {item.vote_average > 0 && (
+                      <span className="text-green-400 font-semibold">{Math.round(item.vote_average * 10)}% Match</span>
+                  )}
+                  <span className="border px-1 py-0.5 rounded">{year}</span>
+                  <span className="uppercase text-[0.6rem] border px-1 py-0.5 rounded">{item.media_type}</span>
+              </div>
+              <p className="text-xs text-muted-foreground line-clamp-2 mt-2">{item.overview}</p>
+          </div>
+        </motion.div>
+      </motion.div>
     </motion.div>
   );
 }
-
-    

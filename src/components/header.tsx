@@ -81,5 +81,3 @@ export function Header() {
     </header>
   );
 }
-
-    
