@@ -3,20 +3,12 @@
 
 import { notFound, useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { doc, serverTimestamp, setDoc } from "firebase/firestore";
-
 import type { MediaType } from "@/types/tmdb";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
-import { useUser, useFirestore } from "@/firebase";
-import { getMediaDetails } from "@/lib/tmdb";
-import { errorEmitter } from "@/firebase/error-emitter";
-import { FirestorePermissionError } from "@/firebase/errors";
 
 type Props = {
-  // Params are no longer passed as props in this client component
-  // but we keep the type for structure.
   params: {
     mediaType: MediaType;
     id: string;
@@ -24,54 +16,41 @@ type Props = {
 };
 
 export default function StreamPage({}: Props) {
-  // Use the hook to get params on the client
   const params = useParams<{ mediaType: MediaType; id: string }>();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { user } = useUser();
-  const firestore = useFirestore();
 
   const [isHovered, setIsHovered] = useState(false);
   
   const { mediaType, id } = params;
   
-  // Get season and episode from query params
   const season = searchParams.get('s');
   const episode = searchParams.get('e');
 
   useEffect(() => {
-    if (!user || !firestore || !id || !mediaType) return;
-    
-    const numericId = parseInt(id, 10);
-    if (isNaN(numericId)) return;
+    const handleVidZeeMessage = (event: MessageEvent) => {
+      if (event.origin !== 'https://player.vidzee.wtf') return;
 
-    const logContinueWatching = async () => {
-      try {
-        const mediaDetails = await getMediaDetails(numericId, mediaType);
-        
-        const historyRef = doc(firestore, 'users', user.uid, 'continueWatching', id);
-        const dataToSet = {
-          userId: user.uid,
-          lastWatched: serverTimestamp(),
-          media: { ...mediaDetails, media_type: mediaType },
-        };
-        
-        // Non-blocking write
-        setDoc(historyRef, dataToSet).catch(error => {
-            errorEmitter.emit('permission-error', new FirestorePermissionError({
-                path: historyRef.path,
-                operation: 'write',
-                requestResourceData: dataToSet,
-            }));
-        });
-      } catch (error) {
-        console.error("Failed to log continue watching:", error);
+      if (event.data?.type === 'MEDIA_DATA') {
+          const mediaData = event.data.data;
+          localStorage.setItem('vidZeeProgress', JSON.stringify(mediaData));
+          // Dispatch a custom event to notify other components (like the carousel) of the change
+          window.dispatchEvent(new Event('vidzee-progress-change'));
+      }
+
+      if (event.data?.type === 'PLAYER_EVENT') {
+        const { event: eventType, currentTime, duration } = event.data.data;
+        // Example of handling player events
+        console.log(`Player ${eventType} at ${currentTime}s of ${duration}s`);
       }
     };
 
-    logContinueWatching();
-  }, [user, firestore, id, mediaType]);
+    window.addEventListener('message', handleVidZeeMessage);
 
+    return () => {
+      window.removeEventListener('message', handleVidZeeMessage);
+    };
+  }, []);
 
   if (mediaType !== "tv" && mediaType !== "movie") {
     notFound();
@@ -83,8 +62,8 @@ export default function StreamPage({}: Props) {
   }
 
   const streamUrl = (mediaType === 'tv' && season && episode)
-    ? `https://cinemaos.tech/player/${id}/${season}/${episode}`
-    : `https://cinemaos.tech/player/${id}`;
+    ? `https://player.vidzee.wtf/embed/tv/${id}/${season}/${episode}`
+    : `https://player.vidzee.wtf/embed/movie/${id}`;
 
   return (
     <div 
@@ -118,5 +97,3 @@ export default function StreamPage({}: Props) {
     </div>
   );
 }
-
-    
