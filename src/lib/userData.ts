@@ -64,12 +64,15 @@ const addToFirebaseWatchlist = (userId: string, item: Media) => {
     const { firestore } = getSdks();
     const watchlistItemRef = doc(firestore, 'users', userId, 'watchlists', String(item.id));
     
+    // Add userId to the item data to be stored. This is important for security rules.
+    const itemWithUser = { ...item, userId: userId };
+
     // Non-blocking write
-    setDoc(watchlistItemRef, item).catch(error => {
+    setDoc(watchlistItemRef, itemWithUser).catch(error => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
             path: watchlistItemRef.path,
             operation: 'create',
-            requestResourceData: item,
+            requestResourceData: itemWithUser,
         }));
     });
 };
@@ -120,7 +123,7 @@ export const removeFromWatchlist = (itemId: number) => {
   }
 };
 
-export const mergeLocalWatchlistToFirebase = async () => {
+export const mergeLocalWatchlistToFirebase = () => {
     const { user } = useUser.getState();
     if (!user) return;
 
@@ -130,12 +133,11 @@ export const mergeLocalWatchlistToFirebase = async () => {
     console.log('Merging local watchlist to Firebase...');
 
     const { firestore } = getSdks();
-    const watchlistCol = collection(firestore, 'users', user.uid, 'watchlists');
+    const watchlistColRef = collection(firestore, 'users', user.uid, 'watchlists');
 
-    try {
-        const firebaseWatchlistSnapshot = await getDocs(watchlistCol);
+    // This operation is now non-blocking and uses the error handling architecture
+    getDocs(watchlistColRef).then(firebaseWatchlistSnapshot => {
         const firebaseWatchlist = firebaseWatchlistSnapshot.docs.map(d => d.data() as Media);
-
         const itemsToMerge = localWatchlist.filter(localItem => 
             !firebaseWatchlist.some(firebaseItem => firebaseItem.id === localItem.id)
         );
@@ -144,19 +146,38 @@ export const mergeLocalWatchlistToFirebase = async () => {
             const batch = writeBatch(firestore);
             itemsToMerge.forEach(item => {
                 const docRef = doc(firestore, 'users', user.uid, 'watchlists', String(item.id));
-                batch.set(docRef, item);
+                const itemWithUser = { ...item, userId: user.uid };
+                batch.set(docRef, itemWithUser);
             });
-            await batch.commit();
-            console.log(`${itemsToMerge.length} items merged to Firebase.`);
+            
+            // Commit the batch and handle potential errors
+            batch.commit().then(() => {
+                console.log(`${itemsToMerge.length} items merged to Firebase.`);
+                // Clear local watchlist after successful merge
+                localStorage.removeItem(WATCHLIST_KEY);
+                window.dispatchEvent(new CustomEvent('willow-watchlist-change'));
+                console.log('Local watchlist cleared after merge.');
+            }).catch(error => {
+                console.error("Error committing batch to Firebase:", error);
+                // Although we can't get per-document data, we can emit a general error.
+                errorEmitter.emit('permission-error', new FirestorePermissionError({
+                    path: watchlistColRef.path,
+                    operation: 'write',
+                    requestResourceData: { note: `${itemsToMerge.length} items in a batch write.` }
+                }));
+            });
+        } else {
+             // If there is nothing to merge, we can still clear the local list.
+            localStorage.removeItem(WATCHLIST_KEY);
+            window.dispatchEvent(new CustomEvent('willow-watchlist-change'));
+            console.log('Local watchlist was already in sync. Cleared.');
         }
-        
-        // Clear local watchlist after successful merge
-        localStorage.removeItem(WATCHLIST_KEY);
-        // Dispatch event to update any components listening to local storage changes (e.g., watchlist page if viewed while logged out)
-        window.dispatchEvent(new CustomEvent('willow-watchlist-change'));
-        console.log('Local watchlist cleared after merge.');
-
-    } catch (error) {
-        console.error("Error merging watchlist to Firebase:", error);
-    }
+    }).catch(error => {
+        // This will catch permission errors on the initial getDocs call
+        console.error("Error reading Firebase watchlist for merge:", error);
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: watchlistColRef.path,
+            operation: 'list'
+        }));
+    });
 };
