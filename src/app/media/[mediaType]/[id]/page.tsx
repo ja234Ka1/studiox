@@ -3,26 +3,11 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { getMediaDetails } from "@/lib/tmdb";
 import type { MediaType } from "@/types/tmdb";
-import { getTmdbImageUrl } from "@/lib/utils";
 import { Star } from "lucide-react";
 import MediaCarousel from "@/components/media-carousel";
 import { DetailPageHero } from "@/components/detail-page-hero";
 import { EpisodeSelector } from "@/components/episode-selector";
-import LoadingLink from "@/components/loading-link";
-import { motion } from "framer-motion";
-
-const castVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: i * 0.05,
-      duration: 0.5,
-      ease: "easeOut",
-    },
-  }),
-};
+import { CastSection } from "@/components/cast-section";
 
 interface MediaDetailsPageProps {
     params: {
@@ -115,42 +100,7 @@ export default async function MediaDetailsPage({ params }: MediaDetailsPageProps
         )}
 
         {topCast.length > 0 && (
-          <motion.div 
-              className="mt-12"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-          >
-              <h2 className="text-2xl font-bold mb-6 text-center">Top Cast</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-6">
-              {topCast.map((member, index) => (
-                  <LoadingLink
-                    key={member.id}
-                    href={`/person/${member.id}`}
-                    className="group"
-                  >
-                      <motion.div 
-                      className="text-center"
-                      variants={castVariants}
-                      custom={index}
-                      >
-                          <div className="relative aspect-[2/3] rounded-lg overflow-hidden mb-2 bg-muted shadow-lg">
-                              <Image
-                              src={getTmdbImageUrl(member.profile_path, "w500")}
-                              alt={member.name}
-                              fill
-                              className="object-cover transition-transform duration-300 group-hover:scale-105"
-                              />
-                          </div>
-                          <p className="font-semibold text-sm group-hover:text-accent transition-colors">{member.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                              {member.character}
-                          </p>
-                      </motion.div>
-                  </LoadingLink>
-              ))}
-              </div>
-          </motion.div>
+          <CastSection topCast={topCast} />
         )}
 
         {item.recommendations?.results.length > 0 && (
