@@ -7,7 +7,6 @@ import { AnimatePresence, motion } from "framer-motion";
 export default function LoadingScreen() {
   const { isLoading } = useLoading();
   const brandName = "Willow";
-  const letters = brandName.split("");
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -28,36 +27,14 @@ export default function LoadingScreen() {
     },
   };
 
-  const textContainerVariants = {
-    hidden: {},
-    visible: {
-      transition: {
-        staggerChildren: 0.08,
-        delayChildren: 0.1,
-      },
-    },
-  };
-  
-  const letterVariants = {
-    hidden: { y: "100%", opacity: 0 },
+  const waveVariants = {
+    hidden: { y: "100%" },
     visible: {
       y: "0%",
-      opacity: 1,
       transition: {
-        duration: 0.5,
-        ease: [0.6, 0.01, 0.05, 0.95],
-      },
-    },
-  };
-
-  const lineVariants = {
-    hidden: { width: 0 },
-    visible: {
-      width: "100%",
-      transition: {
-        duration: 1,
-        ease: [0.83, 0, 0.17, 1],
-        delay: 0.4,
+        duration: 1.5,
+        ease: "easeInOut",
+        delay: 0.2,
       },
     },
   };
@@ -72,31 +49,70 @@ export default function LoadingScreen() {
           variants={containerVariants}
           className="fixed inset-0 z-[100] flex items-center justify-center bg-background/95 backdrop-blur-sm"
         >
-          <div className="flex flex-col items-center gap-4">
-            <motion.div
-              className="flex overflow-hidden text-4xl font-bold tracking-widest"
-              aria-label={brandName}
-              variants={textContainerVariants}
+          <div className="relative">
+            {/* Background text (semi-transparent) */}
+            <h1
+              className="text-6xl md:text-8xl font-black tracking-widest text-foreground/20"
+              aria-hidden="true"
             >
-              {letters.map((letter, index) => (
-                <motion.span
-                  key={index}
-                  variants={letterVariants}
-                  className="inline-block"
-                >
-                  {letter}
-                </motion.span>
-              ))}
-            </motion.div>
-            <div className="w-48 h-0.5 bg-muted overflow-hidden">
-              <motion.div
-                className="h-full bg-accent"
-                variants={lineVariants}
-              />
-            </div>
+              {brandName}
+            </h1>
+
+            {/* Foreground text (solid) that acts as a MASK */}
+            <h1
+              className="absolute inset-0 text-6xl md:text-8xl font-black tracking-widest text-foreground"
+              style={{
+                clipPath: "url(#liquid-mask)",
+                WebkitClipPath: "url(#liquid-mask)",
+              }}
+              aria-label={brandName}
+            >
+              {brandName}
+            </h1>
+            
+            {/* The SVG mask definition, which contains the animating wave */}
+            <svg style={{ width: 0, height: 0, position: "absolute" }}>
+              <defs>
+                <clipPath id="liquid-mask">
+                  <motion.path
+                    initial={{
+                      d: "M0,200 Q200,200 400,200 L400,200 L0,200 Z"
+                    }}
+                    animate={{
+                      d: "M0,100 Q200,50 400,100 L400,200 L0,200 Z"
+                    }}
+                    transition={{
+                      duration: 2,
+                      ease: "easeInOut",
+                      repeat: Infinity,
+                      repeatType: "mirror",
+                    }}
+                  />
+                </clipPath>
+              </defs>
+            </svg>
+            
+             {/* The new "liquid fill" implementation */}
+             <div className="absolute inset-0 z-10"
+                style={{
+                    maskImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%'><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='8rem' font-weight='900' letter-spacing='0.05em' fill='white'>${brandName}</text></svg>")`,
+                    maskSize: '100% 100%',
+                    maskRepeat: 'no-repeat',
+                    maskPosition: 'center',
+                }}
+             >
+                <motion.div 
+                    className="w-full h-full bg-accent"
+                    initial={{ y: "100%" }}
+                    animate={{ y: "0%" }}
+                    transition={{ duration: 1.2, ease: [0.6, 0.01, 0.05, 0.95] }}
+                />
+             </div>
           </div>
         </motion.div>
       )}
     </AnimatePresence>
   );
 }
+
+    
