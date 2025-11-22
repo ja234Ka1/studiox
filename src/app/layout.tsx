@@ -31,6 +31,15 @@ export default function RootLayout({
         />
       </head>
       <body className={cn("antialiased font-sans")}>
+        <svg className="absolute w-0 h-0">
+            <defs>
+                <filter id="goo">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10" result="goo" />
+                <feBlend in="SourceGraphic" in2="goo" />
+                </filter>
+            </defs>
+        </svg>
         <FirebaseClientProvider>
           <AppProviders>
             <LoadingScreen />

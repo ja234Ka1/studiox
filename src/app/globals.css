@@ -121,4 +121,18 @@
       transform: translate(20%, calc(100vh - 80%)) scale(1.2);
     }
   }
+
+  .gooey-container button,
+  .gooey-container a,
+  .gooey-container [role="switch"],
+  .gooey-container [role="slider"] {
+    filter: url(#goo);
+  }
+
+  .gooey-container button > *,
+  .gooey-container a > *,
+  .gooey-container [role="switch"] > *,
+  .gooey-container [role="slider"] > * {
+    filter: none; /* Prevent children from being affected by the goo filter */
+  }
 }
