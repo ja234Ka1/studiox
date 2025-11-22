@@ -34,11 +34,11 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
         }}
         className="w-full group"
       >
-        <CarouselContent className="-ml-2">
+        <CarouselContent className="-ml-4">
           {items.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
-              className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-[15%] pl-2"
+              className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 2xl:basis-1/7 pl-4"
             >
               <motion.div layout>
                 <MediaCard item={item} />
@@ -46,8 +46,8 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="opacity-0 group-hover:opacity-100 transition-opacity" />
-        <CarouselNext className="opacity-0 group-hover:opacity-100 transition-opacity" />
+        <CarouselPrevious className="w-12 h-12" />
+        <CarouselNext className="w-12 h-12" />
       </Carousel>
     </section>
   );
