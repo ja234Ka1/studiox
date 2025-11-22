@@ -7,6 +7,7 @@ import Image from "next/image";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Clapperboard } from "lucide-react";
 import type { Media } from "@/types/tmdb";
+import Top10Carousel from "@/components/top10-carousel";
 
 interface Category {
   title: string;
@@ -14,7 +15,8 @@ interface Category {
 }
 
 const categoriesConfig = [
-  { title: "Trending This Week", fetcher: () => getTrending("all", "week") },
+  { title: "Trending Movies Today", fetcher: () => getTrending("movie", "day") },
+  { title: "Trending TV Today", fetcher: () => getTrending("tv", "day") },
   { title: "Upcoming Movies", fetcher: () => getUpcoming("movie") },
   { title: "Popular Movies", fetcher: () => getPopular("movie") },
   { title: "Top Rated Movies", fetcher: () => getTopRated("movie") },
@@ -29,23 +31,35 @@ const categoriesConfig = [
 ];
 
 export default async function Home() {
-  let trendingItems: Media[] = [];
+  let trendingWeekly: Media[] = [];
   let categories: Category[] = [];
   let error: string | null = null;
+  let top10MoviesToday: Media[] = [];
   
   try {
-    const results = await Promise.allSettled(categoriesConfig.map(c => c.fetcher()));
+    const trendingWeeklyPromise = getTrending("all", "week");
+    const categoriesPromises = categoriesConfig.map(c => c.fetcher());
 
-    const trendingResult = results[0];
-    if (trendingResult.status === 'fulfilled') {
-      trendingItems = trendingResult.value;
+    const [trendingWeeklyResult, ...categoriesResults] = await Promise.allSettled([
+      trendingWeeklyPromise,
+      ...categoriesPromises
+    ]);
+
+    if (trendingWeeklyResult.status === 'fulfilled') {
+      trendingWeekly = trendingWeeklyResult.value;
     } else {
-      console.error('Failed to fetch trending:', trendingResult.reason);
+      console.error('Failed to fetch trending:', trendingWeeklyResult.reason);
       throw new Error("Failed to fetch trending data.");
     }
+    
+    // The first category config is "Trending Movies Today", which we use for the Top 10
+    const top10Result = categoriesResults[0];
+    if (top10Result.status === 'fulfilled') {
+        top10MoviesToday = top10Result.value.slice(0, 10);
+    }
 
-    categories = results.slice(1).map((result, index) => {
-        const config = categoriesConfig[index + 1];
+    categories = categoriesConfig.map((config, index) => {
+        const result = categoriesResults[index];
         if (result.status === 'fulfilled') {
             return { title: config.title, items: result.value };
         }
@@ -57,7 +71,7 @@ export default async function Home() {
     error = e.message || "Failed to fetch data.";
   }
   
-  const heroItem = trendingItems?.[0];
+  const heroItem = trendingWeekly?.[0];
   const heroFallbackImage = PlaceHolderImages.find(p => p.id === 'hero-fallback');
 
   return (
@@ -96,11 +110,14 @@ export default async function Home() {
         )}
 
         {!error && (
-          <div className="space-y-12">
-            {trendingItems.length > 1 && (
-              <MediaCarousel title="Trending This Week" items={trendingItems.slice(1)} />
+          <div className="space-y-16">
+            {top10MoviesToday.length > 0 && (
+              <Top10Carousel title="Top 10 Movies Today" items={top10MoviesToday} />
             )}
-            {categories.map((category) => (
+            {trendingWeekly.length > 1 && (
+              <MediaCarousel title="Trending This Week" items={trendingWeekly.slice(1)} />
+            )}
+            {categories.slice(1).map((category) => ( // .slice(1) to skip the Top 10 data we already used
               <MediaCarousel key={category.title} title={category.title} items={category.items} />
             ))}
           </div>

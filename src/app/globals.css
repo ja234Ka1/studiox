@@ -86,6 +86,11 @@
 }
 
 @layer utilities {
+  .text-outline {
+    -webkit-text-stroke: 1px hsl(var(--secondary));
+    text-shadow: 0 0 15px hsl(var(--secondary) / 0.5);
+  }
+
   .animate-fade-in {
     animation: fade-in 0.5s ease-in-out forwards;
     opacity: 0;
