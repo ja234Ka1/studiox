@@ -43,6 +43,18 @@ const genres = [
   { id: 37, name: 'Western', type: 'movie' },
 ];
 
+const unique = (arr: Media[]) => {
+    const seen = new Set();
+    return arr.filter(item => {
+        const key = `${item.id}-${item.media_type}`;
+        if (seen.has(key)) {
+            return false;
+        }
+        seen.add(key);
+        return true;
+    });
+};
+
 
 const SearchPage = () => {
   const searchParams = useSearchParams();
@@ -85,7 +97,7 @@ const SearchPage = () => {
         if (isNewSearch) {
           setResults(data.results);
         } else {
-          setResults(prev => [...prev, ...data.results]);
+          setResults(prev => unique([...prev, ...data.results]));
         }
         setPage(pageToFetch);
         setTotalPages(data.total_pages);
@@ -121,7 +133,7 @@ const SearchPage = () => {
             if (isNewSearch) {
                 setResults(combinedResults);
             } else {
-                setResults(prev => [...prev, ...combinedResults]);
+                setResults(prev => unique([...prev, ...combinedResults]));
             }
 
             setPage(pageToFetch);
