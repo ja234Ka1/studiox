@@ -15,7 +15,6 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 const navItems = [
   { href: "/tv-shows", label: "Shows", icon: Tv },
   { href: "/movies", label: "Movies", icon: Film },
-  { href: "/live-tv", label: "Live TV", icon: Radio },
   { href: "/watchlist", label: "Watchlist", icon: List },
 ];
 
