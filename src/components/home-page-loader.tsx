@@ -22,7 +22,7 @@ const categoriesConfig: Omit<Category, 'items'>[] = [
   { title: "Horror", fetcher: () => getDiscover("movie", { with_genres: '27' }) },
   { title: "Sci-Fi & Fantasy", fetcher: () => getDiscover("movie", { with_genres: '878,14' }) },
   { title: "Documentaries", fetcher: () => getDiscover("movie", { with_genres: '99' }) },
-  { title: "Must-Watch Anime", fetcher: () => getDiscover("tv", { with_genres: '16', with_keywords: '210024' }) },
+  { title: "K-Drama", fetcher: () => getDiscover("tv", { with_keywords: '210024', with_original_language: 'ko' }) },
 ];
 
 
