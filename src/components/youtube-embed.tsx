@@ -19,6 +19,7 @@ const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({ videoId, isMuted }) => {
   embedUrl.searchParams.append('rel', '0');
   embedUrl.searchParams.append('iv_load_policy', '3');
   embedUrl.searchParams.append('modestbranding', '1');
+  embedUrl.searchParams.append('playsinline', '1');
   
   return (
     <div className="absolute inset-0 w-full h-full pointer-events-none">
