@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Clapperboard, Film, List, Menu, Search, Settings, Tv } from "lucide-react";
+import { Clapperboard, Compass, Film, List, Menu, Search, Settings, Tv } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
@@ -122,15 +122,11 @@ export function Header() {
           ))}
         </nav>
         <div className="flex flex-1 items-center justify-end space-x-2">
-          <div className="relative w-full max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search..."
-              className="pl-9 rounded-full"
-              onKeyDown={handleSearch}
-            />
-          </div>
+          <Button asChild variant="ghost" size="icon">
+             <LoadingLink href="/search">
+                <Search />
+             </LoadingLink>
+          </Button>
           <Button asChild variant="ghost" size="icon">
              <LoadingLink href="/settings">
                 <Settings />
