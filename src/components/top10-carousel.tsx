@@ -55,7 +55,7 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
       variants={carouselVariants}
     >
       <motion.div
-        className="text-left px-4 md:px-8"
+        className="text-left md:px-8 px-4"
         variants={itemVariants}
       >
         <h2 className="flex items-baseline gap-3">
@@ -75,7 +75,7 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
           {items.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
-              className="basis-2/5 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 pl-24 pr-4 group"
+              className="basis-2/5 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 pl-24 pr-8 group"
             >
               <motion.div
                 className="relative flex items-center"
