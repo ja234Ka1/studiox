@@ -1,6 +1,7 @@
 
 
 
+
 export type MediaType = "movie" | "tv";
 export type TimeRange = "day" | "week";
 
@@ -134,11 +135,4 @@ export interface PersonDetails {
     };
 }
 
-export type Toast = {
-  title?: React.ReactNode;
-  description?: React.ReactNode;
-  variant?: "default" | "destructive";
-  action?: React.ReactElement<any, string | React.JSXElementConstructor<any>>;
-  imageUrl?: string;
-  status?: "success" | "error" | "info";
-};
+export type Toast = Omit<import("@/hooks/use-toast").Toast, "id">;
