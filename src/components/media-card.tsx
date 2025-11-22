@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Check, Star, Info } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -14,7 +14,6 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Button } from "./ui/button";
 import { addToWatchlist, getWatchlist, removeFromWatchlist } from "@/lib/userData";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
 
 interface MediaCardProps {
   item: Media;
@@ -24,6 +23,7 @@ export function MediaCard({ item }: MediaCardProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [isInWatchlist, setIsInWatchlist] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   
   const fallbackImage = PlaceHolderImages.find(p => p.id === 'media-fallback');
   const posterUrl = item.poster_path ? getTmdbImageUrl(item.poster_path) : fallbackImage?.imageUrl;
@@ -57,10 +57,6 @@ export function MediaCard({ item }: MediaCardProps) {
     }
   };
   
-  const handlePrefetch = () => {
-    router.prefetch(detailPath);
-  };
-  
   const handleCardClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('button')) {
         return;
@@ -70,85 +66,95 @@ export function MediaCard({ item }: MediaCardProps) {
   }
 
   const cardVariants = {
-    initial: { scale: 1 },
-    hover: {
-      scale: 1.1,
-      zIndex: 20,
+    initial: { scale: 1, zIndex: 10, y: 0 },
+    hover: { 
+      scale: 1.15, 
+      zIndex: 20, 
+      y: -10,
       transition: { type: "spring", stiffness: 300, damping: 20, delay: 0.2 },
+    },
+  };
+
+  const detailsVariants = {
+    hidden: { opacity: 0, height: 0 },
+    visible: { 
+      opacity: 1, 
+      height: 'auto',
+      transition: { duration: 0.3, delay: 0.2 }
     },
   };
 
   return (
     <motion.div
       layout
-      variants={cardVariants}
-      initial="initial"
-      whileHover="hover"
-      onHoverStart={handlePrefetch}
-      onClick={handleCardClick}
-      className="relative aspect-[2/3] rounded-lg group cursor-pointer bg-card shadow-lg"
+      className="relative aspect-[2/3]"
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
     >
-      {/* Poster Image */}
-      <motion.div 
-        className="w-full h-full"
-        animate={{ opacity: 1 }}
-        whileHover={{ opacity: 0, transition: { delay: 0.15, duration: 0.2 } }}
-      >
-        {posterUrl && (
-            <Image
-                src={posterUrl}
-                alt={title || "Media poster"}
-                fill
-                sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
-                className="object-cover rounded-lg"
-                data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
-            />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent rounded-lg" />
-      </motion.div>
-
-      {/* Expanded Details - Hidden by default */}
       <motion.div
-        className="absolute inset-0 w-full h-full rounded-lg overflow-hidden"
-        initial={{ opacity: 0 }}
-        whileHover={{ opacity: 1, transition: { delay: 0.15, duration: 0.2 } }}
+        variants={cardVariants}
+        animate={isHovered ? "hover" : "initial"}
+        className="w-full h-full rounded-lg shadow-lg bg-card overflow-hidden cursor-pointer"
+        onClick={handleCardClick}
       >
-        <div className="relative w-full h-full">
-            {backdropUrl && (
+        {/* Main Card Content (Always Visible Part) */}
+        <div className="w-full h-full">
+            {posterUrl && (
                 <Image
-                    src={backdropUrl}
-                    alt={`${title} backdrop`}
+                    src={posterUrl}
+                    alt={title || "Media poster"}
                     fill
+                    sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
                     className="object-cover"
+                    data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
                 />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
         </div>
-        <div 
-            className="absolute bottom-0 left-0 right-0 p-3 text-white flex flex-col justify-end gap-2 animate-fade-in"
-        >
-            <h3 className="font-bold text-base text-card-foreground truncate">{title}</h3>
-            {item.vote_average > 0 && (
-                <div className="flex items-center text-xs text-amber-400">
-                    <Star className="w-3 h-3 mr-1 fill-current" />
-                    <span>{item.vote_average.toFixed(1)}</span>
-                </div>
-            )}
-            <p className="text-xs text-muted-foreground line-clamp-3 my-1">
-                {item.overview}
-            </p>
-            <div className="flex gap-2 w-full mt-1">
-                <Button size="sm" className="flex-1 text-xs" asChild>
-                <Link href={detailPath}>
-                    <Info className="w-3.5 h-3.5 mr-1" />
-                    Details
-                </Link>
-                </Button>
-                <Button size="sm" variant="secondary" className="px-2" onClick={handleWatchlistToggle}>
-                    {isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                </Button>
+        
+        {/* Expanded Details - Absolutely Positioned */}
+        <AnimatePresence>
+        {isHovered && (
+          <motion.div
+            variants={detailsVariants}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            className="absolute top-full left-0 right-0 w-full bg-card rounded-b-lg shadow-lg"
+          >
+            <div className="relative w-full aspect-video">
+              {backdropUrl && (
+                  <Image
+                      src={backdropUrl}
+                      alt={`${title} backdrop`}
+                      fill
+                      className="object-cover"
+                  />
+              )}
+               <div className="absolute inset-0 bg-gradient-to-t from-card via-card/80 to-transparent" />
             </div>
-        </div>
+            <div className="p-3 space-y-2">
+              <h3 className="font-bold text-base text-card-foreground truncate">{title}</h3>
+              {item.vote_average > 0 && (
+                  <div className="flex items-center text-xs text-amber-400">
+                      <Star className="w-3 h-3 mr-1 fill-current" />
+                      <span>{item.vote_average.toFixed(1)}</span>
+                  </div>
+              )}
+              <div className="flex gap-2 w-full mt-1">
+                  <Button size="sm" className="flex-1 text-xs" asChild>
+                  <Link href={detailPath}>
+                      <Info className="w-3.5 h-3.5 mr-1" />
+                      Details
+                  </Link>
+                  </Button>
+                  <Button size="sm" variant="secondary" className="px-2" onClick={handleWatchlistToggle}>
+                      {isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                  </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+        </AnimatePresence>
       </motion.div>
     </motion.div>
   );
