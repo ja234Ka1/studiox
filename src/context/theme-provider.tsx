@@ -8,6 +8,8 @@ type BackgroundEffects = {
   starfield: boolean;
 };
 
+type ContentDensity = 'comfortable' | 'cozy' | 'compact';
+
 type CustomThemeProviderProps = {
   children: React.ReactNode;
   defaultTheme?: string;
@@ -26,6 +28,10 @@ type ThemeProviderState = {
   setBlobSpeed: (speed: number) => void;
   dataSaver: boolean;
   setDataSaver: (enabled: boolean) => void;
+  radius: number;
+  setRadius: (radius: number) => void;
+  contentDensity: ContentDensity;
+  setContentDensity: (density: ContentDensity) => void;
 };
 
 const ThemeProviderContext = React.createContext<ThemeProviderState | undefined>(undefined);
@@ -46,7 +52,8 @@ export function ThemeProvider({
   const [animationsEnabled, setAnimationsEnabledState] = React.useState<boolean>(true);
   const [blobSpeed, setBlobSpeedState] = React.useState<number>(30);
   const [dataSaver, setDataSaverState] = React.useState<boolean>(false);
-
+  const [radius, setRadiusState] = React.useState<number>(0.5);
+  const [contentDensity, setContentDensityState] = React.useState<ContentDensity>('cozy');
 
   const [isMounted, setIsMounted] = React.useState(false);
 
@@ -66,6 +73,11 @@ export function ThemeProvider({
     const storedBlobSpeed = localStorage.getItem("willow-blob-speed");
     setBlobSpeedState(storedBlobSpeed ? parseInt(storedBlobSpeed, 10) : 30);
     setDataSaverState(localStorage.getItem("willow-data-saver") === "true");
+    const storedRadius = localStorage.getItem("willow-radius");
+    setRadiusState(storedRadius ? parseFloat(storedRadius) : 0.5);
+    const storedContentDensity = localStorage.getItem("willow-content-density");
+    setContentDensityState((storedContentDensity as ContentDensity) || 'cozy');
+
 
   }, [isMounted, defaultTheme]);
 
@@ -141,6 +153,22 @@ export function ThemeProvider({
       window.dispatchEvent(new CustomEvent("willow-storage-change", { detail: { key: 'dataSaver' } }));
     }
   };
+  
+  const setRadius = (newRadius: number) => {
+    setRadiusState(newRadius);
+    if (typeof window !== "undefined" && isMounted) {
+      localStorage.setItem("willow-radius", String(newRadius));
+      window.dispatchEvent(new CustomEvent("willow-storage-change", { detail: { key: 'radius' } }));
+    }
+  };
+
+  const setContentDensity = (density: ContentDensity) => {
+    setContentDensityState(density);
+    if (typeof window !== "undefined" && isMounted) {
+      localStorage.setItem("willow-content-density", density);
+      window.dispatchEvent(new CustomEvent("willow-storage-change", { detail: { key: 'contentDensity' } }));
+    }
+  };
 
   const value = {
     theme,
@@ -152,7 +180,11 @@ export function ThemeProvider({
     blobSpeed,
     setBlobSpeed,
     dataSaver,
-    setDataSaver
+    setDataSaver,
+    radius,
+    setRadius,
+    contentDensity,
+    setContentDensity
   };
 
   if (!isMounted) {
