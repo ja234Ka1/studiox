@@ -83,7 +83,7 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
                 layout
                 variants={itemVariants}
               >
-                <span className="absolute -left-16 bottom-0 text-[16rem] font-black text-transparent text-outline leading-none select-none z-0 transition-all duration-300 group-hover:scale-105 group-hover:text-glow">
+                <span className="absolute -left-24 bottom-0 text-[16rem] font-black text-transparent text-outline leading-none select-none z-0 transition-all duration-300 group-hover:scale-105 group-hover:text-glow">
                   {index + 1}
                 </span>
                 <div className="relative z-10 w-full">
