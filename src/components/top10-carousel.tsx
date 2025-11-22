@@ -72,7 +72,6 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
       <Carousel
         opts={{
           align: "start",
-          loop: false,
         }}
         className="w-full mt-4"
       >
@@ -80,7 +79,7 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
           {items.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
-              className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4 pr-4 group"
+              className="basis-1/2 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5 pr-4 group"
             >
               <motion.div
                 className="relative flex items-center h-full"
@@ -118,4 +117,3 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
     </motion.section>
   );
 }
-
