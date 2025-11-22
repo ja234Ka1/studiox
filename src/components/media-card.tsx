@@ -3,10 +3,10 @@
 
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, PlayCircle, Star, Check } from "lucide-react";
+import { Plus, PlayCircle, Star, Check, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 import type { Media } from "@/types/tmdb";
 import { getTmdbImageUrl } from "@/lib/utils";
@@ -41,7 +41,9 @@ export function MediaCard({ item }: MediaCardProps) {
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+  const pathname = usePathname();
 
+  const isOnWatchlistPage = pathname === '/watchlist';
   const fallbackImage = PlaceHolderImages.find(p => p.id === 'media-fallback');
   const posterUrl = item.poster_path ? getTmdbImageUrl(item.poster_path, 'w500') : fallbackImage?.imageUrl;
   
@@ -137,7 +139,7 @@ export function MediaCard({ item }: MediaCardProps) {
                 </LoadingLink>
               </Button>
               <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full" onClick={handleWatchlistToggle}>
-                {isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                {isOnWatchlistPage ? <X className="w-4 h-4" /> : (isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />)}
               </Button>
             </motion.div>
           </motion.div>
