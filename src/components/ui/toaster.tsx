@@ -4,6 +4,7 @@
 import Image from "next/image"
 import { CheckCircle2, Info, XCircle } from "lucide-react"
 import { AnimatePresence, motion } from "framer-motion"
+import * as React from "react"
 
 import { useToast } from "@/hooks/use-toast"
 import {
@@ -26,19 +27,11 @@ export function Toaster() {
 
   return (
     <ToastProvider>
-      <AnimatePresence>
         {toasts.map(function ({ id, title, description, action, imageUrl, status, ...props }) {
           const Icon = status ? statusIcons[status] : null
 
           return (
-            <motion.li
-                key={id}
-                layout
-                initial={{ opacity: 0, y: 50, scale: 0.3 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
-            >
-              <Toast {...props}>
+              <Toast key={id} {...props}>
                 <div className="flex items-center gap-3 w-full">
                   {Icon && <div className="flex-shrink-0">{Icon}</div>}
                   {imageUrl && (
@@ -61,10 +54,8 @@ export function Toaster() {
                 {action}
                 <ToastClose />
               </Toast>
-            </motion.li>
           )
         })}
-      </AnimatePresence>
       <ToastViewport />
     </ToastProvider>
   )
