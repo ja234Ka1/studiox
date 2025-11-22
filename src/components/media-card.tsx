@@ -14,6 +14,7 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Button } from "./ui/button";
 import { addToWatchlist, getWatchlist, removeFromWatchlist } from "@/lib/userData";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 interface MediaCardProps {
   item: Media;
@@ -25,7 +26,8 @@ export function MediaCard({ item }: MediaCardProps) {
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   
   const fallbackImage = PlaceHolderImages.find(p => p.id === 'media-fallback');
-  const imageUrl = item.poster_path ? getTmdbImageUrl(item.poster_path) : fallbackImage?.imageUrl;
+  const posterUrl = item.poster_path ? getTmdbImageUrl(item.poster_path) : fallbackImage?.imageUrl;
+  const backdropUrl = item.backdrop_path ? getTmdbImageUrl(item.backdrop_path, 'w500') : posterUrl;
   const title = item.title || item.name;
 
   const detailPath = `/media/${item.media_type}/${item.id}`;
@@ -60,7 +62,6 @@ export function MediaCard({ item }: MediaCardProps) {
   };
   
   const handleCardClick = (e: React.MouseEvent) => {
-    // Prevent navigation if a button was clicked
     if ((e.target as HTMLElement).closest('button')) {
         return;
     }
@@ -69,40 +70,13 @@ export function MediaCard({ item }: MediaCardProps) {
   }
 
   const cardVariants = {
-    initial: { 
-      scale: 1,
-      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-    },
+    initial: { scale: 1 },
     hover: {
       scale: 1.1,
-      zIndex: 10,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 20,
-        delay: 0.15
-      },
+      zIndex: 20,
+      transition: { type: "spring", stiffness: 300, damping: 20, delay: 0.2 },
     },
   };
-  
-  const expandedDetailsVariants = {
-    initial: { 
-        opacity: 0, 
-        height: 0,
-        width: "100%",
-    },
-    hover: {
-      opacity: 1,
-      height: "auto",
-      width: "180%", // Expand sideways
-      transition: {
-        opacity: { delay: 0.25, duration: 0.3 },
-        height: { delay: 0.25, type: "spring", stiffness: 200, damping: 25 },
-        width: { delay: 0.25, type: "spring", stiffness: 300, damping: 25 }
-      },
-    },
-  };
-
 
   return (
     <motion.div
@@ -112,30 +86,46 @@ export function MediaCard({ item }: MediaCardProps) {
       whileHover="hover"
       onHoverStart={handlePrefetch}
       onClick={handleCardClick}
-      className="relative aspect-[2/3] rounded-lg overflow-hidden group cursor-pointer bg-card"
+      className="relative aspect-[2/3] rounded-lg group cursor-pointer bg-card shadow-lg"
     >
-        {/* Poster Image (always visible) */}
-        {imageUrl && (
+      {/* Poster Image */}
+      <motion.div 
+        className="w-full h-full"
+        animate={{ opacity: 1 }}
+        whileHover={{ opacity: 0, transition: { delay: 0.15, duration: 0.2 } }}
+      >
+        {posterUrl && (
             <Image
-                src={imageUrl}
+                src={posterUrl}
                 alt={title || "Media poster"}
                 fill
                 sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
-                className="object-cover transition-transform duration-300 group-hover:scale-110"
+                className="object-cover rounded-lg"
                 data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
             />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent rounded-lg" />
+      </motion.div>
 
-      {/* Expanded Details - positioned absolutely to overlay content */}
-       <motion.div
-        variants={expandedDetailsVariants}
-        className="absolute bottom-0 left-[-40%] w-[180%] p-4 bg-card/90 backdrop-blur-sm rounded-b-lg overflow-hidden flex flex-col justify-end"
-        style={{ pointerEvents: 'none' }} // Initially no pointer events
+      {/* Expanded Details - Hidden by default */}
+      <motion.div
+        className="absolute inset-0 w-full h-full rounded-lg overflow-hidden"
+        initial={{ opacity: 0 }}
+        whileHover={{ opacity: 1, transition: { delay: 0.15, duration: 0.2 } }}
       >
-        <motion.div 
-            className="flex flex-col gap-2 animate-fade-in"
-            style={{ pointerEvents: 'auto' }} // Re-enable pointer events for content
+        <div className="relative w-full h-full">
+            {backdropUrl && (
+                <Image
+                    src={backdropUrl}
+                    alt={`${title} backdrop`}
+                    fill
+                    className="object-cover"
+                />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
+        </div>
+        <div 
+            className="absolute bottom-0 left-0 right-0 p-3 text-white flex flex-col justify-end gap-2 animate-fade-in"
         >
             <h3 className="font-bold text-base text-card-foreground truncate">{title}</h3>
             {item.vote_average > 0 && (
@@ -147,18 +137,18 @@ export function MediaCard({ item }: MediaCardProps) {
             <p className="text-xs text-muted-foreground line-clamp-3 my-1">
                 {item.overview}
             </p>
-            <div className="flex gap-2 w-full mt-2">
-                <Button size="sm" className="flex-1" asChild>
+            <div className="flex gap-2 w-full mt-1">
+                <Button size="sm" className="flex-1 text-xs" asChild>
                 <Link href={detailPath}>
-                    <Info className="w-4 h-4 mr-1" />
+                    <Info className="w-3.5 h-3.5 mr-1" />
                     Details
                 </Link>
                 </Button>
-                <Button size="sm" variant="secondary" onClick={handleWatchlistToggle}>
+                <Button size="sm" variant="secondary" className="px-2" onClick={handleWatchlistToggle}>
                     {isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                 </Button>
             </div>
-        </motion.div>
+        </div>
       </motion.div>
     </motion.div>
   );
