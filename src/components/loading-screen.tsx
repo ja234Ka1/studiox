@@ -67,26 +67,17 @@ export default function LoadingScreen() {
                 </clipPath>
               </defs>
             </svg>
-            
-             {/* The "liquid fill" implementation which is masked by the text shape */}
-             <div className="absolute inset-0 z-10"
-                style={{
-                    maskImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%'><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='8rem' font-weight='900' letter-spacing='0.05em' fill='white'>${brandName}</text></svg>")`,
-                    WebkitMaskImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%'><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='8rem' font-weight='900' letter-spacing='0.05em' fill='white'>${brandName}</text></svg>")`,
-                    maskSize: '100% 100%',
-                    WebkitMaskSize: '100% 100%',
-                    maskRepeat: 'no-repeat',
-                    WebkitMaskRepeat: 'no-repeat',
-                    maskPosition: 'center',
-                    WebkitMaskPosition: 'center',
-                }}
-             >
-                <motion.div 
-                    className="w-full h-full bg-accent"
+
+            {/* The "liquid fill" implementation */}
+            <div className="absolute inset-0" style={{ clipPath: "url(#liquid-mask)" }}>
+                <motion.h1 
+                    className="text-6xl md:text-8xl font-black tracking-widest text-accent"
                     initial={{ y: "100%" }}
                     animate={{ y: "0%" }}
                     transition={{ duration: 1.2, ease: [0.6, 0.01, 0.05, 0.95] }}
-                />
+                >
+                  {brandName}
+                </motion.h1>
              </div>
           </div>
         </motion.div>
