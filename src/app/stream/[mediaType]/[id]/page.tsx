@@ -1,8 +1,12 @@
 
 'use client'
 
-import { notFound, useParams } from "next/navigation";
+import { notFound, useParams, useRouter } from "next/navigation";
 import type { MediaType } from "@/types/tmdb";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { motion } from "framer-motion";
+import { useState } from "react";
 
 type Props = {
   // Params are no longer passed as props in this client component
@@ -17,6 +21,9 @@ export default function StreamPage({}: Props) {
   // Use the hook to get params on the client
   const params = useParams<{ mediaType: MediaType; id: string }>();
   const { mediaType, id } = params;
+  const router = useRouter();
+  const [isHovered, setIsHovered] = useState(false);
+
 
   if (mediaType !== "tv" && mediaType !== "movie") {
     notFound();
@@ -32,7 +39,28 @@ export default function StreamPage({}: Props) {
     : `https://cinemaos.tech/player/${id}`;
 
   return (
-    <div className="w-screen h-screen bg-black">
+    <div 
+      className="relative w-screen h-screen bg-black group"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: isHovered ? 1 : 0 }}
+            transition={{ duration: 0.3 }}
+            className="absolute top-4 left-4 z-20"
+        >
+            <Button
+                variant="secondary"
+                size="icon"
+                onClick={() => router.back()}
+                className="rounded-full h-12 w-12"
+            >
+                <ArrowLeft className="w-6 h-6" />
+                <span className="sr-only">Go back</span>
+            </Button>
+        </motion.div>
+
       <iframe
           src={streamUrl}
           allow="autoplay; fullscreen"
