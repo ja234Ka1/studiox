@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -58,10 +57,14 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
         className="text-left md:px-8 px-4"
         variants={itemVariants}
       >
-        <h2 className="flex items-baseline gap-3">
-          <span className="text-3xl font-bold tracking-tight text-primary">TOP 10</span>
-          <span className="text-lg font-semibold text-muted-foreground">Movies Today</span>
-        </h2>
+        <div className="flex items-center gap-4">
+          <span className="text-5xl font-black tracking-tighter text-transparent text-outline-blue">TOP</span>
+          <span className="text-5xl font-black tracking-tighter text-blue-400 text-glow-blue">10</span>
+          <div className="flex flex-col leading-tight -mt-1">
+            <span className="text-lg font-bold">MOVIES</span>
+            <span className="text-sm text-muted-foreground">TODAY</span>
+          </div>
+        </div>
       </motion.div>
 
       <Carousel
@@ -98,4 +101,3 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
     </motion.section>
   );
 }
-
