@@ -90,7 +90,7 @@ export default function StreamPage() {
 
       <iframe
           src={streamUrl}
-          allow="autoplay; fullscreen"
+          allow="autoplay; fullscreen; encrypted-media"
           allowFullScreen
           className="w-full h-full border-0"
       />
