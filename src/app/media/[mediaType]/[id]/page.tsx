@@ -1,7 +1,7 @@
 
 'use client'
 
-import { notFound, usePathname, useRouter } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 import Image from "next/image";
 import { getMediaDetails } from "@/lib/tmdb";
 import type { MediaType, MediaDetails as MediaDetailsType } from "@/types/tmdb";
@@ -13,13 +13,6 @@ import { EpisodeSelector } from "@/components/episode-selector";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
-
-type Props = {
-  params: {
-    mediaType: MediaType;
-    id: string;
-  };
-};
 
 const castVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -35,8 +28,11 @@ const castVariants = {
 };
 
 
-export default function MediaDetailsPage({ params }: Props) {
-  const { mediaType, id } = params;
+export default function MediaDetailsPage() {
+  const params = useParams();
+  const mediaType = params.mediaType as MediaType;
+  const id = params.id as string;
+  
   const [item, setItem] = useState<MediaDetailsType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
