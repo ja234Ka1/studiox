@@ -2,6 +2,7 @@
 'use client'
 
 import type { ReactNode } from "react";
+import React from "react";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { AppProviders } from "@/components/providers";
