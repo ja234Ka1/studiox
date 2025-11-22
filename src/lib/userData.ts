@@ -1,9 +1,8 @@
+
 import type { Media } from "@/types/tmdb";
+import { useUser } from "@/firebase/auth/use-user";
 
 const WATCHLIST_KEY = "willow-watchlist";
-
-// Placeholder for Firebase authentication check
-const isUserLoggedIn = () => false;
 
 // --- Local Storage Implementation ---
 
@@ -40,13 +39,24 @@ const removeFromLocalWatchlist = (itemId: number) => {
   setLocalWatchlist(watchlist.filter(item => item.id !== itemId));
 };
 
+// --- Firebase Implementation (Placeholder) ---
+
+// In a real app, you would get the user from a hook like this.
+// const { user } = useUser();
+const isUserLoggedIn = () => {
+    // This is a placeholder. We will replace this with real auth state.
+    const { user } = useUser.getState();
+    return !!user;
+}
+
 
 // --- Public API ---
 
 export const getWatchlist = (): Media[] => {
   if (isUserLoggedIn()) {
     // TODO: Implement Firestore logic
-    return [];
+    // For now, we still use local storage even if logged in.
+    return getLocalWatchlist();
   } else {
     return getLocalWatchlist();
   }
@@ -55,6 +65,7 @@ export const getWatchlist = (): Media[] => {
 export const addToWatchlist = (item: Media) => {
   if (isUserLoggedIn()) {
     // TODO: Implement Firestore logic
+     addToLocalWatchlist(item);
   } else {
     addToLocalWatchlist(item);
   }
@@ -63,7 +74,33 @@ export const addToWatchlist = (item: Media) => {
 export const removeFromWatchlist = (itemId: number) => {
   if (isUserLoggedIn()) {
     // TODO: Implement Firestore logic
+    removeFromLocalWatchlist(itemId);
   } else {
     removeFromLocalWatchlist(itemId);
   }
 };
+
+export const mergeLocalWatchlistToFirebase = async () => {
+    const { user } = useUser.getState();
+    if (!user) return;
+
+    const localWatchlist = getLocalWatchlist();
+    if (localWatchlist.length === 0) return;
+
+    // TODO: Get existing firebase watchlist
+    const firebaseWatchlist: Media[] = []; // placeholder
+
+    const itemsToMerge = localWatchlist.filter(localItem => 
+        !firebaseWatchlist.some(firebaseItem => firebaseItem.id === localItem.id)
+    );
+
+    if (itemsToMerge.length > 0) {
+        // TODO: Implement batch write to firestore
+        console.log('Merging items to Firebase:', itemsToMerge);
+    }
+    
+    // Clear local watchlist after merging
+    // localStorage.removeItem(WATCHLIST_KEY);
+    // window.dispatchEvent(new CustomEvent('willow-watchlist-change'));
+     console.log('Local watchlist merged to Firebase.');
+}

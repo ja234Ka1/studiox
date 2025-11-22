@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import LoadingLink from "./loading-link";
+import { AuthButton } from "./auth-button";
 
 const navItems = [
   { href: "/tv-shows", label: "Shows", icon: Tv },
@@ -76,7 +77,7 @@ export function Header() {
             </Button>
           ))}
         </nav>
-        <div className="flex flex-1 items-center justify-end space-x-4">
+        <div className="flex flex-1 items-center justify-end space-x-2">
           <div className="relative w-full max-w-xs">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -91,7 +92,7 @@ export function Header() {
                 <Settings />
              </LoadingLink>
           </Button>
-          <Button variant="ghost">Login</Button>
+          <AuthButton />
         </div>
       </div>
     </header>

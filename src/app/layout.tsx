@@ -8,6 +8,7 @@ import { Background } from "@/components/background";
 import { Toaster } from "@/components/ui/toaster";
 import VideoPlayer from "@/components/video-player";
 import LoadingScreen from "@/components/loading-screen";
+import { FirebaseClientProvider } from "@/firebase/client-provider";
 
 export const metadata: Metadata = {
   title: "Willow",
@@ -30,16 +31,18 @@ export default function RootLayout({
         />
       </head>
       <body className={cn("antialiased font-sans")}>
-        <AppProviders>
-          <LoadingScreen />
-          <Background />
-          <div className="relative z-10 flex min-h-screen flex-col">
-            <Header />
-            <main className="flex-1 w-full mx-auto">{children}</main>
-          </div>
-          <VideoPlayer />
-          <Toaster />
-        </AppProviders>
+        <FirebaseClientProvider>
+          <AppProviders>
+            <LoadingScreen />
+            <Background />
+            <div className="relative z-10 flex min-h-screen flex-col">
+              <Header />
+              <main className="flex-1 w-full mx-auto">{children}</main>
+            </div>
+            <VideoPlayer />
+            <Toaster />
+          </AppProviders>
+        </FirebaseClientProvider>
       </body>
     </html>
   );
