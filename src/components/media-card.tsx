@@ -4,7 +4,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Check, Star, Info, PlayCircle } from "lucide-react";
+import { Plus, Check, Star, PlayCircle } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 
@@ -24,7 +24,6 @@ export function MediaCard({ item }: MediaCardProps) {
   const router = useRouter();
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
   
   const fallbackImage = PlaceHolderImages.find(p => p.id === 'media-fallback');
   const posterUrl = item.poster_path ? getTmdbImageUrl(item.poster_path) : fallbackImage?.imageUrl;
@@ -66,74 +65,81 @@ export function MediaCard({ item }: MediaCardProps) {
     router.push(detailPath);
   }
 
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-  };
-  
   return (
     <motion.div
-      ref={cardRef}
       layout
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      className="relative aspect-[2/3] z-0"
-      transition={{ layout: { duration: 0.2, ease: "easeOut" } }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      className="relative aspect-[2/3] bg-card rounded-lg shadow-lg cursor-pointer z-0"
+      transition={{ layout: { duration: 0.2 } }}
     >
-        <div className="w-full h-full rounded-lg shadow-lg bg-card overflow-hidden cursor-pointer" onClick={handleCardClick}>
-            {posterUrl && (
-                <Image
-                    src={posterUrl}
-                    alt={title || "Media poster"}
-                    fill
-                    sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
-                    className="object-cover"
-                    data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
-                />
-            )}
-        </div>
-      
+      {/* Poster Image (Visible when not hovered) */}
+      <motion.div
+        className="w-full h-full"
+        animate={{ opacity: isHovered ? 0 : 1 }}
+        transition={{ duration: 0.2, delay: isHovered ? 0 : 0.15 }}
+      >
+        {posterUrl && (
+          <Image
+            src={posterUrl}
+            alt={title || "Media poster"}
+            fill
+            sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
+            className="object-cover rounded-lg"
+            data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
+          />
+        )}
+      </motion.div>
+
+      {/* Expanded Content (Visible on hover) */}
       <AnimatePresence>
         {isHovered && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1, transition: { delay: 0.3, duration: 0.2 } }}
-            exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
-            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[160%] z-50"
+            className="absolute inset-0 w-full h-full rounded-lg overflow-hidden flex flex-col bg-card"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { delay: 0.15 } }}
+            exit={{ opacity: 0, transition: { delay: 0, duration: 0.1 } }}
+            style={{
+              width: '160%',
+              left: '-30%',
+              height: 'auto',
+              aspectRatio: '16/9',
+            }}
+            onClick={handleCardClick}
           >
-            <div className="bg-card rounded-lg shadow-2xl overflow-hidden w-full">
-              <div className="relative w-full aspect-video">
-                  {backdropUrl && (
-                      <Image
-                          src={backdropUrl}
-                          alt={`${title} backdrop`}
-                          fill
-                          className="object-cover"
-                      />
-                  )}
-                 <div className="absolute inset-0 bg-gradient-to-t from-card via-card/50 to-transparent" />
-                 <Button size="icon" className="absolute bottom-2 left-2 rounded-full h-10 w-10" asChild>
-                    <Link href={detailPath}>
-                      <PlayCircle />
+            {/* Backdrop Image */}
+            <div className="relative w-full flex-shrink-0" style={{ paddingBottom: "56.25%" /* 16:9 aspect ratio */ }}>
+              {backdropUrl && (
+                <Image
+                  src={backdropUrl}
+                  alt={`${title} backdrop`}
+                  fill
+                  className="object-cover"
+                />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-card via-card/50 to-transparent" />
+            </div>
+            
+            {/* Details */}
+            <div className="p-3 flex-grow flex flex-col justify-between">
+              <h3 className="font-bold text-sm text-card-foreground truncate">{title}</h3>
+              <div className="flex items-center justify-between gap-2 mt-2">
+                <div className="flex items-center gap-2">
+                  <Button size="icon" className="h-8 w-8 rounded-full" asChild>
+                    <Link href={detailPath} onClick={e => e.stopPropagation()}>
+                      <PlayCircle className="w-4 h-4" />
                     </Link>
                   </Button>
-              </div>
-              <div className="p-3 space-y-2">
-                <h3 className="font-bold text-sm text-card-foreground truncate">{title}</h3>
-                <div className="flex items-center justify-between">
-                    {item.vote_average > 0 && (
-                        <div className="flex items-center text-xs text-amber-400">
-                            <Star className="w-3 h-3 mr-1 fill-current" />
-                            <span>{item.vote_average.toFixed(1)}</span>
-                        </div>
-                    )}
-                    <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full" onClick={handleWatchlistToggle}>
-                        {isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                    </Button>
+                  <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full" onClick={handleWatchlistToggle}>
+                    {isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                  </Button>
                 </div>
+                {item.vote_average > 0 && (
+                  <div className="flex items-center text-xs text-amber-400">
+                    <Star className="w-3 h-3 mr-1 fill-current" />
+                    <span>{item.vote_average.toFixed(1)}</span>
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
