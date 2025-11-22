@@ -138,16 +138,16 @@ export default function MediaDetailsPage() {
                 </p>
               </div>
             </div>
-
-            {mediaType === 'tv' && item.number_of_seasons && (
-                <EpisodeSelector 
-                    showId={item.id} 
-                    numberOfSeasons={item.number_of_seasons} 
-                    title={item.name || item.title || ''}
-                />
-            )}
           </div>
         </div>
+
+        {mediaType === 'tv' && item.number_of_seasons && (
+            <EpisodeSelector 
+                showId={item.id} 
+                numberOfSeasons={item.number_of_seasons} 
+                title={item.name || item.title || ''}
+            />
+        )}
 
         <motion.div 
             className="mt-12"
