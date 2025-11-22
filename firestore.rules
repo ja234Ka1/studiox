@@ -160,6 +160,18 @@ service cloud.firestore {
         allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
         allow delete: if isExistingOwner(userId);
       }
+
+       /**
+       * @description Stores a user's 'Continue Watching' history.
+       * @path        /users/{userId}/continueWatching/{mediaId}
+       * @allow       A user (write) to their own history. `auth: {uid: 'user_123'}` -> `/users/user_123/continueWatching/movie_456`
+       * @deny        A user (read) another user's history. `auth: {uid: 'user_123'}` -> `/users/user_456/continueWatching`
+       * @principle   Enforces ownership for viewing history data.
+       */
+      match /continueWatching/{mediaId} {
+        allow get, list: if isOwner(userId);
+        allow write: if isOwner(userId) && request.resource.data.userId == userId;
+      }
     }
 
     // -------------------------------------------------------------------------
@@ -184,3 +196,4 @@ service cloud.firestore {
     }
   }
 }
+    

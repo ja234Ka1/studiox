@@ -8,6 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Clapperboard } from "lucide-react";
 import type { Media } from "@/types/tmdb";
 import Top10Carousel from "@/components/top10-carousel";
+import ContinueWatchingCarousel from "@/components/continue-watching-carousel";
 
 interface Category {
   title: string;
@@ -111,6 +112,7 @@ export default async function Home() {
 
         {!error && (
           <div className="space-y-16">
+            <ContinueWatchingCarousel />
             {top10MoviesToday.length > 0 && (
               <Top10Carousel title="Top 10 Movies Today" items={top10MoviesToday} />
             )}
@@ -126,3 +128,5 @@ export default async function Home() {
     </div>
   );
 }
+
+    

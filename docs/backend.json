@@ -154,6 +154,33 @@
         "mediaType"
       ]
     },
+    "UserContinueWatching": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserContinueWatching",
+      "type": "object",
+      "description": "Stores a user's viewing history for a 'Continue Watching' feature.",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user."
+        },
+        "lastWatched": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of when the media was last watched."
+        },
+        "media": {
+          "type": "object",
+          "description": "The full media object that is being watched.",
+          "properties": {}
+        }
+      },
+      "required": [
+        "userId",
+        "lastWatched",
+        "media"
+      ]
+    },
     "User": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
@@ -274,6 +301,26 @@
         }
       },
       {
+        "path": "/users/{userId}/continueWatching/{mediaId}",
+        "definition": {
+          "entityName": "UserContinueWatching",
+          "schema": {
+            "$ref": "#/backend/entities/UserContinueWatching"
+          },
+          "description": "Stores items for the 'Continue Watching' list. 'mediaId' is the ID of the movie or TV show.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The Firebase Auth UID of the user."
+            },
+            {
+              "name": "mediaId",
+              "description": "The ID of the media item being watched."
+            }
+          ]
+        }
+      },
+      {
         "path": "/roles_admin/{userId}",
         "definition": {
           "entityName": "adminRole",
@@ -293,3 +340,4 @@
     "reasoning": "The Firestore structure is designed to support Willow's content discovery and watchlist features while adhering to the core principles of Authorization Independence, Clarity of Intent, DBAC, and QAPs.  \n\nAuthorization Independence is achieved through path-based ownership for user-specific data (watchlists). No `get()` calls are needed in security rules to validate ownership. The `UserWatchlist` collection is structured under `/users/{userId}/watchlists/{watchlistItemId}` ensuring only the authenticated user (`request.auth.uid`) can access their own watchlist data.  \n\nStructural Segregation is maintained by separating global content (movies, TV shows, genres) from user-specific data. This simplifies security rules as different collections have distinct access requirements. Movies, TV shows, and genres are stored in root-level collections (`/movies`, `/tv_shows`, `/genres`) as their access isn't user-dependent. \n\nAccess Modeling is standardized. Private data (watchlists) uses path-based ownership. This makes security rules trivial: `request.auth.uid == userId`. Global data has read access for all authenticated users, potentially with stricter write rules depending on admin roles (which can be implemented via a dedicated `/roles_admin/{uid}` collection). \n\nQAPs are supported. List operations are secure because the user watchlist data is segregated under their user id.  There are no server side filters required in the rules. For example, a user can only ever list the documents under their own user id. \n\nThe structure also allows for future scalability. If collaborative features are added (e.g., shared watchlists), the Membership Map pattern can be implemented by denormalizing a `members` map in the shared watchlist documents. "
   }
 }
+    
