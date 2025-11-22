@@ -68,8 +68,8 @@ export default function MediaDetailsPage() {
             {/* Skeleton for Hero */}
             <div className="w-full h-[60vh] lg:h-[85vh] bg-muted animate-pulse" />
             <div className="container mx-auto px-4 md:px-8 lg:px-16 space-y-12 py-12 pb-24">
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                    <div className="lg:col-span-3 space-y-8">
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                    <div className="lg:col-span-3 lg:col-start-2 space-y-8">
                         <Skeleton className="h-24 w-full" />
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <Skeleton className="h-12 w-full" />
@@ -105,13 +105,13 @@ export default function MediaDetailsPage() {
       <div className="container mx-auto px-4 md:px-8 lg:px-16 space-y-12 py-12 pb-24">
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          <div className="lg:col-span-3 lg:col-start-2">
-            <p className="text-muted-foreground text-lg mb-8 text-center">{item.overview}</p>
+          <div className="lg:col-span-3 lg:col-start-2 text-center">
+            <p className="text-muted-foreground text-lg mb-8">{item.overview}</p>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-8">
               <div>
                 <p className="font-semibold">Rating</p>
-                <p className="flex items-center gap-2 text-muted-foreground">
+                <p className="flex items-center justify-center gap-2 text-muted-foreground">
                   <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
                   {item.vote_average.toFixed(1)} / 10
                 </p>
@@ -158,25 +158,32 @@ export default function MediaDetailsPage() {
             <h2 className="text-2xl font-bold mb-6 text-center">Top Cast</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-6">
             {topCast.map((member, index) => (
-                <motion.div 
-                key={member.id} 
-                className="text-center"
-                variants={castVariants}
-                custom={index}
+                <a
+                  key={member.id}
+                  href={`https://www.themoviedb.org/person/${member.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group"
                 >
-                <div className="relative aspect-[2/3] rounded-lg overflow-hidden mb-2 bg-muted shadow-lg">
-                    <Image
-                    src={getTmdbImageUrl(member.profile_path, "w500")}
-                    alt={member.name}
-                    fill
-                    className="object-cover transition-transform duration-300 hover:scale-105"
-                    />
-                </div>
-                <p className="font-semibold text-sm">{member.name}</p>
-                <p className="text-xs text-muted-foreground">
-                    {member.character}
-                </p>
-                </motion.div>
+                    <motion.div 
+                    className="text-center"
+                    variants={castVariants}
+                    custom={index}
+                    >
+                        <div className="relative aspect-[2/3] rounded-lg overflow-hidden mb-2 bg-muted shadow-lg">
+                            <Image
+                            src={getTmdbImageUrl(member.profile_path, "w500")}
+                            alt={member.name}
+                            fill
+                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+                        </div>
+                        <p className="font-semibold text-sm group-hover:text-accent transition-colors">{member.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                            {member.character}
+                        </p>
+                    </motion.div>
+                </a>
             ))}
             </div>
         </motion.div>
