@@ -71,13 +71,13 @@ export default async function Home() {
     error = e.message || "Failed to fetch data.";
   }
   
-  const heroItem = trendingWeekly?.[0];
+  const heroItems = trendingWeekly.slice(0, 5);
   const heroFallbackImage = PlaceHolderImages.find(p => p.id === 'hero-fallback');
 
   return (
     <div className="flex flex-col">
-      {heroItem ? (
-        <Hero item={heroItem} />
+      {heroItems.length > 0 ? (
+        <Hero items={heroItems} />
       ) : (
         !error && (
           <div className="relative w-full h-[60vh] lg:h-[80vh]">
@@ -114,8 +114,8 @@ export default async function Home() {
             {top10MoviesToday.length > 0 && (
               <Top10Carousel title="Top 10 Movies Today" items={top10MoviesToday} />
             )}
-            {trendingWeekly.length > 1 && (
-              <MediaCarousel title="Trending This Week" items={trendingWeekly.slice(1)} />
+            {trendingWeekly.length > 0 && (
+              <MediaCarousel title="Trending This Week" items={trendingWeekly} />
             )}
             {categories.slice(1).map((category) => ( // .slice(1) to skip the Top 10 data we already used
               <MediaCarousel key={category.title} title={category.title} items={category.items} />
