@@ -86,7 +86,7 @@ export function MediaCard({ item }: MediaCardProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="absolute inset-0 p-3 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent"
+              className="absolute inset-0 p-3 flex flex-col justify-end items-center text-center bg-gradient-to-t from-black/80 via-black/40 to-transparent"
           >
               <h3 className="text-white font-bold text-base truncate mb-2">{title}</h3>
               <div className="flex items-center text-xs text-muted-foreground mb-3 gap-2">
@@ -101,12 +101,12 @@ export function MediaCard({ item }: MediaCardProps) {
                 <Button 
                     size="icon" 
                     className="h-8 w-8 rounded-full" 
-                    asChild
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(detailPath)
+                    }}
                 >
-                  <LoadingLink href={detailPath}>
-                      <PlayCircle className="w-4 h-4" />
-                  </LoadingLink>
+                    <PlayCircle className="w-4 h-4" />
                 </Button>
                 <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full" onClick={handleWatchlistToggle}>
                   {isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
