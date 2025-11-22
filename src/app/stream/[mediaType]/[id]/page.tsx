@@ -9,15 +9,12 @@ import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-type StreamSource = 'vidzee' | 'mapple';
-
 export default function StreamPage() {
   const params = useParams<{ mediaType: MediaType; id: string }>();
   const searchParams = useSearchParams();
   const router = useRouter();
 
   const [isHovered, setIsHovered] = useState(false);
-  const [source, setSource] = useState<StreamSource>('vidzee');
   
   const { mediaType, id } = params;
   
@@ -25,30 +22,29 @@ export default function StreamPage() {
   const episode = searchParams.get('e');
 
   useEffect(() => {
-    const handleVidZeeMessage = (event: MessageEvent) => {
-      if (event.origin !== 'https://player.vidzee.wtf') return;
+    const handleMappleMessage = (event: MessageEvent) => {
+      if (event.origin !== 'https://mapple.uk' || !event.data) return;
 
-      if (event.data?.type === 'MEDIA_DATA') {
-          const mediaData = event.data.data;
+      if (event.data.type === 'MEDIA_DATA') {
           // This merges new data with existing data, which might be from other shows
-          const existingData = JSON.parse(localStorage.getItem('vidZeeProgress') || '{}');
-          const newData = { ...existingData, ...mediaData };
-          localStorage.setItem('vidZeeProgress', JSON.stringify(newData));
+          const existingData = JSON.parse(localStorage.getItem('mapplePlayerProgress') || '{}');
+          const newData = { ...existingData, ...event.data.data };
+          localStorage.setItem('mapplePlayerProgress', JSON.stringify(newData));
           // Dispatch a custom event to notify other components (like the carousel) of the change
-          window.dispatchEvent(new Event('vidzee-progress-change'));
+          window.dispatchEvent(new Event('mapple-progress-change'));
       }
 
-      if (event.data?.type === 'PLAYER_EVENT') {
+      if (event.data.type === 'PLAYER_EVENT') {
         const { event: eventType, currentTime, duration } = event.data.data;
         // Example of handling player events
         console.log(`Player ${eventType} at ${currentTime}s of ${duration}s`);
       }
     };
 
-    window.addEventListener('message', handleVidZeeMessage);
+    window.addEventListener('message', handleMappleMessage);
 
     return () => {
-      window.removeEventListener('message', handleVidZeeMessage);
+      window.removeEventListener('message', handleMappleMessage);
     };
   }, []);
 
@@ -61,19 +57,13 @@ export default function StreamPage() {
     notFound();
   }
 
-  const getStreamUrl = (selectedSource: StreamSource) => {
-    if (selectedSource === 'mapple') {
-      return mediaType === 'tv' && season && episode
-        ? `https://mapple.uk/watch/tv/${id}-${season}-${episode}`
-        : `https://mapple.uk/watch/movie/${id}`;
-    }
-    // Default to vidzee
-    return (mediaType === 'tv' && season && episode)
-        ? `https://player.vidzee.wtf/embed/tv/${id}/${season}/${episode}`
-        : `https://player.vidzee.wtf/embed/movie/${id}`;
+  const getStreamUrl = () => {
+    return mediaType === 'tv' && season && episode
+      ? `https://mapple.uk/watch/tv/${id}-${season}-${episode}`
+      : `https://mapple.uk/watch/movie/${id}`;
   }
 
-  const streamUrl = getStreamUrl(source);
+  const streamUrl = getStreamUrl();
 
   return (
     <div 
@@ -96,26 +86,9 @@ export default function StreamPage() {
                 <ArrowLeft className="w-6 h-6" />
                 <span className="sr-only">Go back</span>
             </Button>
-            <div className="flex items-center gap-1 bg-secondary/80 rounded-full p-1">
-                <Button
-                    size="sm"
-                    onClick={() => setSource('vidzee')}
-                    className={cn("rounded-full", source === 'vidzee' ? 'bg-primary text-primary-foreground' : 'bg-transparent text-secondary-foreground hover:bg-secondary/50')}
-                >
-                    VidZee
-                </Button>
-                 <Button
-                    size="sm"
-                    onClick={() => setSource('mapple')}
-                    className={cn("rounded-full", source === 'mapple' ? 'bg-primary text-primary-foreground' : 'bg-transparent text-secondary-foreground hover:bg-secondary/50')}
-                >
-                    Mapple
-                </Button>
-            </div>
         </motion.div>
 
       <iframe
-          key={source} // Add key to force iframe remount on source change
           src={streamUrl}
           allow="autoplay; fullscreen"
           allowFullScreen
