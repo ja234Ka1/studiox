@@ -30,7 +30,7 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
         }}
         className="w-full"
       >
-        <CarouselContent className="-ml-4 py-4 px-2">
+        <CarouselContent className="-ml-4 p-4">
           {items.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
@@ -46,5 +46,3 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
     </section>
   );
 }
-
-    

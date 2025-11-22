@@ -96,7 +96,11 @@ export function MediaCard({ item }: MediaCardProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { delay: 0.2, duration: 0.2 } }}
             exit={{ opacity: 0, transition: { duration: 0.1 } }}
-            className="absolute inset-0 w-full h-full flex flex-col"
+            className="absolute top-0 left-0 w-full h-auto bg-card rounded-lg shadow-2xl"
+            style={{ 
+              width: '150%', 
+              left: '-25%',
+            }}
           >
              <div className="relative w-full aspect-video">
                 <Image
@@ -107,7 +111,7 @@ export function MediaCard({ item }: MediaCardProps) {
                 />
                  <div className="absolute inset-0 bg-gradient-to-t from-card via-card/50 to-transparent rounded-t-lg" />
             </div>
-            <div className="p-3 bg-card rounded-b-lg flex-grow">
+            <div className="p-3">
                  <div className="flex items-center justify-between gap-2 mb-2">
                     <div className="flex items-center gap-2">
                         <Button size="icon" className="h-8 w-8 rounded-full" asChild>
@@ -140,5 +144,3 @@ export function MediaCard({ item }: MediaCardProps) {
     </motion.div>
   );
 }
-
-    
