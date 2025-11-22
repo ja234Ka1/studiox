@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Film, List, Menu, Search, Settings, Server, Tv } from "lucide-react";
+import { Film, List, Menu, Search, Settings, Tv } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 
@@ -118,9 +118,6 @@ export function Header() {
               <LoadingLink href="/search">
                   <Search />
               </LoadingLink>
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => setIsSourceDialogOpen(true)}>
-              <Server />
             </Button>
             <Button asChild variant="ghost" size="icon">
               <LoadingLink href="/settings">
