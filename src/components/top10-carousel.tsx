@@ -75,18 +75,18 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
         }}
         className="w-full mt-4"
       >
-        <CarouselContent className="-ml-16 md:px-4">
+        <CarouselContent className="-ml-24 md:px-4">
           {items.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
-              className="basis-1/2 sm:basis-1/3 md:basis-1/4 pl-16 group"
+              className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 pl-24 group"
             >
               <motion.div
                 className="relative flex items-center justify-end h-full"
                 layout
                 variants={itemVariants}
               >
-                <span className="absolute -left-16 bottom-0 text-[18rem] font-black text-transparent text-outline leading-none select-none transition-all duration-300 group-hover:scale-105 group-hover:text-glow">
+                <span className="absolute -left-24 bottom-0 text-[18rem] font-black text-transparent text-outline leading-none select-none transition-all duration-300 group-hover:scale-105 group-hover:text-glow">
                   {index + 1}
                 </span>
                 <div className="w-full relative z-10">
