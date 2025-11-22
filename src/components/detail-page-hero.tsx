@@ -2,7 +2,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { PlayCircle, Plus, Check, VolumeX, Volume2 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 
