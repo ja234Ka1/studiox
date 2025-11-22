@@ -1,9 +1,10 @@
 
 'use client';
 
-import * as React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import type { Media } from "@/types/tmdb";
-import { TopTenCard } from "./top-ten-card";
+import { getTrending } from "@/lib/tmdb";
+import { MediaCard } from "./media-card";
 import {
   Carousel,
   CarouselContent,
@@ -11,84 +12,72 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import Autoplay from "embla-carousel-autoplay";
 
-interface TopTenCarouselProps {
-  items: Media[];
-}
+export default function TopTenCarousel() {
+  const [items, setItems] = useState<Media[]>([]);
+  const plugin = useRef(
+    Autoplay({ delay: 5000, stopOnInteraction: true })
+  );
 
-const carouselVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
+  useEffect(() => {
+    getTrending('movie', 'day').then(movies => {
+      setItems(movies.slice(0, 10));
+    });
+  }, []);
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-      ease: "easeOut",
-    },
-  },
-};
-
-export default function TopTenCarousel({ items }: TopTenCarouselProps) {
-  if (!items || items.length === 0) {
-    return null;
+  if (items.length === 0) {
+    return null; // Or a loading skeleton
   }
 
   return (
-    <motion.section 
-      className="text-left w-full group relative overflow-hidden py-12"
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.1 }}
-      variants={carouselVariants}
-    >
-      <div className="container mx-auto px-4 md:px-8">
-        <motion.div 
-          className="flex items-end gap-4 mb-8"
-          variants={itemVariants}
-        >
-            <h2 className="text-6xl md:text-8xl font-black tracking-tighter leading-none text-outline text-glow">
-                TOP 10
-            </h2>
-            <div>
-                <h3 className="text-lg md:text-xl font-bold">MOVIES</h3>
-                <p className="text-sm text-muted-foreground">TODAY</p>
+    <section className="py-12 group/section">
+        <div className="container mx-auto px-4 md:px-8">
+            <div className="flex items-end gap-2 mb-6">
+                <h2 className="text-8xl font-black tracking-tighter flex items-center">
+                    <span className="text-transparent text-outline-white">TOP</span>
+                    <span className="text-primary text-glow">10</span>
+                </h2>
+                <div className="pb-2">
+                    <h3 className="text-xl font-bold">MOVIES</h3>
+                    <p className="text-sm text-muted-foreground">TODAY</p>
+                </div>
             </div>
-        </motion.div>
-      </div>
+        </div>
       
-      <Carousel
-        opts={{
-          align: "start",
-          loop: true,
-        }}
-        className="w-full"
-      >
-        <CarouselContent className="-ml-16">
-          {items.map((item, index) => (
-            <CarouselItem
-              key={item.id}
-              className="basis-[45%] sm:basis-[30%] md:basis-[25%] lg:basis-[20%] xl:basis-[18%] pl-16"
-            >
-              <motion.div layout variants={itemVariants}>
-                <TopTenCard item={item} rank={index} />
-              </motion.div>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <CarouselPrevious className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 left-8" />
-        <CarouselNext className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 right-8" />
-      </Carousel>
-    </motion.section>
+        <Carousel
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+            plugins={[plugin.current]}
+            onMouseEnter={plugin.current.stop}
+            onMouseLeave={plugin.current.reset}
+            className="w-full"
+        >
+            <CarouselContent className="-ml-8">
+            {items.map((item, index) => (
+                <CarouselItem
+                    key={item.id}
+                    className="basis-auto pl-8 group"
+                >
+                    <div className="flex items-center transition-transform duration-500 ease-out group-hover:scale-105">
+                        <span 
+                            className="text-[200px] font-black text-transparent text-outline-primary text-glow transition-colors duration-500 ease-out group-hover:text-primary"
+                        >
+                            {index + 1}
+                        </span>
+                        <div className="w-52 -ml-8 shrink-0">
+                           <MediaCard item={item} />
+                        </div>
+                    </div>
+                </CarouselItem>
+            ))}
+            </CarouselContent>
+            <CarouselPrevious className="left-8 opacity-0 group-hover/section:opacity-100 transition-opacity" />
+            <CarouselNext className="right-8 opacity-0 group-hover/section:opacity-100 transition-opacity" />
+        </Carousel>
+    </section>
   );
 }
