@@ -74,7 +74,7 @@ export function ThemeProvider({
     const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     const resolvedTheme = isSystem ? systemTheme : newTheme;
     
-    root.classList.remove("light", "dark", "theme-rose");
+    root.classList.remove("light", "dark", "theme-rose", "theme-nintendo", "theme-playstation", "theme-xbox");
     
     if (resolvedTheme !== 'system') {
         root.classList.add(resolvedTheme);
