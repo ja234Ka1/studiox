@@ -78,10 +78,21 @@ export async function getVideos(mediaId: number, mediaType: MediaType): Promise<
     }
 }
 
-export async function getMediaDetails(mediaId: number, mediaType: MediaType): Promise<MediaDetails> {
+export async function getMediaDetails(id: number, mediaType: MediaType): Promise<MediaDetails> {
     const params = {
         append_to_response: 'credits,recommendations,videos'
     }
-    const data = await fetcher<MediaDetails>(`/${mediaType}/${mediaId}`, params);
+    const data = await fetcher<MediaDetails>(`/${mediaType}/${id}`, params);
+    return data;
+}
+
+export async function searchMedia(query: string, page: number = 1): Promise<ApiResponse<Media>> {
+    const data = await fetcher<ApiResponse<Media>>('/search/multi', { 
+        query,
+        page: String(page),
+        include_adult: 'false'
+    });
+    // Filter out people from search results
+    data.results = data.results.filter(item => item.media_type === 'movie' || item.media_type === 'tv');
     return data;
 }

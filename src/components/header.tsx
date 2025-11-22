@@ -3,15 +3,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Clapperboard, Film, Gamepad2, Home, List, Search, Settings, Tv } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { Clapperboard, Film, List, Search, Settings, Tv } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 const navItems = [
-  { href: "/", label: "Home", icon: Home },
   { href: "/tv-shows", label: "Shows", icon: Tv },
   { href: "/movies", label: "Movies", icon: Film },
   { href: "/watchlist", label: "Watchlist", icon: List },
@@ -20,10 +19,10 @@ const navItems = [
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
-      // Don't apply scroll effect on stream page
       if (pathname.startsWith('/stream')) {
         setIsScrolled(true);
         return;
@@ -35,6 +34,15 @@ export function Header() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [pathname]);
+  
+  const handleSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      const query = event.currentTarget.value;
+      if (query.trim()) {
+        router.push(`/search?q=${encodeURIComponent(query)}`);
+      }
+    }
+  };
 
   return (
     <header
@@ -76,6 +84,7 @@ export function Header() {
               type="search"
               placeholder="Search..."
               className="pl-9 rounded-full"
+              onKeyDown={handleSearch}
             />
           </div>
           <Button asChild variant="ghost" size="icon">
