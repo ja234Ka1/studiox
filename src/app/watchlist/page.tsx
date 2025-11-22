@@ -6,10 +6,10 @@ import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebas
 import { getWatchlist as getLocalWatchlist, removeFromWatchlist as removeLocalWatchlist } from "@/lib/userData";
 import type { Media } from "@/types/tmdb";
 import { MediaCard } from "@/components/media-card";
-import { collection, deleteDoc, doc } from "firebase/firestore";
+import { collection } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 
-function WatchlistGrid({ items, onRemove }: { items: Media[], onRemove: (id: number) => void }) {
+function WatchlistGrid({ items }: { items: Media[] }) {
   if (items.length === 0) {
     return (
       <p className="text-muted-foreground text-center col-span-full">
@@ -43,8 +43,7 @@ export default function WatchlistPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
 
-  // Unified state for the watchlist, regardless of source
-  const [watchlist, setWatchlist] = useState<Media[]>([]);
+  const [guestWatchlist, setGuestWatchlist] = useState<Media[]>([]);
   const [isMounted, setIsMounted] = useState(false);
 
   // Firestore state for logged-in user
@@ -55,39 +54,26 @@ export default function WatchlistPage() {
   
   const { data: firebaseWatchlist, isLoading: isFirestoreLoading } = useCollection<Media>(watchlistQuery);
   
-  // Effect to load initial data from correct source (local or firebase)
   useEffect(() => {
     setIsMounted(true);
-    if (user) {
-      if (firebaseWatchlist) {
-        setWatchlist(firebaseWatchlist);
-      }
-    } else {
-      setWatchlist(getLocalWatchlist());
+    if (!user) {
+      setGuestWatchlist(getLocalWatchlist());
     }
-  }, [user, firebaseWatchlist]);
+  }, [user]);
 
-  // Effect to listen for watchlist changes (from other tabs or actions)
+  // Effect to listen for local storage changes for GUEST users
   useEffect(() => {
-    const handleWatchlistChange = (event: Event) => {
-        if(user) {
-            // For logged-in users, useCollection handles updates automatically.
-            // But we need to handle removals instantly.
-            if ((event as CustomEvent).detail?.removed) {
-                const removedId = (event as CustomEvent).detail.removed;
-                setWatchlist(prev => prev.filter(item => item.id !== removedId));
-            }
-        } else {
-            // For guests, we refetch from local storage.
-            setWatchlist(getLocalWatchlist());
-        }
+    if (user) return; // Only run for guests
+
+    const handleWatchlistChange = () => {
+        setGuestWatchlist(getLocalWatchlist());
     };
     
     window.addEventListener('willow-watchlist-change', handleWatchlistChange);
     return () => {
         window.removeEventListener('willow-watchlist-change', handleWatchlistChange);
     };
-}, [user]);
+  }, [user]);
 
 
   if (!isMounted || isUserLoading) {
@@ -103,21 +89,9 @@ export default function WatchlistPage() {
         </div>
     );
   }
-
-  const handleRemoveItem = (itemId: number) => {
-    // Optimistically update UI
-    setWatchlist(currentWatchlist => currentWatchlist.filter(item => item.id !== itemId));
-
-    // Perform the actual removal
-    if (user && firestore) {
-      const watchlistItemRef = doc(firestore, 'users', user.uid, 'watchlists', String(itemId));
-      deleteDoc(watchlistItemRef);
-    } else {
-      removeLocalWatchlist(itemId);
-    }
-  };
-
-  const isLoading = user ? isFirestoreLoading && watchlist.length === 0 : false;
+  
+  const watchlist = user ? firebaseWatchlist : guestWatchlist;
+  const isLoading = user ? isFirestoreLoading : false;
 
   return (
     <div className="container px-4 md:px-8 lg:px-16 space-y-12 py-12 pb-24 mx-auto">
@@ -129,7 +103,7 @@ export default function WatchlistPage() {
       </header>
       
       {isLoading && <WatchlistSkeleton />}
-      {!isLoading && <WatchlistGrid items={watchlist} onRemove={handleRemoveItem} />}
+      {!isLoading && <WatchlistGrid items={watchlist || []} />}
       
     </div>
   );
