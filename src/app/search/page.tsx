@@ -117,14 +117,15 @@ const SearchPage = () => {
     Promise.all(fetchPromises)
         .then(allResults => {
             const combinedResults = allResults.flat();
-            // Simple combination, could be improved with sorting
-            const finalResults = isNewSearch ? combinedResults : [...results, ...combinedResults];
             
-            // For simplicity, we are not handling pagination properly for 'all' genre type
-            // It will just load page 1 of movies and page 1 of tv shows.
-            setResults(finalResults);
+            if (isNewSearch) {
+                setResults(combinedResults);
+            } else {
+                setResults(prev => [...prev, ...combinedResults]);
+            }
+
             setPage(pageToFetch);
-            // This is not accurate for combined results
+            // This is not accurate for combined results, but gives basic load more functionality
             setTotalPages(pageToFetch + (combinedResults.length > 0 ? 1 : 0));
         })
         .catch(() => setError('Failed to fetch genre results.'))
@@ -132,7 +133,7 @@ const SearchPage = () => {
             if (isNewSearch) setIsLoading(false);
             else setIsLoadingMore(false);
         })
-  }, [results]);
+  }, []);
   
   useEffect(() => {
     const query = searchParams.get('q');
