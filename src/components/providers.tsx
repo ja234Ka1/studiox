@@ -6,7 +6,6 @@ import { ThemeProvider } from "@/context/theme-provider";
 import { VideoProvider } from "@/context/video-provider";
 import { LoadingProvider } from "@/context/loading-provider";
 import { ToastContext, type ToasterToast } from "@/hooks/use-toast";
-import { WatchlistProvider } from "@/context/watchlist-provider";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
 
 let count = 0;
@@ -47,7 +46,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     setToasts((prev) => [newToast, ...prev].slice(0, TOAST_LIMIT));
 
     return { id, dismiss, update };
-  }, []);
+  }, [toasts]);
 
   const dismiss = React.useCallback((toastId?: string) => {
     setToasts((prev) =>

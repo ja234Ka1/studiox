@@ -26,7 +26,7 @@ function ThemedBodyContent({ children }: { children: ReactNode }) {
 
 
   return (
-      <WatchlistProvider>
+      <>
         <LoadingScreen />
         <Background />
         <div className="relative z-10 flex min-h-screen flex-col">
@@ -35,7 +35,7 @@ function ThemedBodyContent({ children }: { children: ReactNode }) {
         </div>
         <VideoPlayer />
         <Toaster />
-      </WatchlistProvider>
+      </>
   );
 }
 
@@ -53,9 +53,11 @@ export default function RootLayout({
       </head>
       <body className={cn("antialiased font-sans", inter.variable)}>
         <AppProviders>
-          <ThemedBodyContent>
-            {children}
-          </ThemedBodyContent>
+          <WatchlistProvider>
+            <ThemedBodyContent>
+              {children}
+            </ThemedBodyContent>
+          </WatchlistProvider>
         </AppProviders>
       </body>
     </html>
