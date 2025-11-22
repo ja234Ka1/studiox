@@ -127,7 +127,7 @@ export function AppearanceSettings() {
               <div>
                 <Label htmlFor="starfield-switch" className="font-medium">
                   Starfield
-                Label>
+                </Label>
                 <p className="text-xs text-muted-foreground">
                   A subtle starfield effect for extra depth (dark mode only).
                 </p>
