@@ -73,9 +73,9 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
         opts={{
           align: "start",
         }}
-        className="w-full mt-4"
+        className="w-full mt-4 md:px-8 px-4"
       >
-        <CarouselContent className="-ml-28 md:px-4">
+        <CarouselContent className="-ml-28">
           {items.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
@@ -99,8 +99,8 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300 ml-20" />
-        <CarouselNext className="opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300 mr-20" />
+        <CarouselPrevious className="opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300 left-8" />
+        <CarouselNext className="opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300 right-8" />
       </Carousel>
     </motion.section>
   );
