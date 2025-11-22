@@ -217,4 +217,3 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
     </>
   );
 }
-
