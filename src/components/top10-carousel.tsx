@@ -80,16 +80,28 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
           {items.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
-              className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 pl-28 pr-4 group"
+              className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4 pr-4 group"
             >
               <motion.div
-                className="relative flex items-center justify-end h-full"
+                className="relative flex items-center h-full"
                 layout
                 variants={itemVariants}
               >
                 <span className={cn(
-                  "absolute bottom-0 text-[18rem] font-black text-transparent text-outline leading-none select-none transition-all duration-300 group-hover:scale-105 group-hover:text-glow",
-                   index === 9 ? "-left-40" : "-left-28" // Shift "10" further left
+                  "absolute font-black text-transparent text-outline leading-none select-none transition-all duration-300 group-hover:scale-105 group-hover:text-glow",
+                  // Responsive font sizes
+                  "text-[28vw] bottom-0", // Mobile first
+                  "sm:text-[20vw] sm:-bottom-2",
+                  "md:text-[16vw] md:-bottom-2",
+                  "lg:text-[12vw] lg:-bottom-4",
+                  "xl:text-[10vw] xl:-bottom-2",
+                  // Responsive positioning
+                  "left-[-8vw]",
+                  "sm:left-[-5vw]",
+                  "md:left-[-4vw]",
+                  "lg:left-[-3vw]",
+                  // Special adjustment for number 10
+                  index === 9 && "left-[-16vw] sm:left-[-10vw] md:left-[-8vw] lg:left-[-6vw]"
                 )}>
                   {index + 1}
                 </span>
@@ -106,3 +118,4 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
     </motion.section>
   );
 }
+
