@@ -110,14 +110,20 @@ export async function getPersonDetails(id: number): Promise<PersonDetails> {
     return data;
 }
 
-export async function searchMedia(query: string, page: number = 1): Promise<ApiResponse<Media>> {
+export async function searchMedia(query: string, page: number = 1, limit?: number): Promise<ApiResponse<Media>> {
     const data = await fetcher<ApiResponse<Media>>('/search/multi', { 
         query,
         page: String(page),
         include_adult: 'false'
     });
     // Filter out people from search results
-    data.results = data.results.filter(item => item.media_type === 'movie' || item.media_type === 'tv');
+    let results = data.results.filter(item => item.media_type === 'movie' || item.media_type === 'tv');
+
+    if (limit) {
+        results = results.slice(0, limit);
+    }
+    data.results = results;
+
     return data;
 }
 
