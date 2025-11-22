@@ -50,7 +50,7 @@ export function ThemeProvider({
   const [animationsEnabled, setAnimationsEnabledState] = React.useState<boolean>(true);
   const [blobSpeed, setBlobSpeedState] = React.useState<number>(30);
   const [dataSaver, setDataSaverState] = React.useState<boolean>(false);
-  const [radius, setRadiusState] = React.useState<number>(0.5);
+  const [radius, setRadiusState] = React.useState<number>(1.0);
 
   const [isMounted, setIsMounted] = React.useState(false);
 
@@ -71,7 +71,7 @@ export function ThemeProvider({
     setBlobSpeedState(storedBlobSpeed ? parseInt(storedBlobSpeed, 10) : 30);
     setDataSaverState(localStorage.getItem("willow-data-saver") === "true");
     const storedRadius = localStorage.getItem("willow-radius");
-    setRadiusState(storedRadius ? parseFloat(storedRadius) : 0.5);
+    setRadiusState(storedRadius ? parseFloat(storedRadius) : 1.0);
 
   }, [isMounted, defaultTheme]);
 
