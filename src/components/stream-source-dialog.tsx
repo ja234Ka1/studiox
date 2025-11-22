@@ -3,9 +3,10 @@
 
 import { Check, Crown, Gem, Shield, Sparkles, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { useTheme, type StreamSource } from "@/context/theme-provider";
+import { type StreamSource } from "@/context/theme-provider";
 import { cn } from "@/lib/utils";
 import { Badge } from "./ui/badge";
+import { useTheme } from "@/context/theme-provider";
 
 const sources: { id: StreamSource; name: string; description: string; icon: React.ReactNode; recommended?: boolean }[] = [
   {
@@ -35,8 +36,23 @@ const sources: { id: StreamSource; name: string; description: string; icon: Reac
   },
 ];
 
-export function StreamSourceDialog({ isOpen, onOpenChange }: { isOpen: boolean; onOpenChange: (isOpen: boolean) => void; }) {
+interface StreamSourceDialogProps {
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
+  onSelectSource?: (source: StreamSource) => void;
+}
+
+export function StreamSourceDialog({ isOpen, onOpenChange, onSelectSource }: StreamSourceDialogProps) {
   const { streamSource, setStreamSource } = useTheme();
+
+  const handleSourceSelect = (source: StreamSource) => {
+    if (onSelectSource) {
+      onSelectSource(source);
+    } else {
+      setStreamSource(source);
+      onOpenChange(false);
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -53,10 +69,7 @@ export function StreamSourceDialog({ isOpen, onOpenChange }: { isOpen: boolean; 
           {sources.map((source) => (
             <div
               key={source.id}
-              onClick={() => {
-                setStreamSource(source.id);
-                onOpenChange(false);
-              }}
+              onClick={() => handleSourceSelect(source.id)}
               className={cn(
                 "p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 flex items-center gap-4",
                 streamSource === source.id

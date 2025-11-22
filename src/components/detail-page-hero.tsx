@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { PlayCircle, Plus, Check, VolumeX, Volume2 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import type { YouTubePlayer } from "react-youtube";
+import { useRouter } from "next/navigation";
 
 import type { MediaDetails } from "@/types/tmdb";
 import { getTmdbImageUrl } from "@/lib/utils";
@@ -16,20 +17,25 @@ import { useToast } from "@/hooks/use-toast";
 import { addToWatchlist, getWatchlist, removeFromWatchlist } from "@/lib/userData";
 import LoadingLink from "./loading-link";
 import YouTubeEmbed from "./youtube-embed";
-import { useTheme } from "@/context/theme-provider";
+import { useTheme, type StreamSource } from "@/context/theme-provider";
+import { StreamSourceDialog } from "./stream-source-dialog";
+
 
 interface DetailPageHeroProps {
   item: MediaDetails;
 }
 
 export function DetailPageHero({ item }: DetailPageHeroProps) {
+  const router = useRouter();
   const { playVideo } = useVideo();
   const { toast } = useToast();
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [showTrailer, setShowTrailer] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const playerRef = useRef<YouTubePlayer | null>(null);
-  const { dataSaver } = useTheme();
+  const { dataSaver, setStreamSource } = useTheme();
+
+  const [showSourceDialog, setShowSourceDialog] = useState(false);
 
   const title = item.title || item.name;
   const releaseDate = item.release_date || item.first_air_date;
@@ -87,13 +93,18 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
       });
     }
   };
-  
-  const streamPath = item.media_type === 'tv'
-    ? `/stream/tv/${item.id}?s=1&e=1`
-    : `/stream/movie/${item.id}`;
 
+  const handleSelectSource = (source: StreamSource) => {
+    setStreamSource(source);
+    setShowSourceDialog(false);
+    const streamPath = item.media_type === 'tv'
+      ? `/stream/tv/${item.id}?s=1&e=1`
+      : `/stream/movie/${item.id}`;
+    router.push(streamPath);
+  };
 
   return (
+    <>
     <div 
       className="relative w-full h-[60vh] lg:h-[85vh]"
       onMouseEnter={handleMouseEnter}
@@ -164,11 +175,9 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
           </h1>
           
           <div className="flex items-center gap-4">
-            <Button size="lg" asChild>
-              <LoadingLink href={streamPath}>
+            <Button size="lg" onClick={() => setShowSourceDialog(true)}>
                 <PlayCircle className="mr-2" />
                 Watch
-              </LoadingLink>
             </Button>
             <Button size="lg" variant="secondary" onClick={handleWatchlistToggle}>
                 {isInWatchlist ? <Check className="w-5 h-5 mr-2" /> : <Plus className="w-5 h-5 mr-2" />}
@@ -200,5 +209,12 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
         </motion.div>
       )}
     </div>
+    <StreamSourceDialog 
+        isOpen={showSourceDialog} 
+        onOpenChange={setShowSourceDialog}
+        onSelectSource={handleSelectSource}
+    />
+    </>
   );
 }
+
