@@ -13,6 +13,7 @@ import { EpisodeSelector } from "@/components/episode-selector";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
+import LoadingLink from "@/components/loading-link";
 
 const castVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -102,13 +103,13 @@ export default function MediaDetailsPage() {
     <div className="flex flex-col">
       <DetailPageHero item={itemWithMediaType} />
 
-      <div className="container mx-auto px-4 md:px-8 lg:px-16 space-y-12 py-12 pb-24">
+      <div className="container mx-auto px-4 md:px-8 lg:px-16 py-12 pb-24 space-y-16">
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          <div className="lg:col-span-3 lg:col-start-2 text-center">
-            <p className="text-muted-foreground text-lg mb-8">{item.overview}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-3 text-center">
+            <p className="text-muted-foreground text-lg mb-8 max-w-4xl mx-auto">{item.overview}</p>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-8 max-w-2xl mx-auto">
               <div>
                 <p className="font-semibold">Rating</p>
                 <p className="flex items-center justify-center gap-2 text-muted-foreground">
@@ -159,11 +160,9 @@ export default function MediaDetailsPage() {
               <h2 className="text-2xl font-bold mb-6 text-center">Top Cast</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-6">
               {topCast.map((member, index) => (
-                  <a
+                  <LoadingLink
                     key={member.id}
-                    href={`https://www.themoviedb.org/person/${member.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href={`/person/${member.id}`}
                     className="group"
                   >
                       <motion.div 
@@ -184,7 +183,7 @@ export default function MediaDetailsPage() {
                               {member.character}
                           </p>
                       </motion.div>
-                  </a>
+                  </LoadingLink>
               ))}
               </div>
           </motion.div>

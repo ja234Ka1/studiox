@@ -1,4 +1,4 @@
-import type { ApiResponse, Media, MediaDetails, MediaType, TimeRange, Video, SeasonDetails } from "@/types/tmdb";
+import type { ApiResponse, Media, MediaDetails, MediaType, TimeRange, Video, SeasonDetails, PersonDetails } from "@/types/tmdb";
 
 const API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
 const BASE_URL = "https://api.themoviedb.org/3";
@@ -83,6 +83,20 @@ export async function getMediaDetails(id: number, mediaType: MediaType): Promise
         append_to_response: 'credits,recommendations,videos'
     }
     const data = await fetcher<MediaDetails>(`/${mediaType}/${id}`, params);
+    return data;
+}
+
+export async function getPersonDetails(id: number): Promise<PersonDetails> {
+    const params = {
+        append_to_response: 'combined_credits'
+    }
+    const data = await fetcher<PersonDetails>(`/person/${id}`, params);
+    // Sort combined credits by popularity descending, and filter out items without a poster
+    if (data.combined_credits?.cast) {
+        data.combined_credits.cast = data.combined_credits.cast
+            .filter(item => item.poster_path)
+            .sort((a, b) => b.popularity - a.popularity);
+    }
     return data;
 }
 

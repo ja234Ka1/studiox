@@ -13,6 +13,7 @@ export interface Media {
   first_air_date?: string;
   vote_average: number;
   genre_ids: number[];
+  popularity: number;
 }
 
 export interface Movie extends Media {
@@ -114,4 +115,18 @@ export interface Episode {
   
 export interface SeasonDetails extends Season {
     episodes: Episode[];
+}
+
+export interface PersonDetails {
+    id: number;
+    name: string;
+    biography: string;
+    profile_path: string | null;
+    birthday: string | null;
+    deathday: string | null;
+    place_of_birth: string | null;
+    known_for_department: string;
+    combined_credits: {
+        cast: Media[];
+    };
 }
