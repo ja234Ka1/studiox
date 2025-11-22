@@ -9,13 +9,11 @@ import { motion } from "framer-motion";
 const NUM_BLOBS = 4;
 const REPULSION_STRENGTH = 150;
 
-export function Background() {
-  const { backgroundEffects, theme, blobSpeed } = useTheme();
+function AnimatedBlobs() {
+  const { blobSpeed } = useTheme();
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
     const handleMouseMove = (event: MouseEvent) => {
       setMousePos({ x: event.clientX, y: event.clientY });
     };
@@ -26,76 +24,47 @@ export function Background() {
   }, []);
 
   const blobs = useMemo(() => {
-    if (!isMounted) return [];
     return Array.from({ length: NUM_BLOBS }).map((_, i) => ({
       id: i,
-      size: Math.random() * 200 + 150, // size between 150 and 350
-      initialX: `${Math.random() * 80 + 10}%`, // 10% to 90%
+      size: Math.random() * 200 + 150,
+      initialX: `${Math.random() * 80 + 10}%`,
       initialY: `${Math.random() * 80 + 10}%`,
       animationDuration: `${Math.random() * 20 + blobSpeed}s`,
       animationDelay: `-${Math.random() * 10}s`,
     }));
-  }, [isMounted, blobSpeed]);
-
-  if (!backgroundEffects.blobs) {
-    return (
-      <div className="fixed inset-0 -z-10 h-full w-full">
-         <div
-          className={cn(
-            "absolute inset-0 transition-opacity duration-1000",
-             "opacity-100"
-          )}
-        >
-          <div className="absolute bottom-0 left-0 right-0 top-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-20"></div>
-        </div>
-        {backgroundEffects.starfield && theme === 'dark' && <Starfield />}
-      </div>
-    );
-  }
+  }, [blobSpeed]);
 
   return (
-    <div className="fixed inset-0 -z-10 h-full w-full overflow-hidden">
-      <div
-        className={cn(
-          "absolute inset-0 transition-opacity duration-1000",
-          backgroundEffects.blobs ? "opacity-100" : "opacity-0"
-        )}
-      >
-        <div className="absolute bottom-0 left-0 right-0 top-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-20"></div>
+    <>
+      <div className="absolute bottom-0 left-0 right-0 top-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-20"></div>
+      {blobs.map((blob) => {
+        const dx = mousePos.x - (window.innerWidth * parseFloat(blob.initialX) / 100);
+        const dy = mousePos.y - (window.innerHeight * parseFloat(blob.initialY) / 100);
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const repulsion = Math.max(0, REPULSION_STRENGTH - distance);
+        
+        const angle = Math.atan2(dy, dx);
+        const repelX = -Math.cos(angle) * repulsion;
+        const repelY = -Math.sin(angle) * repulsion;
 
-        {blobs.map((blob) => {
-          const dx = mousePos.x - (window.innerWidth * parseFloat(blob.initialX) / 100);
-          const dy = mousePos.y - (window.innerHeight * parseFloat(blob.initialY) / 100);
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          const repulsion = Math.max(0, REPULSION_STRENGTH - distance);
-          
-          const angle = Math.atan2(dy, dx);
-          const repelX = -Math.cos(angle) * repulsion;
-          const repelY = -Math.sin(angle) * repulsion;
-
-          return (
-            <motion.div
-              key={blob.id}
-              className="absolute bg-accent/10 blur-3xl animate-morph animate-blob-move"
-              style={{
-                width: blob.size,
-                height: blob.size,
-                left: blob.initialX,
-                top: blob.initialY,
-                animationDuration: blob.animationDuration,
-                animationDelay: blob.animationDelay,
-              }}
-              animate={{
-                x: repelX,
-                y: repelY,
-              }}
-              transition={{ type: "spring", stiffness: 50, damping: 15 }}
-            />
-          );
-        })}
-      </div>
-      {backgroundEffects.starfield && theme === 'dark' && <Starfield />}
-    </div>
+        return (
+          <motion.div
+            key={blob.id}
+            className="absolute bg-accent/10 blur-3xl animate-morph animate-blob-move"
+            style={{
+              width: blob.size,
+              height: blob.size,
+              left: blob.initialX,
+              top: blob.initialY,
+              animationDuration: blob.animationDuration,
+              animationDelay: blob.animationDelay,
+            }}
+            animate={{ x: repelX, y: repelY }}
+            transition={{ type: "spring", stiffness: 50, damping: 15 }}
+          />
+        );
+      })}
+    </>
   );
 }
 
@@ -130,4 +99,27 @@ const Starfield = () => {
     });
 
     return <div className="absolute inset-0 z-0">{stars}</div>
+}
+
+
+export function Background() {
+  const { backgroundEffects, theme } = useTheme();
+
+  return (
+    <div className="fixed inset-0 -z-10 h-full w-full overflow-hidden">
+      {backgroundEffects.blobs && (
+        <div className="absolute inset-0 transition-opacity duration-1000 opacity-100">
+          <AnimatedBlobs />
+        </div>
+      )}
+      
+      {!backgroundEffects.blobs && (
+         <div className="absolute inset-0 transition-opacity duration-1000 opacity-100">
+          <div className="absolute bottom-0 left-0 right-0 top-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-20"></div>
+        </div>
+      )}
+
+      {backgroundEffects.starfield && theme === 'dark' && <Starfield />}
+    </div>
+  );
 }
