@@ -14,7 +14,7 @@ interface Category {
 }
 
 const categoriesConfig = [
-  { title: "Trending This Week", fetcher: () => getTrending("all", "week"), slice: 1 },
+  { title: "Trending This Week", fetcher: () => getTrending("all", "week") },
   { title: "Upcoming Movies", fetcher: () => getUpcoming("movie") },
   { title: "Popular Movies", fetcher: () => getPopular("movie") },
   { title: "Top Rated Movies", fetcher: () => getTopRated("movie") },
@@ -30,23 +30,21 @@ const categoriesConfig = [
 
 export default async function Home() {
   let trendingItems: Media[] = [];
-  let otherCategories: Category[] = [];
+  let categories: Category[] = [];
   let error: string | null = null;
   
   try {
-    const results = await Promise.allSettled([
-      categoriesConfig[0].fetcher(),
-      ...categoriesConfig.slice(1).map(c => c.fetcher())
-    ]);
+    const results = await Promise.allSettled(categoriesConfig.map(c => c.fetcher()));
 
-    if (results[0].status === 'fulfilled') {
-      trendingItems = results[0].value;
+    const trendingResult = results[0];
+    if (trendingResult.status === 'fulfilled') {
+      trendingItems = trendingResult.value;
     } else {
-      console.error('Failed to fetch trending:', results[0].reason);
+      console.error('Failed to fetch trending:', trendingResult.reason);
       throw new Error("Failed to fetch trending data.");
     }
-    
-    otherCategories = results.slice(1).map((result, index) => {
+
+    categories = results.slice(1).map((result, index) => {
         const config = categoriesConfig[index + 1];
         if (result.status === 'fulfilled') {
             return { title: config.title, items: result.value };
@@ -102,7 +100,7 @@ export default async function Home() {
             {trendingItems.length > 1 && (
               <MediaCarousel title="Trending This Week" items={trendingItems.slice(1)} />
             )}
-            {otherCategories.map((category) => (
+            {categories.map((category) => (
               <MediaCarousel key={category.title} title={category.title} items={category.items} />
             ))}
           </div>
