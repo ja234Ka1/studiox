@@ -8,6 +8,8 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
 } from "@/components/ui/carousel";
 import { motion } from "framer-motion";
 
@@ -22,7 +24,7 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
   }
 
   return (
-    <section className="text-left w-full">
+    <section className="text-left w-full group">
       <h2 className="text-2xl font-bold mb-4 px-4 md:px-8">{title}</h2>
       
       <Carousel
@@ -36,7 +38,7 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
           {items.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
-              className="basis-1/3 sm:basis-1/4 md:basis-1/5 lg:basis-1/6 xl:basis-1/7 2xl:basis-[11%] pl-4 pr-2"
+              className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 2xl:basis-1/7 pl-4 pr-2"
             >
               <motion.div layout>
                 <MediaCard item={item} />
@@ -44,6 +46,8 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
             </CarouselItem>
           ))}
         </CarouselContent>
+        <CarouselPrevious className="opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <CarouselNext className="opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </Carousel>
     </section>
   );

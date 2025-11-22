@@ -5,8 +5,10 @@ import * as React from "react"
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react"
+import { ArrowLeft, ArrowRight } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 
 type CarouselApi = UseEmblaCarouselType[1]
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>
@@ -156,12 +158,12 @@ const CarouselContent = React.forwardRef<
   const { carouselRef, orientation } = useCarousel()
 
   return (
-    <div ref={carouselRef} className="overflow-hidden px-4 md:px-8">
+    <div ref={carouselRef} className="overflow-hidden">
       <div
         ref={ref}
         className={cn(
           "flex",
-          orientation === "horizontal" ? "" : "-mt-4 flex-col",
+          orientation === "horizontal" ? "px-4 md:px-8" : "-mt-4 flex-col px-0",
           className
         )}
         {...props}
@@ -196,7 +198,7 @@ CarouselItem.displayName = "CarouselItem"
 const CarouselPrevious = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<typeof Button>
->(({ className, variant = "outline", size = "icon", ...props }, ref) => {
+>(({ className, variant = "secondary", size = "icon", ...props }, ref) => {
   const { scrollPrev, canScrollPrev } = useCarousel()
 
   return (
@@ -206,7 +208,8 @@ const CarouselPrevious = React.forwardRef<
       size={size}
       className={cn(
         "absolute rounded-full h-12 w-12",
-        "left-0 top-1/2 -translate-y-1/2 z-10",
+        "left-4 top-1/2 -translate-y-1/2 z-10",
+        "hover:scale-110 transition-transform",
         className
       )}
       disabled={!canScrollPrev}
@@ -223,7 +226,7 @@ CarouselPrevious.displayName = "CarouselPrevious"
 const CarouselNext = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<typeof Button>
->(({ className, variant = "outline", size = "icon", ...props }, ref) => {
+>(({ className, variant = "secondary", size = "icon", ...props }, ref) => {
   const { scrollNext, canScrollNext } = useCarousel()
 
   return (
@@ -233,7 +236,8 @@ const CarouselNext = React.forwardRef<
       size={size}
       className={cn(
         "absolute rounded-full h-12 w-12",
-        "right-0 top-1/2 -translate-y-1/2 z-10",
+        "right-4 top-1/2 -translate-y-1/2 z-10",
+        "hover:scale-110 transition-transform",
         className
       )}
       disabled={!canScrollNext}
@@ -255,5 +259,3 @@ export {
   CarouselPrevious,
   CarouselNext,
 }
-export { Button } from "@/components/ui/button"
-export { ArrowLeft, ArrowRight } from "lucide-react"
