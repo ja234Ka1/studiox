@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { getStreams, getChannels } from "@/lib/iptv-api";
 import type { IptvChannel, IptvStream } from "@/types/tmdb";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -69,31 +69,36 @@ export default function LiveStreamPage() {
 
   return (
     <div 
-      className="relative w-screen h-screen bg-black group"
+      className="relative w-screen h-screen bg-black"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: isHovered ? 1 : 0 }}
-            transition={{ duration: 0.3 }}
-            className="absolute top-4 left-4 z-20 flex gap-2 items-center"
-        >
-            <Button
-                variant="secondary"
-                size="icon"
-                onClick={() => router.back()}
-                className="rounded-full h-12 w-12"
+        <AnimatePresence>
+        {isHovered && (
+            <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="absolute top-4 left-4 z-20 flex gap-2 items-center"
             >
-                <ArrowLeft className="w-6 h-6" />
-                <span className="sr-only">Go back</span>
-            </Button>
-            {channel && (
-                <div className="bg-background/80 backdrop-blur-sm p-2 px-4 rounded-lg">
-                    <h1 className="font-bold text-lg">{channel.name}</h1>
-                </div>
-            )}
-        </motion.div>
+                <Button
+                    variant="secondary"
+                    size="icon"
+                    onClick={() => router.back()}
+                    className="rounded-full h-12 w-12"
+                >
+                    <ArrowLeft className="w-6 h-6" />
+                    <span className="sr-only">Go back</span>
+                </Button>
+                {channel && (
+                    <div className="bg-background/80 backdrop-blur-sm p-2 px-4 rounded-lg">
+                        <h1 className="font-bold text-lg">{channel.name}</h1>
+                    </div>
+                )}
+            </motion.div>
+        )}
+        </AnimatePresence>
 
         {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center">
