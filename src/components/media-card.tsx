@@ -59,15 +59,15 @@ export function MediaCard({ item }: MediaCardProps) {
   };
   
   return (
-    <motion.div
-      layout
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
-      className="relative aspect-[2/3] w-full rounded-md overflow-hidden bg-card shadow-md cursor-pointer group"
-      whileHover={{ scale: 1.05, zIndex: 10 }}
-      transition={{ duration: 0.3 }}
-    >
-      <LoadingLink href={detailPath} className="absolute inset-0 z-0">
+    <LoadingLink href={detailPath} className="w-full h-full">
+        <motion.div
+        layout
+        onHoverStart={() => setIsHovered(true)}
+        onHoverEnd={() => setIsHovered(false)}
+        className="relative aspect-[2/3] w-full rounded-md overflow-hidden bg-card shadow-md cursor-pointer group"
+        whileHover={{ scale: 1.05, zIndex: 10 }}
+        transition={{ duration: 0.3 }}
+        >
         <Image
             src={posterUrl!}
             alt={title || "Media"}
@@ -76,39 +76,39 @@ export function MediaCard({ item }: MediaCardProps) {
             className="object-cover"
             data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
         />
-      </LoadingLink>
 
-      <AnimatePresence>
-        {isHovered && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="absolute inset-0 p-3 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10"
-          >
-            <h3 className="text-white font-bold text-base truncate mb-2">{title}</h3>
-            <div className="flex items-center text-xs text-muted-foreground mb-3 gap-2">
-                <div className="flex items-center gap-1 text-amber-400">
-                    <Star className="w-3 h-3 fill-current"/>
-                    <span>{item.vote_average.toFixed(1)}</span>
+        <AnimatePresence>
+            {isHovered && (
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="absolute inset-0 p-3 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent"
+            >
+                <h3 className="text-white font-bold text-base truncate mb-2">{title}</h3>
+                <div className="flex items-center text-xs text-muted-foreground mb-3 gap-2">
+                    <div className="flex items-center gap-1 text-amber-400">
+                        <Star className="w-3 h-3 fill-current"/>
+                        <span>{item.vote_average.toFixed(1)}</span>
+                    </div>
+                    <span>•</span>
+                    <span>{year}</span>
                 </div>
-                <span>•</span>
-                <span>{year}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button size="icon" className="h-8 w-8 rounded-full" asChild>
-                  <LoadingLink href={detailPath}>
-                    <PlayCircle className="w-4 h-4" />
-                  </LoadingLink>
-              </Button>
-              <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full" onClick={handleWatchlistToggle}>
-                {isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-              </Button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+                <div className="flex items-center gap-2">
+                <Button size="icon" className="h-8 w-8 rounded-full" asChild>
+                    <LoadingLink href={detailPath}>
+                        <PlayCircle className="w-4 h-4" />
+                    </LoadingLink>
+                </Button>
+                <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full" onClick={handleWatchlistToggle}>
+                    {isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                </Button>
+                </div>
+            </motion.div>
+            )}
+        </AnimatePresence>
+        </motion.div>
+    </LoadingLink>
   );
 }
