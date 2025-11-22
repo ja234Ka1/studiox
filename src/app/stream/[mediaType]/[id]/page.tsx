@@ -7,7 +7,7 @@ import type { MediaType } from "@/types/tmdb";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
-import { useTheme } from "@/context/theme-provider";
+import { useTheme, type StreamSource } from "@/context/theme-provider";
 import { getMediaDetails } from "@/lib/tmdb";
 
 const vidfastOrigins = [
@@ -19,6 +19,29 @@ const vidfastOrigins = [
     'https://vidfast.pm',
     'https://vidfast.xyz'
 ];
+
+const sourceConfig: Record<StreamSource, { movie: string, tv: string, origin: string | string[] }> = {
+    Prime: {
+        movie: 'https://vidfast.pro/movie/{id}',
+        tv: 'https://vidfast.pro/tv/{id}/{season}/{episode}',
+        origin: vidfastOrigins,
+    },
+    Elite: {
+        movie: 'https://player.vidify.top/embed/movie/{id}',
+        tv: 'https://player.vidify.top/embed/tv/{id}?s={season}&e={episode}',
+        origin: 'https://player.vidify.top',
+    },
+    Vision: { // Assuming a third source might follow vidfast structure
+        movie: 'https://vidfast.net/movie/{id}',
+        tv: 'https://vidfast.net/tv/{id}/{season}/{episode}',
+        origin: 'https://vidfast.net',
+    },
+    Infinity: { // Assuming a fourth source might follow vidify structure
+        movie: 'https://vidify.net/embed/movie/{id}',
+        tv: 'https://vidify.net/embed/tv/{id}?s={season}&e={episode}',
+        origin: 'https://vidify.net',
+    }
+}
 
 export default function StreamPage() {
   const params = useParams<{ mediaType: MediaType; id: string }>();
@@ -45,7 +68,8 @@ export default function StreamPage() {
         console.error("Failed to parse progress data from localStorage", e);
     }
 
-    const details = await getMediaDetails(parseInt(mediaId), mediaType);
+    const numericId = parseInt(id, 10);
+    const details = await getMediaDetails(numericId, mediaType);
     
     let progressData: any = {
       ...existingData,
@@ -59,19 +83,23 @@ export default function StreamPage() {
       watched_percentage: (currentTime / duration) * 100,
     };
     
-    if (mediaType === 'tv') {
+    if (mediaType === 'tv' && details.seasons) {
+        const seasonData = details.seasons.find(s => s.season_number === parseInt(season!));
+        if (seasonData) {
+             const episodeData = seasonData.episodes.find(e => e.episode_number === parseInt(episode!));
+             progressData.episodeTitle = episodeData?.name;
+        }
         progressData = {
             ...progressData,
             season: season,
             episode: episode,
-            episodeTitle: details.seasons?.find(s => s.season_number === parseInt(season!))?.name, // This is not quite right
         };
     }
 
     localStorage.setItem(progressKey, JSON.stringify(progressData));
     window.dispatchEvent(new CustomEvent('vidify-progress-change'));
 
-  }, [mediaType, season, episode]);
+  }, [mediaType, season, episode, id]);
   
 
   useEffect(() => {
@@ -83,7 +111,8 @@ export default function StreamPage() {
       }
       
       // Vidify handler
-      if (event.origin === 'https://player.vidify.top' && event.data?.type === 'WATCH_PROGRESS') {
+      const vidifyOrigin = sourceConfig['Elite'].origin;
+      if (event.origin === vidifyOrigin && event.data?.type === 'WATCH_PROGRESS') {
         handleVidifyProgress(event.data.data);
       }
     };
@@ -105,35 +134,39 @@ export default function StreamPage() {
   }
 
   const getStreamUrl = () => {
-    if (streamSource === 'vidify') {
-        const vidifyUrl = mediaType === 'tv' && season && episode
-            ? `https://player.vidify.top/embed/tv/${id}?s=${season}&e=${episode}`
-            : `https://player.vidify.top/embed/movie/${id}`;
-        
-        const url = new URL(vidifyUrl);
-        url.searchParams.set('autoplay', 'true');
-        url.searchParams.set('poster', 'true');
-        url.searchParams.set('chromecast', 'false');
-        url.searchParams.set('servericon', 'true');
-        url.searchParams.set('setting', 'true');
-        url.searchParams.set('pip', 'false');
-        url.searchParams.set('download', 'true');
-        url.searchParams.set('logourl', 'https://i.ibb.co/67wTJd9R/pngimg-com-netflix-PNG11.png');
-        url.searchParams.set('font', 'Roboto');
-        url.searchParams.set('fontcolor', '6f63ff');
-        url.searchParams.set('fontsize', '20');
-        url.searchParams.set('opacity', '0.5');
-        url.searchParams.set('primarycolor', 'fdfff5');
-        url.searchParams.set('secondarycolor', '000000');
-        url.searchParams.set('iconcolor', 'c2c2c2');
-        
-        return url.toString();
-    }
+    const source = sourceConfig[streamSource];
+    let urlTemplate: string;
 
-    // Default to vidfast
-    return mediaType === 'tv' && season && episode
-      ? `https://vidfast.pro/tv/${id}/${season}/${episode}`
-      : `https://vidfast.pro/movie/${id}`;
+    if (mediaType === 'tv') {
+        urlTemplate = source.tv;
+        return urlTemplate.replace('{id}', id).replace('{season}', season || '1').replace('{episode}', episode || '1');
+    }
+    
+    urlTemplate = source.movie;
+    let url = urlTemplate.replace('{id}', id);
+
+    // Append vidify-specific params
+    if (source.origin.includes('vidify')) {
+        const urlObj = new URL(url);
+        urlObj.searchParams.set('autoplay', 'true');
+        urlObj.searchParams.set('poster', 'true');
+        urlObj.searchParams.set('chromecast', 'false');
+        urlObj.searchParams.set('servericon', 'true');
+        urlObj.searchParams.set('setting', 'true');
+        urlObj.searchParams.set('pip', 'false');
+        urlObj.searchParams.set('download', 'true');
+        urlObj.searchParams.set('logourl', 'https://i.ibb.co/67wTJd9R/pngimg-com-netflix-PNG11.png');
+        urlObj.searchParams.set('font', 'Roboto');
+        urlObj.searchParams.set('fontcolor', '6f63ff');
+        urlObj.searchParams.set('fontsize', '20');
+        urlObj.searchParams.set('opacity', '0.5');
+        urlObj.searchParams.set('primarycolor', 'fdfff5');
+        urlObj.searchParams.set('secondarycolor', '000000');
+        urlObj.searchParams.set('iconcolor', 'c2c2c2');
+        return urlObj.toString();
+    }
+    
+    return url;
   }
 
   const streamUrl = getStreamUrl();

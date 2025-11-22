@@ -9,7 +9,7 @@ type BackgroundEffects = {
   starfield: boolean;
 };
 
-type StreamSource = "vidfast" | "vidify";
+export type StreamSource = "Prime" | "Elite" | "Vision" | "Infinity";
 
 type CustomThemeProviderProps = {
   children: React.ReactNode;
@@ -51,7 +51,7 @@ export function ThemeProvider({
   const [blobSpeed, setBlobSpeed] = useLocalStorage<number>("willow-blob-speed", 30);
   const [dataSaver, setDataSaver] = useLocalStorage<boolean>("willow-data-saver", false);
   const [radius, setRadius] = useLocalStorage<number>("willow-radius", 1.0);
-  const [streamSource, setStreamSource] = useLocalStorage<StreamSource>("willow-stream-source", "vidfast");
+  const [streamSource, setStreamSource] = useLocalStorage<StreamSource>("willow-stream-source", "Prime");
   
   const [isMounted, setIsMounted] = React.useState(false);
 
