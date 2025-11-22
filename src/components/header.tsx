@@ -63,8 +63,8 @@ export function Header() {
             </SheetTrigger>
             <SheetContent side="left" className="pr-0">
               <LoadingLink href="/" className="mr-6 flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
-                <Image src="https://upload.wikimedia.org/wikipedia/commons/7/7a/A-symmetrical-silhouette-of-a-tree-with-many-branches-and-leaves-cutouts-png.svg" alt="Willow logo" width={32} height={32} className="h-8 w-8 filter-glow" />
-                <span className="font-bold sm:inline-block text-xl">Willow</span>
+                <Image src="https://upload.wikimedia.org/wikipedia/commons/7/7a/A-symmetrical-silhouette-of-a-tree-with-many-branches-and-leaves-cutouts-png.svg" alt="Willow logo" width={40} height={40} className="h-10 w-10 filter-glow" />
+                <span className="font-bold sm:inline-block text-2xl">Willow</span>
               </LoadingLink>
               <div className="flex flex-col space-y-2 mt-6">
                   {navItems.map((item) => (
@@ -91,8 +91,8 @@ export function Header() {
           </Sheet>
 
           <LoadingLink href="/" className="mr-6 flex items-center space-x-2">
-            <Image src="https://upload.wikimedia.org/wikipedia/commons/7/7a/A-symmetrical-silhouette-of-a-tree-with-many-branches-and-leaves-cutouts-png.svg" alt="Willow logo" width={32} height={32} className="h-8 w-8 filter-glow" />
-            <span className="hidden font-bold sm:inline-block text-xl">Willow</span>
+            <Image src="https://upload.wikimedia.org/wikipedia/commons/7/7a/A-symmetrical-silhouette-of-a-tree-with-many-branches-and-leaves-cutouts-png.svg" alt="Willow logo" width={40} height={40} className="h-10 w-10 filter-glow" />
+            <span className="hidden font-bold sm:inline-block text-2xl">Willow</span>
           </LoadingLink>
           <nav className="hidden md:flex items-center space-x-1">
             {navItems.map((item) => (
