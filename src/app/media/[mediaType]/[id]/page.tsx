@@ -1,4 +1,5 @@
 
+
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { getMediaDetails } from "@/lib/tmdb";
