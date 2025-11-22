@@ -24,6 +24,8 @@ export function Header() {
   const pathname = usePathname();
   const router = useRouter();
 
+  const isStreamPage = pathname.startsWith('/stream');
+
   useEffect(() => {
     const handleScroll = () => {
       if (pathname.startsWith('/stream')) {
@@ -47,12 +49,15 @@ export function Header() {
     }
   };
 
+  if (isStreamPage) {
+    return null;
+  }
+
   return (
     <header
       className={cn(
         "sticky top-0 z-50 w-full transition-all duration-300",
-        isScrolled ? "bg-background/80 backdrop-blur-sm border-b border-border" : "bg-transparent",
-        pathname.startsWith('/stream') && "bg-background/95 backdrop-blur-sm border-b border-border"
+        isScrolled ? "bg-background/80 backdrop-blur-sm border-b border-border" : "bg-transparent"
       )}
     >
       <div className="container flex h-16 items-center px-4 md:px-8 mx-auto">

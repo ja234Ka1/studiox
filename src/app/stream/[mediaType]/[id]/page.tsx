@@ -1,11 +1,8 @@
 
 'use client'
 
-import { notFound, useSearchParams } from "next/navigation";
+import { notFound } from "next/navigation";
 import type { MediaType } from "@/types/tmdb";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 type Props = {
@@ -17,7 +14,6 @@ type Props = {
 
 export default function StreamPage({ params }: Props) {
   const { mediaType, id } = params;
-  const searchParams = useSearchParams();
   const fullscreenRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -26,6 +22,19 @@ export default function StreamPage({ params }: Props) {
         console.error("Error attempting to enable full-screen mode:", err.message);
       });
     }
+
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement) {
+        // User exited fullscreen, so we can navigate back
+        window.history.back();
+      }
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
   }, []);
 
   if (mediaType !== "tv" && mediaType !== "movie") {
@@ -36,35 +45,19 @@ export default function StreamPage({ params }: Props) {
   if (isNaN(numericId)) {
     notFound();
   }
-  
-  const title = searchParams.get('title') || 'Stream';
 
   const streamUrl = mediaType === 'tv'
     ? `https://cinemaos.tech/player/${id}/1/1`
     : `https://cinemaos.tech/player/${id}`;
-    
-  const itemTitle = mediaType === 'tv'
-    ? `${title} - S1 E1`
-    : title;
 
   return (
-    <div ref={fullscreenRef} className="w-full h-full flex flex-col pt-16 bg-background">
-       <div className="container px-4 md:px-8 mx-auto py-4 flex items-center justify-between">
-        <Button asChild variant="ghost">
-          <Link href={`/media/${mediaType}/${id}`}>
-            <ArrowLeft className="mr-2" /> Back to details
-          </Link>
-        </Button>
-        <h1 className="text-xl font-bold truncate">{itemTitle}</h1>
-      </div>
-      <div className="w-full flex-1 aspect-video bg-black">
-        <iframe
-            src={streamUrl}
-            allow="autoplay; fullscreen"
-            allowFullScreen
-            className="w-full h-full border-0"
-        />
-      </div>
+    <div ref={fullscreenRef} className="w-screen h-screen bg-black">
+      <iframe
+          src={streamUrl}
+          allow="autoplay; fullscreen"
+          allowFullScreen
+          className="w-full h-full border-0"
+      />
     </div>
   );
 }
