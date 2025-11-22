@@ -28,7 +28,7 @@ const LoadingLink = ({ children, href, className, ...props }: LoadingLinkProps) 
   };
 
   return (
-    <Link href={href} onClick={handleClick} className={className} {...props}>
+    <Link href={href} onClick={handleClick} className={className} scroll={false} {...props}>
       {children}
     </Link>
   );
