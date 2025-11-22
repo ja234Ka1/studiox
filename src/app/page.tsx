@@ -95,7 +95,7 @@ export default async function Home() {
         {error && (
           <div className="container mx-auto px-4 md:px-8">
             <Alert variant="destructive" className="text-left">
-                <Clapperboard className="h-4 w-4" />
+                <Image src="https://upload.wikimedia.org/wikipedia/commons/7/7a/A-symmetrical-silhouette-of-a-tree-with-many-branches-and-leaves-cutouts-png.svg" alt="Willow logo" width={16} height={16} className="h-4 w-4" />
                 <AlertTitle>Error Loading Content</AlertTitle>
                 <AlertDescription>
                     {error} Please make sure your TMDB API key is correct and try again later.

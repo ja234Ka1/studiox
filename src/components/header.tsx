@@ -2,8 +2,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Clapperboard, Film, List, Menu, Search, Settings, Server, Tv } from "lucide-react";
+import { Film, List, Menu, Search, Settings, Server, Tv } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import Image from "next/image";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -62,7 +63,7 @@ export function Header() {
             </SheetTrigger>
             <SheetContent side="left" className="pr-0">
               <LoadingLink href="/" className="mr-6 flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
-                <Clapperboard className="h-6 w-6 text-accent" />
+                <Image src="https://upload.wikimedia.org/wikipedia/commons/7/7a/A-symmetrical-silhouette-of-a-tree-with-many-branches-and-leaves-cutouts-png.svg" alt="Willow logo" width={24} height={24} className="h-6 w-6 text-accent" />
                 <span className="font-bold sm:inline-block text-lg">Willow</span>
               </LoadingLink>
               <div className="flex flex-col space-y-2 mt-6">
@@ -90,7 +91,7 @@ export function Header() {
           </Sheet>
 
           <LoadingLink href="/" className="mr-6 flex items-center space-x-2">
-            <Clapperboard className="h-6 w-6 text-accent" />
+            <Image src="https://upload.wikimedia.org/wikipedia/commons/7/7a/A-symmetrical-silhouette-of-a-tree-with-many-branches-and-leaves-cutouts-png.svg" alt="Willow logo" width={24} height={24} className="h-6 w-6 text-accent" />
             <span className="hidden font-bold sm:inline-block text-lg">Willow</span>
           </LoadingLink>
           <nav className="hidden md:flex items-center space-x-1">
