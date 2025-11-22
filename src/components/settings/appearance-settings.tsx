@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const themes = [
-  { name: "light", label: "Light", icon: Sun, accentColor: "hsl(45 90% 55%)" },
+  { name: "light", label: "Willow Light", icon: Sun, accentColor: "hsl(45 90% 55%)" },
   { name: "dark", label: "Willow", icon: Moon, accentColor: "hsl(0 0% 100%)" },
   { name: "theme-rose", label: "Rose", accentColor: "hsl(346.8 77.2% 49.8%)" },
 ];
@@ -109,5 +109,3 @@ export function AppearanceSettings() {
     </div>
   );
 }
-
-    
