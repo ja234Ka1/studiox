@@ -76,14 +76,14 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
           {items.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
-              className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 pl-20 pr-4 group"
+              className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 pl-28 pr-4 group"
             >
               <motion.div
                 className="relative flex items-center"
                 layout
                 variants={itemVariants}
               >
-                <span className="absolute -left-32 bottom-0 text-[16rem] font-black text-transparent text-outline leading-none select-none z-0 transition-all duration-300 group-hover:scale-105 group-hover:text-glow">
+                <span className="absolute -left-40 bottom-0 text-[16rem] font-black text-transparent text-outline leading-none select-none z-0 transition-all duration-300 group-hover:scale-105 group-hover:text-glow">
                   {index + 1}
                 </span>
                 <div className="relative z-10 w-full">
@@ -99,4 +99,5 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
     </motion.section>
   );
 }
+
 
