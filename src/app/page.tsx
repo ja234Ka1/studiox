@@ -10,6 +10,7 @@ import type { Media } from "@/types/tmdb";
 import VidfastContinueWatching from "@/components/vidfast-continue-watching";
 import TopTenCarousel from "@/components/top-ten-carousel";
 import VidifyContinueWatching from "@/components/vidify-continue-watching";
+import PlatformCarousel from "@/components/platform-carousel";
 
 interface Category {
   title: string;
@@ -115,6 +116,7 @@ export default async function Home() {
             {categories.map((category) => (
               <MediaCarousel key={category.title} title={category.title} items={category.items} />
             ))}
+            <PlatformCarousel />
           </div>
         )}
       </div>
