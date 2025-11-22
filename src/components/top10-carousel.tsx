@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -58,8 +59,8 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
         variants={itemVariants}
       >
         <div className="flex items-center gap-4">
-          <span className="text-5xl font-black tracking-tighter text-transparent text-outline-blue">TOP</span>
-          <span className="text-5xl font-black tracking-tighter text-blue-400 text-glow-blue">10</span>
+          <span className="text-7xl font-black tracking-tighter text-transparent text-outline">TOP</span>
+          <span className="text-7xl font-black tracking-tighter text-accent text-glow">10</span>
           <div className="flex flex-col leading-tight -mt-1">
             <span className="text-lg font-bold">MOVIES</span>
             <span className="text-sm text-muted-foreground">TODAY</span>
@@ -78,7 +79,7 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
           {items.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
-              className="basis-2/5 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 pl-24 pr-8 group"
+              className="basis-2/5 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 pl-24 pr-12 group"
             >
               <motion.div
                 className="relative flex items-center"
