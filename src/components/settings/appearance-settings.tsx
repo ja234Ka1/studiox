@@ -13,9 +13,6 @@ const themes = [
   { name: "light", label: "Light", icon: Sun, accentColor: "hsl(45 90% 55%)" },
   { name: "dark", label: "Willow", icon: Moon, accentColor: "hsl(0 0% 100%)" },
   { name: "theme-rose", label: "Rose", accentColor: "hsl(346.8 77.2% 49.8%)" },
-  { name: "theme-blue", label: "Blue", accentColor: "hsl(217.2 91.2% 59.8%)" },
-  { name: "theme-green", label: "Green", accentColor: "hsl(142.1 76.2% 36.3%)" },
-  { name: "theme-orange", label: "Orange", accentColor: "hsl(25.3 92.5% 53.1%)" },
 ];
 
 export function AppearanceSettings() {
