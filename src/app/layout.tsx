@@ -20,10 +20,6 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 function ThemedBodyContent({ children }: { children: ReactNode }) {
   const { radius } = useTheme();
 
-  // This component's purpose is to apply styles to the parent body
-  // We can't put the body tag here, as it needs to be in the root layout
-  // We can instead apply a data-theme attribute or similar if needed,
-  // but for now, we apply style variables to the root element.
   React.useEffect(() => {
     document.documentElement.style.setProperty('--radius', `${radius}rem`);
   }, [radius]);
