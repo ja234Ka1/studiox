@@ -69,7 +69,7 @@ export function ThemeProvider({
     const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     const resolvedTheme = isSystem ? systemTheme : newTheme;
     
-    root.classList.remove("light", "dark", "theme-rose", "theme-blue", "theme-green", "theme-orange");
+    root.classList.remove("light", "dark", "theme-rose");
     
     if (resolvedTheme !== 'system') {
         root.classList.add(resolvedTheme);
@@ -116,14 +116,13 @@ export function ThemeProvider({
     setBackgroundEffects,
   };
 
-  // During server-side rendering and the initial client render, we don't know the
-  // real theme yet. To prevent hydration mismatches, we can render null or a
-  // placeholder. But a better user experience is to just render the children.
-  // The theme will be applied in the useEffect.
-  // We add the theme as a key to force re-render when it changes.
+  if (!isMounted) {
+    return null;
+  }
+  
   return (
     <ThemeProviderContext.Provider value={value}>
-      <div key={isMounted ? theme : 'initial'}>{children}</div>
+      <div key={theme}>{children}</div>
     </ThemeProviderContext.Provider>
   )
 }
