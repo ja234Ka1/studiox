@@ -21,17 +21,17 @@ export function AppearanceSettings() {
   const { theme, setTheme, backgroundEffects, setBackgroundEffects } = useTheme();
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Appearance</CardTitle>
-        <CardDescription>
-          Customize the look and feel of the application.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
+    <div className="space-y-6">
+       <div>
+        <h3 className="text-lg font-medium">Appearance</h3>
+        <p className="text-sm text-muted-foreground">
+          Customize the look and feel of your application.
+        </p>
+      </div>
+      <div className="space-y-6">
         <div className="space-y-2">
           <Label>Color Scheme</Label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {themes.map((t) => (
               <Button
                 key={t.name}
@@ -107,7 +107,7 @@ export function AppearanceSettings() {
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
