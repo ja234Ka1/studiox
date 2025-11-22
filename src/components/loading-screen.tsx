@@ -27,18 +27,6 @@ export default function LoadingScreen() {
     },
   };
 
-  const waveVariants = {
-    hidden: { y: "100%" },
-    visible: {
-      y: "0%",
-      transition: {
-        duration: 1.5,
-        ease: "easeInOut",
-        delay: 0.2,
-      },
-    },
-  };
-
   return (
     <AnimatePresence>
       {isLoading && (
@@ -73,17 +61,17 @@ export default function LoadingScreen() {
             {/* The SVG mask definition, which contains the animating wave */}
             <svg style={{ width: 0, height: 0, position: "absolute" }}>
               <defs>
-                <clipPath id="liquid-mask">
+                <clipPath id="liquid-mask" clipPathUnits="objectBoundingBox">
                   <motion.path
                     initial={{
-                      d: "M0,200 Q200,200 400,200 L400,200 L0,200 Z"
+                      d: "M 0,1 C 0.3,1 0.7,1 1,1 V 1 H 0 Z"
                     }}
                     animate={{
-                      d: "M0,100 Q200,50 400,100 L400,200 L0,200 Z"
+                      d: "M 0,0.1 C 0.3,0 0.7,0.2 1,0.1 V 1 H 0 Z"
                     }}
                     transition={{
-                      duration: 2,
-                      ease: "easeInOut",
+                      duration: 1.5,
+                      ease: "easeOut",
                       repeat: Infinity,
                       repeatType: "mirror",
                     }}
@@ -96,9 +84,13 @@ export default function LoadingScreen() {
              <div className="absolute inset-0 z-10"
                 style={{
                     maskImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%'><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='8rem' font-weight='900' letter-spacing='0.05em' fill='white'>${brandName}</text></svg>")`,
+                    WebkitMaskImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%'><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='8rem' font-weight='900' letter-spacing='0.05em' fill='white'>${brandName}</text></svg>")`,
                     maskSize: '100% 100%',
+                    WebkitMaskSize: '100% 100%',
                     maskRepeat: 'no-repeat',
+                    WebkitMaskRepeat: 'no-repeat',
                     maskPosition: 'center',
+                    WebkitMaskPosition: 'center',
                 }}
              >
                 <motion.div 
