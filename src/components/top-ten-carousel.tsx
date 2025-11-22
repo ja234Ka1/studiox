@@ -74,11 +74,11 @@ export default function TopTenCarousel({ items }: TopTenCarouselProps) {
         }}
         className="w-full"
       >
-        <CarouselContent className="-ml-8">
+        <CarouselContent className="-ml-16">
           {items.map((item, index) => (
             <CarouselItem
               key={item.id}
-              className="basis-[45%] sm:basis-[30%] md:basis-[25%] lg:basis-[20%] xl:basis-[18%] pl-8"
+              className="basis-[45%] sm:basis-[30%] md:basis-[25%] lg:basis-[20%] xl:basis-[18%] pl-16"
             >
               <motion.div layout variants={itemVariants}>
                 <TopTenCard item={item} rank={index} />
