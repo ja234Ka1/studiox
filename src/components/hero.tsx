@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Info } from "lucide-react";
+import { Info, PlayCircle, Plus, Check } from "lucide-react";
 import { useState, useEffect } from "react";
 
 import type { Media } from "@/types/tmdb";
@@ -11,6 +11,8 @@ import { getTmdbImageUrl } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import LoadingLink from "./loading-link";
+import { useToast } from "@/hooks/use-toast";
+import { addToWatchlist, getWatchlist, removeFromWatchlist } from "@/lib/userData";
 
 interface HeroProps {
   items: Media[];
@@ -18,6 +20,10 @@ interface HeroProps {
 
 export function Hero({ items }: HeroProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isInWatchlist, setIsInWatchlist] = useState(false);
+  const { toast } = useToast();
+
+  const item = items[currentIndex];
 
   useEffect(() => {
     if (items.length <= 1) return;
@@ -28,14 +34,40 @@ export function Hero({ items }: HeroProps) {
 
     return () => clearInterval(timer);
   }, [items.length]);
+  
+  useEffect(() => {
+    if (!item) return;
+    
+    const watchlist = getWatchlist();
+    setIsInWatchlist(watchlist.some(watchlistItem => watchlistItem.id === item.id));
 
-  const item = items[currentIndex];
+    const handleWatchlistChange = () => {
+      const updatedWatchlist = getWatchlist();
+      setIsInWatchlist(updatedWatchlist.some(watchlistItem => watchlistItem.id === item.id));
+    };
+
+    window.addEventListener('willow-watchlist-change', handleWatchlistChange);
+    return () => window.removeEventListener('willow-watchlist-change', handleWatchlistChange);
+  }, [item]);
+
+
   if (!item) return null;
 
   const title = item.title || item.name;
   const releaseDate = item.release_date || item.first_air_date;
   const year = releaseDate ? new Date(releaseDate).getFullYear() : 'N/A';
   const detailPath = `/media/${item.media_type}/${item.id}`;
+
+  const handleWatchlistToggle = () => {
+    const itemToAdd = { ...item, media_type: item.media_type || (item.title ? 'movie' : 'tv') };
+    if (isInWatchlist) {
+      removeFromWatchlist(item.id);
+      toast({ title: `Removed from Watchlist`, description: `"${title}" has been removed.` });
+    } else {
+      addToWatchlist(itemToAdd);
+      toast({ title: 'Added to Watchlist', description: `"${title}" has been added.` });
+    }
+  };
 
   return (
     <div className="relative w-full h-[60vh] lg:h-[80vh] group">
@@ -87,12 +119,16 @@ export function Hero({ items }: HeroProps) {
             <p className="text-muted-foreground line-clamp-3 mb-8">
                 {item.overview}
             </p>
-            <div className="flex gap-4">
+            <div className="flex items-center gap-4">
                 <Button size="lg" asChild>
-                <LoadingLink href={detailPath}>
-                    <Info className="mr-2" />
-                    More Info
-                </LoadingLink>
+                    <LoadingLink href={detailPath}>
+                        <PlayCircle className="mr-2" />
+                        Watch
+                    </LoadingLink>
+                </Button>
+                <Button size="lg" variant="secondary" onClick={handleWatchlistToggle}>
+                    {isInWatchlist ? <Check className="w-5 h-5 mr-2" /> : <Plus className="w-5 h-5 mr-2" />}
+                    {isInWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
                 </Button>
             </div>
             </motion.div>
