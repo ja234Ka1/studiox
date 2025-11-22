@@ -8,8 +8,6 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from "@/components/ui/carousel";
 import { motion } from "framer-motion";
 
@@ -46,8 +44,6 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="w-12 h-12" />
-        <CarouselNext className="w-12 h-12" />
       </Carousel>
     </section>
   );
