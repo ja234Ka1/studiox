@@ -7,6 +7,7 @@ import { getStreams, getImageUrl } from '@/lib/streamed-api';
 import type { StreamedStream, StreamedMatchWithEncodedSources, StreamedMatch } from '@/types/tmdb';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import Image from 'next/image';
 import { Loader2, AlertTriangle, Tv, ChevronLeft } from 'lucide-react';
