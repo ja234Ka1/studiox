@@ -16,6 +16,7 @@ const navItems = [
   { href: "/tv-shows", label: "Shows", icon: Tv },
   { href: "/movies", label: "Movies", icon: Film },
   { href: "/watchlist", label: "Watchlist", icon: List },
+  { href: "/live-tv", label: "Live TV", icon: Radio },
 ];
 
 export function Header() {
@@ -24,11 +25,11 @@ export function Header() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const isStreamPage = pathname.startsWith('/stream');
+  const isStreamPage = pathname.startsWith('/stream') || pathname.startsWith('/live-tv/');
 
   useEffect(() => {
     const handleScroll = () => {
-      if (pathname.startsWith('/stream')) {
+      if (isStreamPage) {
         setIsScrolled(true);
         return;
       }
@@ -38,7 +39,7 @@ export function Header() {
     handleScroll();
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [pathname]);
+  }, [pathname, isStreamPage]);
   
   const handleSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {

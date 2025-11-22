@@ -1,4 +1,5 @@
 
+
 export type MediaType = "movie" | "tv";
 export type TimeRange = "day" | "week";
 
@@ -139,4 +140,48 @@ export type Toast = {
   action?: React.ReactElement<any, string | React.JSXElementConstructor<any>>;
   imageUrl?: string;
   status?: "success" | "error" | "info";
+};
+
+
+// --- Streamed.pk API Types ---
+
+export interface StreamedSport {
+  id: string;
+  name: string;
+}
+
+export interface StreamedMatch {
+  id: string;
+  title: string;
+  category: string;
+  date: number;
+  poster?: string;
+  popular: boolean;
+  teams?: {
+    home?: {
+      name: string;
+      badge: string;
+    };
+    away?: {
+      name: string;
+      badge: string;
+    };
+  };
+  sources: {
+    source: string;
+    id: string;
+  }[];
+}
+
+export interface StreamedStream {
+  id: string;
+  streamNo: number;
+  language: string;
+  hd: boolean;
+  embedUrl: string;
+  source: string;
+}
+
+export type StreamedMatchWithEncodedSources = Omit<StreamedMatch, 'sources'> & {
+  sources: string; // JSON string of the sources array
 };
