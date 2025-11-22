@@ -31,16 +31,6 @@ const sourceConfig: Record<StreamSource, { movie: string, tv: string, origin: st
         tv: 'https://player.vidify.top/embed/tv/{id}?s={season}&e={episode}',
         origin: 'https://player.vidify.top',
     },
-    Vision: { // Assuming a third source might follow vidfast structure
-        movie: 'https://vidfast.net/movie/{id}',
-        tv: 'https://vidfast.net/tv/{id}/{season}/{episode}',
-        origin: 'https://vidfast.net',
-    },
-    Infinity: { // Assuming a fourth source might follow vidify structure
-        movie: 'https://vidify.net/embed/movie/{id}',
-        tv: 'https://vidify.net/embed/tv/{id}?s={season}&e={episode}',
-        origin: 'https://vidify.net',
-    }
 }
 
 export default function StreamPage() {

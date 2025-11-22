@@ -9,7 +9,7 @@ type BackgroundEffects = {
   starfield: boolean;
 };
 
-export type StreamSource = "Prime" | "Elite" | "Vision" | "Infinity";
+export type StreamSource = "Prime" | "Elite";
 
 type CustomThemeProviderProps = {
   children: React.ReactNode;

@@ -22,18 +22,6 @@ const sources: { id: StreamSource; name: string; description: string; icon: Reac
     description: "A reliable backup source.",
     icon: <Shield className="w-6 h-6" />,
   },
-  {
-    id: "Vision",
-    name: "Vision",
-    description: "A new third-party source.",
-    icon: <Gem className="w-6 h-6" />,
-  },
-  {
-    id: "Infinity",
-    name: "Infinity",
-    description: "A fourth-party source.",
-    icon: <Sparkles className="w-6 h-6" />,
-  },
 ];
 
 interface StreamSourceDialogProps {
