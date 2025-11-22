@@ -130,3 +130,11 @@ export interface PersonDetails {
         cast: Media[];
     };
 }
+
+export type Toast = {
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  variant?: "default" | "destructive";
+  action?: React.ReactElement<any, string | React.JSXElementConstructor<any>>;
+  imageUrl?: string;
+};

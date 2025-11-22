@@ -71,11 +71,19 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
   const handleWatchlistToggle = () => {
     if (isInWatchlist) {
       removeFromWatchlist(item.id);
-      toast({ title: `Removed from Watchlist`, description: `"${title}" has been removed.` });
+      toast({ 
+        title: `Removed from Watchlist`, 
+        description: `"${title}" has been removed.`,
+        imageUrl: getTmdbImageUrl(item.poster_path, 'w500'),
+      });
     } else {
       const itemToAdd = { ...item, media_type: item.media_type || (item.title ? 'movie' : 'tv') };
       addToWatchlist(itemToAdd);
-      toast({ title: 'Added to Watchlist', description: `"${title}" has been added.` });
+      toast({ 
+        title: 'Added to Watchlist', 
+        description: `"${title}" has been added.`,
+        imageUrl: getTmdbImageUrl(item.poster_path, 'w500'),
+      });
     }
   };
   

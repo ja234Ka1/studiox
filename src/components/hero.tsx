@@ -63,10 +63,18 @@ export function Hero({ items }: HeroProps) {
     const itemToAdd = { ...item, media_type: item.media_type || (item.title ? 'movie' : 'tv') };
     if (isInWatchlist) {
       removeFromWatchlist(item.id);
-      toast({ title: `Removed from Watchlist`, description: `"${title}" has been removed.` });
+      toast({ 
+        title: `Removed from Watchlist`, 
+        description: `"${title}" has been removed.`,
+        imageUrl: getTmdbImageUrl(item.poster_path, 'w500'),
+      });
     } else {
       addToWatchlist(itemToAdd);
-      toast({ title: 'Added to Watchlist', description: `"${title}" has been added.` });
+      toast({ 
+        title: 'Added to Watchlist', 
+        description: `"${title}" has been added.`,
+        imageUrl: getTmdbImageUrl(item.poster_path, 'w500'),
+      });
     }
   };
 
@@ -81,13 +89,15 @@ export function Hero({ items }: HeroProps) {
           transition={{ duration: 1.5, ease: "easeInOut" }}
           className="absolute inset-0"
         >
-            <Image
-            src={getTmdbImageUrl(item.backdrop_path, "original")}
-            alt={title || "Hero backdrop"}
-            fill
-            priority
-            className="object-cover"
-            />
+            <LoadingLink href={detailPath} className="block w-full h-full">
+              <Image
+                src={getTmdbImageUrl(item.backdrop_path, "original")}
+                alt={title || "Hero backdrop"}
+                fill
+                priority
+                className="object-cover"
+                />
+            </LoadingLink>
         </motion.div>
       </AnimatePresence>
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
