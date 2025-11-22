@@ -1,0 +1,186 @@
+/**
+ * Core Philosophy: This ruleset enforces a hybrid security model. User-specific data
+ * (profiles, watchlists) follows a strict ownership model, where users can only
+ * access their own data. Global content (movies, TV shows, genres) is readable
+ * by any authenticated user, but writable only by designated administrators.
+ *
+ * Data Structure: User data is nested under `/users/{userId}` to leverage path-based
+ * security for clear and performant ownership checks. Public media content is stored in
+ * separate top-level collections. Administrator roles are managed in a dedicated
+ * `/roles_admin` collection, which is not client-accessible.
+ *
+ * Key Security Decisions:
+ * - User Isolation: A user can only create, read, update, or delete their own
+ *   profile and watchlist documents. They cannot access another user's data.
+ * - No User Listing: The top-level `/users` collection cannot be listed to
+ *   prevent user enumeration and protect privacy.
+ * - Admin-Only Writes: All write operations on global content collections
+ *   (`/movies`, `/tv_shows`, `/genres`) are restricted to users who have an
+ *   admin role document in the `/roles_admin` collection.
+ * - Default Deny: All operations are denied by default and must be explicitly
+ *   granted by a rule.
+ *
+ * Denormalization for Authorization: The rules rely on the document's path to determine
+ * ownership for user-specific data (e.g., `/users/{userId}/...`). To ensure data
+ * integrity, the `userId` field within a user's subcollection documents (like a
+ * watchlist item) must match the `{userId}` from the path upon creation and must be
+ * immutable. This prevents a document from being moved or associated with another user.
+ *
+ * Structural Segregation: The clear separation between the private `/users/{userId}`
+ * data tree and the public `/movies`, `/tv_shows`, and `/genres` collections is
+ * fundamental. This design simplifies security rules, enhances performance for list
+ * queries, and prevents accidental data leakage.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // -------------------------------------------------------------------------
+    // Helper Functions
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns true if the user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Returns true if the authenticated user's UID matches the provided userId.
+     * This is the foundation of the user-ownership model.
+     * @param userId The UID of the user to check against.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    
+    /**
+     * Returns true if the requested document already exists in Firestore.
+     * CRITICAL for all update and delete operations to prevent acting on non-existent data.
+     */
+    function isExistingDoc() {
+      return resource != null;
+    }
+
+    /**
+     * A convenient combination of isOwner() and isExistingDoc().
+     * Ensures the user is the owner and the document exists before an update or delete.
+     * @param userId The UID of the user to check against.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && isExistingDoc();
+    }
+
+    /**
+     * Returns true if the user has an admin role.
+     * This is determined by the existence of a document in the /roles_admin collection
+     * where the document ID matches the user's UID.
+     */
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+
+    // -------------------------------------------------------------------------
+    // Public, Read-Only Collections (for non-admins)
+    // -------------------------------------------------------------------------
+
+    /**
+     * @description Stores global movie data. Readable by any signed-in user, but
+     *              only writable by administrators.
+     * @path        /movies/{movieId}
+     * @allow       An authenticated user (create) a movie document. `auth: {uid: 'user_123'}`
+     * @deny        A regular user (create) a movie document. `auth: {uid: 'user_123'}`
+     * @principle   Enforces admin-only writes for globally shared content.
+     */
+    match /movies/{movieId} {
+      allow get, list: if isSignedIn();
+      allow create: if isAdmin();
+      allow update, delete: if isAdmin() && isExistingDoc();
+    }
+
+    /**
+     * @description Stores global TV show data. Readable by any signed-in user, but
+     *              only writable by administrators.
+     * @path        /tv_shows/{tvShowId}
+     * @allow       An admin user (update) a TV show document. `auth: {uid: 'admin_abc'}`
+     * @deny        A regular user (delete) a TV show document. `auth: {uid: 'user_123'}`
+     * @principle   Enforces admin-only writes for globally shared content.
+     */
+    match /tv_shows/{tvShowId} {
+      allow get, list: if isSignedIn();
+      allow create: if isAdmin();
+      allow update, delete: if isAdmin() && isExistingDoc();
+    }
+
+    /**
+     * @description Stores global genre data. Readable by any signed-in user, but
+     *              only writable by administrators.
+     * @path        /genres/{genreId}
+     * @allow       An admin user (create) a genre document. `auth: {uid: 'admin_abc'}`
+     * @deny        A regular user (update) a genre document. `auth: {uid: 'user_123'}`
+     * @principle   Enforces admin-only writes for globally shared content.
+     */
+    match /genres/{genreId} {
+      allow get, list: if isSignedIn();
+      allow create: if isAdmin();
+      allow update, delete: if isAdmin() && isExistingDoc();
+    }
+
+    // -------------------------------------------------------------------------
+    // User-Owned Data
+    // -------------------------------------------------------------------------
+
+    /**
+     * @description Stores a user's public profile. Only the owner can create, read,
+     *              update, or delete their own profile. Listing users is forbidden.
+     * @path        /users/{userId}
+     * @allow       A user (create) their own profile document. `auth: {uid: 'user_123'}` -> `/users/user_123`
+     * @deny        A user (get) another user's profile. `auth: {uid: 'user_123'}` -> `/users/user_456`
+     * @principle   Restricts access to a user's own data tree and prevents user enumeration.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
+
+      /**
+       * @description Stores a user's private watchlist. Only the owner of the user
+       *              document can manage their watchlist items.
+       * @path        /users/{userId}/watchlists/{watchlistItemId}
+       * @allow       A user (create) an item in their own watchlist. `auth: {uid: 'user_123'}` -> `/users/user_123/watchlists/item_abc`
+       * @deny        A user (list) another user's watchlist. `auth: {uid: 'user_123'}` -> `/users/user_456/watchlists`
+       * @principle   Enforces document ownership for all operations within a user's private subcollection.
+       */
+      match /watchlists/{watchlistItemId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+        allow delete: if isExistingOwner(userId);
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // Administrative Collections
+    // -------------------------------------------------------------------------
+
+    /**
+     * @description Manages admin roles. This collection is locked down from ALL client
+     *              access to prevent privilege escalation or enumeration of admins.
+     *              It should only be managed server-side or via the console.
+     * @path        /roles_admin/{userId}
+     * @allow       No client operations are permitted.
+     * @deny        Any user (get) an admin role document. `auth: {uid: 'user_123'}` -> `/roles_admin/admin_abc`
+     * @principle   Secures critical administrative data from any client-side tampering or inspection.
+     */
+    match /roles_admin/{userId} {
+      allow get: if false;
+      allow list: if false;
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}

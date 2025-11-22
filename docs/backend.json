@@ -1,0 +1,295 @@
+{
+  "entities": {
+    "Movie": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Movie",
+      "type": "object",
+      "description": "Represents a movie entity.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Movie entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the movie."
+        },
+        "overview": {
+          "type": "string",
+          "description": "A brief summary or synopsis of the movie."
+        },
+        "releaseDate": {
+          "type": "string",
+          "description": "The date when the movie was released.",
+          "format": "date-time"
+        },
+        "posterPath": {
+          "type": "string",
+          "description": "The file path or URL for the movie's poster image."
+        },
+        "backdropPath": {
+          "type": "string",
+          "description": "The file path or URL for the movie's backdrop image."
+        },
+        "voteAverage": {
+          "type": "number",
+          "description": "The average rating of the movie."
+        },
+        "genreIds": {
+          "type": "array",
+          "description": "References to Genres. (Relationship: Movie N:N Genre)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "overview",
+        "releaseDate",
+        "posterPath",
+        "voteAverage"
+      ]
+    },
+    "TvShow": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "TvShow",
+      "type": "object",
+      "description": "Represents a TV show entity.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the TvShow entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the TV show."
+        },
+        "overview": {
+          "type": "string",
+          "description": "A brief summary or synopsis of the TV show."
+        },
+        "firstAirDate": {
+          "type": "string",
+          "description": "The date when the TV show first aired.",
+          "format": "date-time"
+        },
+        "posterPath": {
+          "type": "string",
+          "description": "The file path or URL for the TV show's poster image."
+        },
+        "backdropPath": {
+          "type": "string",
+          "description": "The file path or URL for the TV show's backdrop image."
+        },
+        "voteAverage": {
+          "type": "number",
+          "description": "The average rating of the TV show."
+        },
+        "genreIds": {
+          "type": "array",
+          "description": "References to Genres. (Relationship: TvShow N:N Genre)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "overview",
+        "firstAirDate",
+        "posterPath",
+        "voteAverage"
+      ]
+    },
+    "Genre": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Genre",
+      "type": "object",
+      "description": "Represents a genre entity.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Genre entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the genre."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "UserWatchlist": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserWatchlist",
+      "type": "object",
+      "description": "Represents a user's watchlist, storing references to movies and TV shows.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserWatchlist entry."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N UserWatchlist)"
+        },
+        "mediaId": {
+          "type": "string",
+          "description": "The id of the movie or tv show to watchlist"
+        },
+        "mediaType": {
+          "type": "string",
+          "description": "The type of media. Either 'movie' or 'tv'"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "mediaId",
+        "mediaType"
+      ]
+    },
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user entity.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the user.",
+          "format": "email"
+        },
+        "username": {
+          "type": "string",
+          "description": "The username of the user."
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "username"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/movies/{movieId}",
+        "definition": {
+          "entityName": "Movie",
+          "schema": {
+            "$ref": "#/backend/entities/Movie"
+          },
+          "description": "Stores movie entities.  'movieId' is the unique identifier for the movie.",
+          "params": [
+            {
+              "name": "movieId",
+              "description": "Unique identifier for the movie"
+            }
+          ]
+        }
+      },
+      {
+        "path": "/tv_shows/{tvShowId}",
+        "definition": {
+          "entityName": "TvShow",
+          "schema": {
+            "$ref": "#/backend/entities/TvShow"
+          },
+          "description": "Stores TV show entities. 'tvShowId' is the unique identifier for the TV show.",
+          "params": [
+            {
+              "name": "tvShowId",
+              "description": "Unique identifier for the TV show."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/genres/{genreId}",
+        "definition": {
+          "entityName": "Genre",
+          "schema": {
+            "$ref": "#/backend/entities/Genre"
+          },
+          "description": "Stores genre entities. 'genreId' is the unique identifier for the genre.",
+          "params": [
+            {
+              "name": "genreId",
+              "description": "Unique identifier for the genre."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile data. 'userId' matches the Firebase Auth UID.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The Firebase Auth UID of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/watchlists/{watchlistItemId}",
+        "definition": {
+          "entityName": "UserWatchlist",
+          "schema": {
+            "$ref": "#/backend/entities/UserWatchlist"
+          },
+          "description": "Stores user's watchlist items. 'userId' ensures only the authenticated user can access their watchlist. 'watchlistItemId' is the unique ID of the watchlist item.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The Firebase Auth UID of the user."
+            },
+            {
+              "name": "watchlistItemId",
+              "description": "Unique identifier for the watchlist item."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{userId}",
+        "definition": {
+          "entityName": "adminRole",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Documents in this collection indicate admin privileges for the given user.  Existence of the document grants admin access.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The Firebase Auth UID of the user."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to support Willow's content discovery and watchlist features while adhering to the core principles of Authorization Independence, Clarity of Intent, DBAC, and QAPs.  \n\nAuthorization Independence is achieved through path-based ownership for user-specific data (watchlists). No `get()` calls are needed in security rules to validate ownership. The `UserWatchlist` collection is structured under `/users/{userId}/watchlists/{watchlistItemId}` ensuring only the authenticated user (`request.auth.uid`) can access their own watchlist data.  \n\nStructural Segregation is maintained by separating global content (movies, TV shows, genres) from user-specific data. This simplifies security rules as different collections have distinct access requirements. Movies, TV shows, and genres are stored in root-level collections (`/movies`, `/tv_shows`, `/genres`) as their access isn't user-dependent. \n\nAccess Modeling is standardized. Private data (watchlists) uses path-based ownership. This makes security rules trivial: `request.auth.uid == userId`. Global data has read access for all authenticated users, potentially with stricter write rules depending on admin roles (which can be implemented via a dedicated `/roles_admin/{uid}` collection). \n\nQAPs are supported. List operations are secure because the user watchlist data is segregated under their user id.  There are no server side filters required in the rules. For example, a user can only ever list the documents under their own user id. \n\nThe structure also allows for future scalability. If collaborative features are added (e.g., shared watchlists), the Membership Map pattern can be implemented by denormalizing a `members` map in the shared watchlist documents. "
+  }
+}
