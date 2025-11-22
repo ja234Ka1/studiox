@@ -15,7 +15,8 @@ type Props = {
   };
 };
 
-export default function StreamPage({ params: { mediaType, id } }: Props) {
+export default function StreamPage({ params }: Props) {
+  const { mediaType, id } = params;
   const searchParams = useSearchParams();
   const fullscreenRef = useRef<HTMLDivElement>(null);
 
