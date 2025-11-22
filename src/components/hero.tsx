@@ -58,7 +58,8 @@ export function Hero({ items }: HeroProps) {
   const year = releaseDate ? new Date(releaseDate).getFullYear() : 'N/A';
   const detailPath = `/media/${item.media_type}/${item.id}`;
 
-  const handleWatchlistToggle = () => {
+  const handleWatchlistToggle = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent navigation if clicking on button over the link
     const itemToAdd = { ...item, media_type: item.media_type || (item.title ? 'movie' : 'tv') };
     if (isInWatchlist) {
       removeFromWatchlist(item.id);
@@ -71,31 +72,29 @@ export function Hero({ items }: HeroProps) {
 
   return (
     <div className="relative w-full h-[60vh] lg:h-[80vh] group">
-      <div className="absolute inset-0">
-        <AnimatePresence initial={false}>
-          <motion.div
-            key={currentIndex}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.5, ease: "easeInOut" }}
-            className="absolute inset-0"
-          >
+      <AnimatePresence initial={false}>
+        <motion.div
+          key={currentIndex}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1.5, ease: "easeInOut" }}
+          className="absolute inset-0"
+        >
             <Image
-              src={getTmdbImageUrl(item.backdrop_path, "original")}
-              alt={title || "Hero backdrop"}
-              fill
-              priority
-              className="object-cover"
+            src={getTmdbImageUrl(item.backdrop_path, "original")}
+            alt={title || "Hero backdrop"}
+            fill
+            priority
+            className="object-cover"
             />
-          </motion.div>
-        </AnimatePresence>
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/20 to-transparent" />
-      </div>
+        </motion.div>
+      </AnimatePresence>
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/20 to-transparent" />
 
       <div className="relative z-10 container h-full flex flex-col justify-end pb-16 md:pb-24 px-4 md:px-8">
-        <AnimatePresence initial={false}>
+        <AnimatePresence>
             <motion.div
                 key={currentIndex}
                 initial={{ opacity: 0, y: 20 }}
