@@ -1,3 +1,4 @@
+
 import type { Media } from "@/types/tmdb";
 import { MediaCard } from "./media-card";
 import {
@@ -28,11 +29,11 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
         }}
         className="w-full"
       >
-        <CarouselContent>
+        <CarouselContent className="-ml-4 py-4">
           {items.map((item) => (
             <CarouselItem
               key={item.id}
-              className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6"
+              className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4"
             >
               <MediaCard item={item} />
             </CarouselItem>

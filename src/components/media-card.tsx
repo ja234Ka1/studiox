@@ -4,7 +4,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Plus, Check, Star } from "lucide-react";
+import { Plus, Check, Star, Info } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -60,62 +60,106 @@ export function MediaCard({ item }: MediaCardProps) {
   };
   
   const handleCardClick = (e: React.MouseEvent) => {
-    // Check if the click target is the watchlist button, if so, don't navigate
-    if ((e.target as HTMLElement).closest('button[data-watchlist-toggle]')) {
+    // Prevent navigation if a button was clicked
+    if ((e.target as HTMLElement).closest('button')) {
         return;
     }
     e.preventDefault();
     router.push(detailPath);
   }
 
+  const cardVariants = {
+    initial: { 
+      scale: 1,
+      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+    },
+    hover: {
+      scale: 1.1,
+      zIndex: 10,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 20,
+        delay: 0.15
+      },
+    },
+  };
+  
+  const expandedDetailsVariants = {
+    initial: { 
+        opacity: 0, 
+        height: 0,
+        width: "100%",
+    },
+    hover: {
+      opacity: 1,
+      height: "auto",
+      width: "180%", // Expand sideways
+      transition: {
+        opacity: { delay: 0.25, duration: 0.3 },
+        height: { delay: 0.25, type: "spring", stiffness: 200, damping: 25 },
+        width: { delay: 0.25, type: "spring", stiffness: 300, damping: 25 }
+      },
+    },
+  };
+
+
   return (
     <motion.div
-      onClick={handleCardClick}
-      onMouseEnter={handlePrefetch}
+      layout
+      variants={cardVariants}
+      initial="initial"
       whileHover="hover"
-      className="relative aspect-[2/3] rounded-lg overflow-hidden group cursor-pointer"
-      variants={{
-        hover: {
-          scale: 1.05,
-          boxShadow: "0px 10px 30px -5px rgba(0, 0, 0, 0.3)",
-          y: -8,
-        },
-      }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      onHoverStart={handlePrefetch}
+      onClick={handleCardClick}
+      className="relative aspect-[2/3] rounded-lg overflow-hidden group cursor-pointer bg-card"
     >
-      <div className="absolute inset-0">
-          {imageUrl && (
+        {/* Poster Image (always visible) */}
+        {imageUrl && (
             <Image
-              src={imageUrl}
-              alt={title || "Media poster"}
-              fill
-              sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
-              className="object-cover"
-              data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
+                src={imageUrl}
+                alt={title || "Media poster"}
+                fill
+                sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
+                className="object-cover transition-transform duration-300 group-hover:scale-110"
+                data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
             />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-      </div>
-
-      <div className="absolute inset-0 flex flex-col justify-end p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
-        <h3 className="font-bold text-sm text-white truncate mb-1">{title}</h3>
-        {item.vote_average > 0 && (
-          <div className="flex items-center text-xs text-amber-400 mb-2">
-            <Star className="w-3 h-3 mr-1 fill-current" />
-            <span>{item.vote_average.toFixed(1)}</span>
-          </div>
         )}
-        <div className="flex gap-2">
-            <Button size="sm" className="flex-1" asChild>
-              <Link href={detailPath}>
-                Details
-              </Link>
-            </Button>
-            <Button size="sm" variant="secondary" onClick={handleWatchlistToggle} data-watchlist-toggle>
-                {isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-            </Button>
-        </div>
-      </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+
+      {/* Expanded Details - positioned absolutely to overlay content */}
+       <motion.div
+        variants={expandedDetailsVariants}
+        className="absolute bottom-0 left-[-40%] w-[180%] p-4 bg-card/90 backdrop-blur-sm rounded-b-lg overflow-hidden flex flex-col justify-end"
+        style={{ pointerEvents: 'none' }} // Initially no pointer events
+      >
+        <motion.div 
+            className="flex flex-col gap-2 animate-fade-in"
+            style={{ pointerEvents: 'auto' }} // Re-enable pointer events for content
+        >
+            <h3 className="font-bold text-base text-card-foreground truncate">{title}</h3>
+            {item.vote_average > 0 && (
+                <div className="flex items-center text-xs text-amber-400">
+                    <Star className="w-3 h-3 mr-1 fill-current" />
+                    <span>{item.vote_average.toFixed(1)}</span>
+                </div>
+            )}
+            <p className="text-xs text-muted-foreground line-clamp-3 my-1">
+                {item.overview}
+            </p>
+            <div className="flex gap-2 w-full mt-2">
+                <Button size="sm" className="flex-1" asChild>
+                <Link href={detailPath}>
+                    <Info className="w-4 h-4 mr-1" />
+                    Details
+                </Link>
+                </Button>
+                <Button size="sm" variant="secondary" onClick={handleWatchlistToggle}>
+                    {isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                </Button>
+            </div>
+        </motion.div>
+      </motion.div>
     </motion.div>
   );
 }
