@@ -1,4 +1,4 @@
-import type { ApiResponse, Media, MediaDetails, MediaType, TimeRange, Video } from "@/types/tmdb";
+import type { ApiResponse, Media, MediaDetails, MediaType, TimeRange, Video, SeasonDetails } from "@/types/tmdb";
 
 const API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
 const BASE_URL = "https://api.themoviedb.org/3";
@@ -94,5 +94,10 @@ export async function searchMedia(query: string, page: number = 1): Promise<ApiR
     });
     // Filter out people from search results
     data.results = data.results.filter(item => item.media_type === 'movie' || item.media_type === 'tv');
+    return data;
+}
+
+export async function getSeasonDetails(tvShowId: number, seasonNumber: number): Promise<SeasonDetails> {
+    const data = await fetcher<SeasonDetails>(`/tv/${tvShowId}/season/${seasonNumber}`);
     return data;
 }

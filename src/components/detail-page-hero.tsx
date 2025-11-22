@@ -77,7 +77,8 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
     }
   };
   
-  const streamPath = `/stream/${item.media_type}/${item.id}?title=${encodeURIComponent(title || '')}`;
+  // Default stream path for movies or if it's a TV show without episode selection on this component
+  const streamPath = `/stream/${item.media_type}/${item.id}`;
 
 
   return (
@@ -151,12 +152,15 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
           </h1>
           
           <div className="flex items-center gap-4">
-            <Button size="lg" asChild>
-              <LoadingLink href={streamPath}>
-                <PlayCircle className="mr-2" />
-                Watch
-              </LoadingLink>
-            </Button>
+            {/* The "Watch" button for movies is a direct link */}
+            {item.media_type === 'movie' && (
+              <Button size="lg" asChild>
+                <LoadingLink href={streamPath}>
+                  <PlayCircle className="mr-2" />
+                  Watch
+                </LoadingLink>
+              </Button>
+            )}
             {trailer && (
                 <Button size="lg" variant="secondary" onClick={handlePlayTrailer}>
                   Play Trailer

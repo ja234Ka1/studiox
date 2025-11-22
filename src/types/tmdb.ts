@@ -83,4 +83,35 @@ export interface MediaDetails extends Media {
   episode_run_time?: number[];
   number_of_seasons?: number;
   number_of_episodes?: number;
+  seasons?: Season[];
+}
+
+export interface Season {
+    air_date: string;
+    episode_count: number;
+    id: number;
+    name: string;
+    overview: string;
+    poster_path: string;
+    season_number: number;
+    vote_average: number;
+}
+
+export interface Episode {
+    air_date: string;
+    episode_number: number;
+    id: number;
+    name: string;
+    overview: string;
+    production_code: string;
+    runtime: number;
+    season_number: number;
+    show_id: number;
+    still_path: string | null;
+    vote_average: number;
+    vote_count: number;
+}
+  
+export interface SeasonDetails extends Season {
+    episodes: Episode[];
 }
