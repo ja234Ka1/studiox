@@ -17,6 +17,7 @@ import { getTmdbImageUrl } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 import LoadingLink from "./loading-link";
 import type { MediaType } from "@/types/tmdb";
+import { Card } from "./ui/card";
 
 // Types matching the VidZee localStorage structure
 interface VidZeeProgressDetails {
@@ -81,26 +82,26 @@ const ContinueWatchingCard = ({ item }: { item: VidZeeMedia }) => {
 
   return (
     <LoadingLink href={streamPath} className="group block">
-      <div className="relative aspect-[2/3] w-full rounded-md overflow-hidden bg-card shadow-md">
-        <Image
-          src={getTmdbImageUrl(item.poster_path, 'w500')}
-          alt={item.title}
-          fill
-          sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <PlayCircle className="w-12 h-12 text-white/80" />
-        </div>
-        <div className="absolute bottom-0 left-0 right-0 p-2">
-            <Progress value={progressPercent} className="h-1 bg-white/20" />
-        </div>
-      </div>
-      <div className="mt-2">
-        <p className="font-semibold truncate text-sm">{item.title}</p>
-        <p className="text-xs text-muted-foreground">{subTitle}</p>
-      </div>
+        <Card className="relative aspect-video w-full rounded-md overflow-hidden shadow-md">
+            <Image
+                src={getTmdbImageUrl(item.backdrop_path, 'w500')}
+                alt={item.title}
+                fill
+                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40">
+                <PlayCircle className="w-12 h-12 text-white/80" />
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
+                <h3 className="font-bold truncate text-sm">{item.title}</h3>
+                <p className="text-xs text-white/70">{subTitle}</p>
+            </div>
+            <div className="absolute bottom-0 left-0 right-0">
+                <Progress value={progressPercent} className="h-1 bg-white/20 border-0" />
+            </div>
+        </Card>
     </LoadingLink>
   );
 };
@@ -161,7 +162,7 @@ export default function VidzeeContinueWatching() {
           {items.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
-              className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4 pr-2"
+              className="basis-2/3 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5 pl-4 pr-2"
             >
               <motion.div layout variants={itemVariants}>
                 <ContinueWatchingCard item={item} />
