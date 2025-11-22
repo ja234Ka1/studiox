@@ -7,6 +7,7 @@ import { VideoProvider } from "@/context/video-provider";
 import { LoadingProvider } from "@/context/loading-provider";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
 import type { ToasterToast, ToastFn } from "@/hooks/use-toast";
+import { WatchlistProvider } from "@/context/watchlist-provider";
 
 const TOAST_LIMIT = 3;
 
