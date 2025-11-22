@@ -4,8 +4,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Check, Star, PlayCircle, ChevronDown } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
+import { Plus, Check, PlayCircle, ChevronDown } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import type { Media } from "@/types/tmdb";
@@ -58,9 +58,6 @@ export function MediaCard({ item }: MediaCardProps) {
   };
   
   const handleCardClick = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('button')) {
-        return;
-    }
     e.preventDefault();
     router.push(detailPath);
   }
@@ -74,13 +71,15 @@ export function MediaCard({ item }: MediaCardProps) {
       layout
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
-      transition={{ layout: { duration: 0.3, ease: 'easeOut' } }}
-      className="relative aspect-[2/3] bg-card rounded-lg shadow-lg cursor-pointer"
-      style={{
-        zIndex: isHovered ? 10 : 0
-      }}
+      onClick={handleCardClick}
+      className="relative rounded-lg overflow-hidden bg-card shadow-lg cursor-pointer"
+      style={{ zIndex: isHovered ? 20 : 1 }}
+      transition={{ layout: { duration: 0.2, ease: "easeOut" } }}
     >
-      <div className="w-full h-full" onClick={handleCardClick}>
+      <motion.div
+        layout="position"
+        className="aspect-[2/3] w-full"
+      >
         <Image
             src={posterUrl!}
             alt={title || "Media poster"}
@@ -89,55 +88,50 @@ export function MediaCard({ item }: MediaCardProps) {
             className="object-cover rounded-lg"
             data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
           />
-      </div>
+      </motion.div>
 
       <AnimatePresence>
         {isHovered && (
           <motion.div
-            layoutId={`card-container-${item.id}`}
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1, transition: { delay: 0.3, duration: 0.2 } }}
-            exit={{ opacity: 0, transition: { duration: 0.2 } }}
-            className="absolute top-0 left-1/2 -translate-x-1/2 w-[250%] max-w-none shadow-2xl bg-card rounded-lg overflow-hidden"
-            style={{
-                top: '-50%'
-            }}
+            animate={{ opacity: 1, transition: { delay: 0.2, duration: 0.2 } }}
+            exit={{ opacity: 0, transition: { duration: 0.1 } }}
+            className="absolute inset-0 w-full h-full flex flex-col"
           >
-            <div className="relative aspect-video">
+             <div className="relative w-full aspect-video">
                 <Image
                     src={backdropUrl!}
                     alt={`${title} backdrop`}
                     fill
-                    className="object-cover"
+                    className="object-cover rounded-t-lg"
                 />
-                 <div className="absolute inset-0 bg-gradient-to-t from-card via-card/50 to-transparent" />
+                 <div className="absolute inset-0 bg-gradient-to-t from-card via-card/50 to-transparent rounded-t-lg" />
             </div>
-            <div className="p-4 space-y-3">
-                 <div className="flex items-center justify-between gap-2">
+            <div className="p-3 bg-card rounded-b-lg flex-grow">
+                 <div className="flex items-center justify-between gap-2 mb-2">
                     <div className="flex items-center gap-2">
-                        <Button size="icon" className="h-9 w-9 rounded-full bg-primary text-primary-foreground" asChild>
+                        <Button size="icon" className="h-8 w-8 rounded-full" asChild>
                             <Link href={detailPath} onClick={e => e.stopPropagation()}>
                                 <PlayCircle className="w-4 h-4 fill-current" />
                             </Link>
                         </Button>
-                        <Button size="icon" variant="secondary" className="h-9 w-9 rounded-full" onClick={handleWatchlistToggle}>
-                            {isInWatchlist ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+                        <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full" onClick={handleWatchlistToggle}>
+                            {isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                         </Button>
                     </div>
-                    <Button size="icon" variant="secondary" className="h-9 w-9 rounded-full" asChild>
+                    <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full" asChild>
                         <Link href={detailPath} onClick={e => e.stopPropagation()}>
-                            <ChevronDown className="w-5 h-5" />
+                            <ChevronDown className="w-4 h-4" />
                         </Link>
                     </Button>
                 </div>
-                <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                <p className="font-bold text-sm truncate mb-1">{title}</p>
+                <div className="flex items-center space-x-2 text-xs text-muted-foreground">
                     {item.vote_average > 0 && (
-                        <div className="flex items-center text-green-400 font-semibold">
-                            <span>{Math.round(item.vote_average * 10)}% Match</span>
-                        </div>
+                        <span className="text-green-400 font-semibold">{Math.round(item.vote_average * 10)}% Match</span>
                     )}
-                    <span className="border px-1.5 py-0.5 rounded text-xs">{year}</span>
-                    <span className="font-semibold text-foreground truncate">{title}</span>
+                    <span className="border px-1 py-0.5 rounded">{year}</span>
+                    <span className="uppercase text-[0.6rem] border px-1 py-0.5 rounded">{item.media_type}</span>
                 </div>
             </div>
           </motion.div>
@@ -146,3 +140,5 @@ export function MediaCard({ item }: MediaCardProps) {
     </motion.div>
   );
 }
+
+    

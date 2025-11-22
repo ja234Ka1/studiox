@@ -26,20 +26,17 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
         opts={{
           align: "start",
           dragFree: true,
-          // Set a larger container for slides to overflow
           containScroll: 'keepSnaps',
         }}
         className="w-full"
       >
-        <CarouselContent className="-ml-4 py-12 px-2">
+        <CarouselContent className="-ml-4 py-4 px-2">
           {items.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
-              className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4"
+              className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-[15%] pl-4"
             >
-              <div className="p-1">
-                 <MediaCard item={item} />
-              </div>
+              <MediaCard item={item} />
             </CarouselItem>
           ))}
         </CarouselContent>
@@ -49,3 +46,5 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
     </section>
   );
 }
+
+    
