@@ -146,45 +146,44 @@ export default function MediaDetailsPage() {
                     title={item.name || item.title || ''}
                 />
             )}
-
-
-            <motion.div 
-              className="mt-12"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-            >
-              <h2 className="text-2xl font-bold mb-6 text-center">Top Cast</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-6">
-                {topCast.map((member, index) => (
-                  <motion.div 
-                    key={member.id} 
-                    className="text-center"
-                    variants={castVariants}
-                    custom={index}
-                  >
-                    <div className="relative aspect-[2/3] rounded-lg overflow-hidden mb-2 bg-muted shadow-lg">
-                      <Image
-                        src={getTmdbImageUrl(member.profile_path, "w500")}
-                        alt={member.name}
-                        fill
-                        className="object-cover transition-transform duration-300 hover:scale-105"
-                      />
-                    </div>
-                    <p className="font-semibold text-sm">{member.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {member.character}
-                    </p>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
           </div>
 
           <div className="lg:col-span-1">
             {/* Additional info could go here */}
           </div>
         </div>
+
+        <motion.div 
+            className="mt-12"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+        >
+            <h2 className="text-2xl font-bold mb-6 text-center">Top Cast</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-6">
+            {topCast.map((member, index) => (
+                <motion.div 
+                key={member.id} 
+                className="text-center"
+                variants={castVariants}
+                custom={index}
+                >
+                <div className="relative aspect-[2/3] rounded-lg overflow-hidden mb-2 bg-muted shadow-lg">
+                    <Image
+                    src={getTmdbImageUrl(member.profile_path, "w500")}
+                    alt={member.name}
+                    fill
+                    className="object-cover transition-transform duration-300 hover:scale-105"
+                    />
+                </div>
+                <p className="font-semibold text-sm">{member.name}</p>
+                <p className="text-xs text-muted-foreground">
+                    {member.character}
+                </p>
+                </motion.div>
+            ))}
+            </div>
+        </motion.div>
 
         {item.recommendations?.results.length > 0 && (
           <MediaCarousel
