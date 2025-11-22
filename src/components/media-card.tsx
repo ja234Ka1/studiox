@@ -72,35 +72,26 @@ export function MediaCard({ item }: MediaCardProps) {
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
       onClick={handleCardClick}
-      className="relative rounded-lg overflow-hidden bg-card shadow-lg cursor-pointer"
-      style={{ zIndex: isHovered ? 20 : 1 }}
+      className="relative aspect-[2/3] rounded-lg bg-card shadow-lg cursor-pointer"
       transition={{ layout: { duration: 0.2, ease: "easeOut" } }}
     >
-      <motion.div
-        layout="position"
-        className="aspect-[2/3] w-full"
-      >
         <Image
-            src={posterUrl!}
-            alt={title || "Media poster"}
-            fill
-            sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
-            className="object-cover rounded-lg"
-            data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
-          />
-      </motion.div>
+          src={posterUrl!}
+          alt={title || "Media poster"}
+          fill
+          sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
+          className="object-cover rounded-lg"
+          data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
+        />
 
       <AnimatePresence>
         {isHovered && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1, transition: { delay: 0.2, duration: 0.2 } }}
-            exit={{ opacity: 0, transition: { duration: 0.1 } }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1.1, transition: { delay: 0.2, duration: 0.3 } }}
+            exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+            style={{ originX: 0.5, originY: 0 }}
             className="absolute top-0 left-0 w-full h-auto bg-card rounded-lg shadow-2xl"
-            style={{ 
-              width: '150%', 
-              left: '-25%',
-            }}
           >
              <div className="relative w-full aspect-video">
                 <Image
@@ -144,3 +135,5 @@ export function MediaCard({ item }: MediaCardProps) {
     </motion.div>
   );
 }
+
+    

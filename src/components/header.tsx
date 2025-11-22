@@ -55,7 +55,7 @@ export function Header() {
               )}
             >
               <Link href={item.href}>
-                <item.icon className="mr-2 h-4 w-4" />
+                
                 {item.label}
               </Link>
             </Button>
@@ -70,7 +70,7 @@ export function Header() {
               className="pl-9 rounded-full"
             />
           </div>
-          <Button asChild variant="ghost">
+          <Button asChild variant="ghost" size="icon">
              <Link href="/settings">
                 <Settings />
              </Link>
@@ -81,3 +81,5 @@ export function Header() {
     </header>
   );
 }
+
+    

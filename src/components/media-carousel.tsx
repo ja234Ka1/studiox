@@ -21,7 +21,7 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
 
   return (
     <section>
-      <h2 className="text-xl font-bold mb-4">Only on Willow: {title}</h2>
+      <h2 className="text-2xl font-bold mb-4">{title}</h2>
       <Carousel
         opts={{
           align: "start",
@@ -30,7 +30,7 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
         }}
         className="w-full"
       >
-        <CarouselContent className="-ml-4 p-4">
+        <CarouselContent className="-ml-4 py-4">
           {items.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
@@ -46,3 +46,5 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
     </section>
   );
 }
+
+    
