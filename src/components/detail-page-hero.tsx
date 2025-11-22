@@ -14,8 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useVideo } from "@/context/video-provider";
 import { useToast } from "@/hooks/use-toast";
-import { addToWatchlist, getWatchlist, removeFromWatchlist } from "@/lib/userData";
-import LoadingLink from "./loading-link";
+import { useWatchlist } from "@/context/watchlist-provider";
 import YouTubeEmbed from "./youtube-embed";
 import { useTheme, type StreamSource } from "@/context/theme-provider";
 import { StreamSourceDialog } from "./stream-source-dialog";
@@ -27,9 +26,9 @@ interface DetailPageHeroProps {
 
 export function DetailPageHero({ item }: DetailPageHeroProps) {
   const router = useRouter();
-  const { playVideo } = useVideo();
   const { toast } = useToast();
-  const [isInWatchlist, setIsInWatchlist] = useState(false);
+  const { isInWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
+  
   const [showTrailer, setShowTrailer] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const playerRef = useRef<YouTubePlayer | null>(null);
@@ -44,19 +43,7 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
   const trailer = item.videos?.results?.find(v => v.type === 'Trailer' && v.official) 
                   || item.videos?.results?.find(v => v.type === 'Trailer');
 
-
-  useEffect(() => {
-    const watchlist = getWatchlist();
-    setIsInWatchlist(watchlist.some(watchlistItem => watchlistItem.id === item.id));
-
-    const handleWatchlistChange = () => {
-      const updatedWatchlist = getWatchlist();
-      setIsInWatchlist(updatedWatchlist.some(watchlistItem => watchlistItem.id === item.id));
-    };
-
-    window.addEventListener('willow-watchlist-change', handleWatchlistChange);
-    return () => window.removeEventListener('willow-watchlist-change', handleWatchlistChange);
-  }, [item.id]);
+  const isItemInWatchlist = isInWatchlist(item.id);
 
   const handleMouseEnter = () => {
     if (trailer && !dataSaver) {
@@ -69,13 +56,9 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
     setIsMuted(true); // Always reset to muted when preview ends
   };
 
-
-  const handlePlayTrailer = () => {
-    playVideo(item.id, item.media_type);
-  };
-
   const handleWatchlistToggle = () => {
-    if (isInWatchlist) {
+    const itemToAdd = { ...item, media_type: item.media_type || (item.title ? 'movie' : 'tv') };
+    if (isItemInWatchlist) {
       removeFromWatchlist(item.id);
       toast({ 
         title: `Removed from Watchlist`, 
@@ -83,7 +66,6 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
         imageUrl: getTmdbImageUrl(item.poster_path, 'w500'),
       });
     } else {
-      const itemToAdd = { ...item, media_type: item.media_type || (item.title ? 'movie' : 'tv') };
       addToWatchlist(itemToAdd);
       toast({ 
         title: 'Added to Watchlist', 
@@ -180,8 +162,8 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
                 Watch
             </Button>
             <Button size="lg" variant="secondary" onClick={handleWatchlistToggle}>
-                {isInWatchlist ? <Check className="w-5 h-5 mr-2" /> : <Plus className="w-5 h-5 mr-2" />}
-              {isInWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
+                {isItemInWatchlist ? <Check className="w-5 h-5 mr-2" /> : <Plus className="w-5 h-5 mr-2" />}
+              {isItemInWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
             </Button>
           </div>
         </motion.div>

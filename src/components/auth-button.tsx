@@ -22,14 +22,14 @@ import LoadingLink from './loading-link';
 import { mergeLocalWatchlistToFirebase } from '@/lib/userData';
 
 export function AuthButton() {
-  const { user, loading: isUserLoading } = useUser();
+  const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
 
   useEffect(() => {
     // When user logs in and is not anonymous, merge local watchlist to firebase
     if (user && !user.isAnonymous) {
-      mergeLocalWatchlistToFirebase();
+      mergeLocalWatchlistToFirebase(user.uid);
     }
   }, [user]);
 

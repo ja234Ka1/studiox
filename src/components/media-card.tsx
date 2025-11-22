@@ -4,7 +4,7 @@
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, PlayCircle, Star, Check, X } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter, usePathname } from 'next/navigation';
 
@@ -12,7 +12,7 @@ import type { Media } from "@/types/tmdb";
 import { getTmdbImageUrl } from "@/lib/utils";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Button } from "./ui/button";
-import { addToWatchlist, getWatchlist, removeFromWatchlist } from "@/lib/userData";
+import { useWatchlist } from "@/context/watchlist-provider";
 import LoadingLink from "./loading-link";
 
 
@@ -38,11 +38,13 @@ const itemVariants = {
 
 export function MediaCard({ item }: MediaCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const [isInWatchlist, setIsInWatchlist] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
   const pathname = usePathname();
 
+  const { isInWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
+  const isItemInWatchlist = isInWatchlist(item.id);
+  
   const isOnWatchlistPage = pathname === '/watchlist';
   const fallbackImage = PlaceHolderImages.find(p => p.id === 'media-fallback');
   const posterUrl = item.poster_path ? getTmdbImageUrl(item.poster_path, 'w500') : fallbackImage?.imageUrl;
@@ -51,25 +53,12 @@ export function MediaCard({ item }: MediaCardProps) {
   const detailPath = `/media/${item.media_type}/${item.id}`;
   const year = item.release_date || item.first_air_date ? new Date(item.release_date || item.first_air_date!).getFullYear() : 'N/A';
 
-  useEffect(() => {
-    const watchlist = getWatchlist();
-    setIsInWatchlist(watchlist.some(watchlistItem => watchlistItem.id === item.id));
-
-    const handleWatchlistChange = () => {
-      const updatedWatchlist = getWatchlist();
-      setIsInWatchlist(updatedWatchlist.some(watchlistItem => watchlistItem.id === item.id));
-    };
-
-    window.addEventListener('willow-watchlist-change', handleWatchlistChange);
-    return () => window.removeEventListener('willow-watchlist-change', handleWatchlistChange);
-  }, [item.id]);
-
   const handleWatchlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     const itemToAdd = { ...item, media_type: item.media_type || (item.title ? 'movie' : 'tv') };
 
-    if (isInWatchlist) {
+    if (isItemInWatchlist) {
       removeFromWatchlist(item.id);
       toast({ 
         title: `Removed from Watchlist`, 
@@ -139,7 +128,7 @@ export function MediaCard({ item }: MediaCardProps) {
                 </LoadingLink>
               </Button>
               <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full" onClick={handleWatchlistToggle}>
-                {isOnWatchlistPage ? <X className="w-4 h-4" /> : (isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />)}
+                {isOnWatchlistPage ? <X className="w-4 h-4" /> : (isItemInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />)}
               </Button>
             </motion.div>
           </motion.div>

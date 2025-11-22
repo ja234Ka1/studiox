@@ -5,64 +5,59 @@ import { useState, useEffect, useCallback } from 'react';
 
 // Custom hook for managing state with localStorage
 export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val: T) => T)) => void] {
-  // State to store our value. Initialize with the initialValue.
-  const [storedValue, setStoredValue] = useState<T>(initialValue);
-
-  // useEffect to safely access localStorage only on the client side after mounting
-  useEffect(() => {
+  const readValue = useCallback((): T => {
+    if (typeof window === 'undefined') {
+      return initialValue;
+    }
     try {
       const item = window.localStorage.getItem(key);
-      if (item) {
-        setStoredValue(JSON.parse(item));
-      }
+      return item ? (JSON.parse(item) as T) : initialValue;
     } catch (error) {
-      console.error("Error reading from localStorage:", error);
-      // If error, we'll just use the initialValue.
+      console.warn(`Error reading localStorage key “${key}”:`, error);
+      return initialValue;
     }
-  }, [key]);
+  }, [initialValue, key]);
 
-  // useEffect to update local storage when the state changes
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-    try {
-      // Allow value to be a function so we have same API as useState
-      const valueToStore =
-        typeof storedValue === 'function'
-          ? storedValue(storedValue)
-          : storedValue;
-      // Save state to local storage
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
-       // Dispatch a storage event so other tabs can sync
-      window.dispatchEvent(new Event('storage'));
-      window.dispatchEvent(new CustomEvent('willow-storage-change', { detail: { key } }));
-
-    } catch (error) {
-      console.error(error);
-    }
-  }, [key, storedValue]);
-  
-  // Listen for changes in other tabs
-  useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-        if (e.key === key && e.newValue !== null) {
-            try {
-                setStoredValue(JSON.parse(e.newValue));
-            } catch (error) {
-                console.error(error);
-            }
-        }
-    };
-    window.addEventListener('storage', handleStorageChange);
-    return () => {
-        window.removeEventListener('storage', handleStorageChange);
-    }
-  }, [key]);
+  const [storedValue, setStoredValue] = useState<T>(readValue);
 
   const setValue = (value: T | ((val: T) => T)) => {
-    setStoredValue(value);
-  }
+    if (typeof window == 'undefined') {
+      console.warn(
+        `Tried setting localStorage key “${key}” even though environment is not a client`
+      );
+    }
+
+    try {
+      const newValue = value instanceof Function ? value(storedValue) : value;
+      window.localStorage.setItem(key, JSON.stringify(newValue));
+      setStoredValue(newValue);
+      window.dispatchEvent(new StorageEvent("storage", { key }));
+      window.dispatchEvent(new CustomEvent('willow-storage-change', { detail: { key } }));
+    } catch (error) {
+      console.warn(`Error setting localStorage key “${key}”:`, error);
+    }
+  };
+
+  useEffect(() => {
+    setStoredValue(readValue());
+  }, [readValue]);
+
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent | CustomEvent) => {
+        const detail = (e as CustomEvent).detail;
+        if ((e as StorageEvent).key === key || (detail && detail.key === key)) {
+            setStoredValue(readValue());
+        }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("willow-storage-change", handleStorageChange);
+
+    return () => {
+        window.removeEventListener("storage", handleStorageChange);
+        window.removeEventListener("willow-storage-change", handleStorageChange);
+    };
+  }, [key, readValue]);
 
   return [storedValue, setValue];
 }

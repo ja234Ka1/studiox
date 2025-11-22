@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import LoadingLink from "./loading-link";
 import { useToast } from "@/hooks/use-toast";
-import { addToWatchlist, getWatchlist, removeFromWatchlist } from "@/lib/userData";
+import { useWatchlist } from "@/context/watchlist-provider";
 
 interface HeroProps {
   items: Media[];
@@ -20,8 +20,8 @@ interface HeroProps {
 
 export function Hero({ items }: HeroProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isInWatchlist, setIsInWatchlist] = useState(false);
   const { toast } = useToast();
+  const { isInWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
 
   const item = items[currentIndex];
 
@@ -35,23 +35,9 @@ export function Hero({ items }: HeroProps) {
     return () => clearInterval(timer);
   }, [items.length]);
   
-  useEffect(() => {
-    if (!item) return;
-    
-    const watchlist = getWatchlist();
-    setIsInWatchlist(watchlist.some(watchlistItem => watchlistItem.id === item.id));
-
-    const handleWatchlistChange = () => {
-      const updatedWatchlist = getWatchlist();
-      setIsInWatchlist(updatedWatchlist.some(watchlistItem => watchlistItem.id === item.id));
-    };
-
-    window.addEventListener('willow-watchlist-change', handleWatchlistChange);
-    return () => window.removeEventListener('willow-watchlist-change', handleWatchlistChange);
-  }, [item]);
-
-
   if (!item) return null;
+  
+  const isItemInWatchlist = isInWatchlist(item.id);
 
   const title = item.title || item.name;
   const releaseDate = item.release_date || item.first_air_date;
@@ -61,7 +47,7 @@ export function Hero({ items }: HeroProps) {
   const handleWatchlistToggle = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent navigation if clicking on button over the link
     const itemToAdd = { ...item, media_type: item.media_type || (item.title ? 'movie' : 'tv') };
-    if (isInWatchlist) {
+    if (isItemInWatchlist) {
       removeFromWatchlist(item.id);
       toast({ 
         title: `Removed from Watchlist`, 
@@ -137,8 +123,8 @@ export function Hero({ items }: HeroProps) {
                     </LoadingLink>
                 </Button>
                 <Button size="lg" variant="secondary" onClick={handleWatchlistToggle}>
-                    {isInWatchlist ? <Check className="w-5 h-5 mr-2" /> : <Plus className="w-5 h-5 mr-2" />}
-                    {isInWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
+                    {isItemInWatchlist ? <Check className="w-5 h-5 mr-2" /> : <Plus className="w-5 h-5 mr-2" />}
+                    {isItemInWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
                 </Button>
             </div>
             </motion.div>
