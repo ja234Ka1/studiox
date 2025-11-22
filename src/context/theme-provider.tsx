@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -30,7 +31,11 @@ export function ThemeProvider({
     ...props 
 }: CustomThemeProviderProps) {
   const [theme, setThemeState] = React.useState<string>(() => {
-    if (typeof window === 'undefined') return defaultTheme;
+    // On the server, always return the default so there's no mismatch
+    if (typeof window === 'undefined') {
+      return defaultTheme;
+    }
+    // On the client, read from localStorage
     return localStorage.getItem("willow-theme") || defaultTheme;
   });
   
@@ -39,15 +44,25 @@ export function ThemeProvider({
     starfield: false,
   });
 
-   React.useEffect(() => {
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  React.useEffect(() => {
+    if (!isMounted) return; // Only run effect after mount
+
     const storedTheme = localStorage.getItem("willow-theme") || defaultTheme;
     setTheme(storedTheme);
     const storedBlobs = localStorage.getItem("willow-bg-blobs") !== "false";
     const storedStarfield = localStorage.getItem("willow-bg-starfield") === "true";
     setBackgroundEffectsState({ blobs: storedBlobs, starfield: storedStarfield });
-  }, [defaultTheme]);
+  }, [isMounted, defaultTheme]);
 
   const setTheme = (newTheme: string) => {
+    if (typeof window === 'undefined') return;
+
     const root = window.document.documentElement;
     const isSystem = newTheme === 'system' && enableSystem;
 
@@ -67,8 +82,9 @@ export function ThemeProvider({
   };
   
   React.useEffect(() => {
-    // Apply the theme on initial load
-    setTheme(theme);
+    if (typeof window === 'undefined' || !isMounted) return;
+    
+    setTheme(theme); // Apply theme on change
     
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = () => {
@@ -78,15 +94,17 @@ export function ThemeProvider({
     };
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [theme, enableSystem]);
+  }, [theme, enableSystem, isMounted]);
 
 
   const setBackgroundEffects = (effects: Partial<BackgroundEffects>) => {
     setBackgroundEffectsState(prev => {
       const newEffects = { ...prev, ...effects };
-      localStorage.setItem("willow-bg-blobs", String(newEffects.blobs));
-      localStorage.setItem("willow-bg-starfield", String(newEffects.starfield));
-      window.dispatchEvent(new CustomEvent("willow-storage-change", { detail: { key: 'backgroundEffects' } }));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem("willow-bg-blobs", String(newEffects.blobs));
+        localStorage.setItem("willow-bg-starfield", String(newEffects.starfield));
+        window.dispatchEvent(new CustomEvent("willow-storage-change", { detail: { key: 'backgroundEffects' } }));
+      }
       return newEffects;
     });
   };
@@ -98,9 +116,14 @@ export function ThemeProvider({
     setBackgroundEffects,
   };
 
+  // During server-side rendering and the initial client render, we don't know the
+  // real theme yet. To prevent hydration mismatches, we can render null or a
+  // placeholder. But a better user experience is to just render the children.
+  // The theme will be applied in the useEffect.
+  // We add the theme as a key to force re-render when it changes.
   return (
     <ThemeProviderContext.Provider value={value}>
-      {children}
+      <div key={isMounted ? theme : 'initial'}>{children}</div>
     </ThemeProviderContext.Provider>
   )
 }
