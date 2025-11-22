@@ -30,8 +30,6 @@ type ThemeProviderState = {
   setDataSaver: (enabled: boolean) => void;
   radius: number;
   setRadius: (radius: number) => void;
-  contentDensity: ContentDensity;
-  setContentDensity: (density: ContentDensity) => void;
 };
 
 const ThemeProviderContext = React.createContext<ThemeProviderState | undefined>(undefined);
@@ -53,7 +51,6 @@ export function ThemeProvider({
   const [blobSpeed, setBlobSpeedState] = React.useState<number>(30);
   const [dataSaver, setDataSaverState] = React.useState<boolean>(false);
   const [radius, setRadiusState] = React.useState<number>(0.5);
-  const [contentDensity, setContentDensityState] = React.useState<ContentDensity>('cozy');
 
   const [isMounted, setIsMounted] = React.useState(false);
 
@@ -75,9 +72,6 @@ export function ThemeProvider({
     setDataSaverState(localStorage.getItem("willow-data-saver") === "true");
     const storedRadius = localStorage.getItem("willow-radius");
     setRadiusState(storedRadius ? parseFloat(storedRadius) : 0.5);
-    const storedContentDensity = localStorage.getItem("willow-content-density");
-    setContentDensityState((storedContentDensity as ContentDensity) || 'cozy');
-
 
   }, [isMounted, defaultTheme]);
 
@@ -162,14 +156,6 @@ export function ThemeProvider({
     }
   };
 
-  const setContentDensity = (density: ContentDensity) => {
-    setContentDensityState(density);
-    if (typeof window !== "undefined" && isMounted) {
-      localStorage.setItem("willow-content-density", density);
-      window.dispatchEvent(new CustomEvent("willow-storage-change", { detail: { key: 'contentDensity' } }));
-    }
-  };
-
   const value = {
     theme,
     setTheme,
@@ -183,8 +169,6 @@ export function ThemeProvider({
     setDataSaver,
     radius,
     setRadius,
-    contentDensity,
-    setContentDensity
   };
 
   if (!isMounted) {

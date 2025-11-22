@@ -15,23 +15,7 @@ import { FirebaseClientProvider } from "@/firebase/client-provider";
 import { useTheme } from "@/context/theme-provider";
 
 function ThemedBodyContent({ children }: { children: ReactNode }) {
-  const { radius, contentDensity } = useTheme();
-
-  const carouselBasis = {
-    comfortable: '1/2',
-    cozy: '1/3',
-    compact: '1/4',
-  };
-  const carouselBasisSm = {
-    comfortable: '1/3',
-    cozy: '1/4',
-    compact: '1/5',
-  };
-  const carouselBasisLg = {
-    comfortable: '1/5',
-    cozy: '1/6',
-    compact: '1/7',
-  };
+  const { radius } = useTheme();
 
   // This component's purpose is to apply styles to the parent body
   // We can't put the body tag here, as it needs to be in the root layout
@@ -39,10 +23,7 @@ function ThemedBodyContent({ children }: { children: ReactNode }) {
   // but for now, we apply style variables to the root element.
   React.useEffect(() => {
     document.documentElement.style.setProperty('--radius', `${radius}rem`);
-    document.documentElement.style.setProperty('--carousel-basis', carouselBasis[contentDensity]);
-    document.documentElement.style.setProperty('--carousel-basis-sm', carouselBasisSm[contentDensity]);
-    document.documentElement.style.setProperty('--carousel-basis-lg', carouselBasisLg[contentDensity]);
-  }, [radius, contentDensity]);
+  }, [radius]);
 
 
   return (

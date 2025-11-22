@@ -20,12 +20,6 @@ const themes = [
   { name: "theme-xbox", label: "XBOX Retro", palette: ["#101010", "#107c10", "#9bf00b"] },
 ];
 
-const densityOptions = [
-    { name: 'comfortable', label: 'Comfortable', icon: Columns },
-    { name: 'cozy', label: 'Cozy', icon: Rows },
-    { name: 'compact', label: 'Compact', icon: AlignJustify }
-]
-
 export function AppearanceSettings() {
   const { 
     theme, setTheme, 
@@ -33,8 +27,7 @@ export function AppearanceSettings() {
     animationsEnabled, setAnimationsEnabled, 
     blobSpeed, setBlobSpeed, 
     dataSaver, setDataSaver,
-    radius, setRadius,
-    contentDensity, setContentDensity
+    radius, setRadius
   } = useTheme();
 
   return (
@@ -123,30 +116,6 @@ export function AppearanceSettings() {
                 <Button variant="outline" onClick={() => setRadius(1)}>Pill</Button>
             </div>
            </div>
-        </div>
-
-        <div className="space-y-4">
-            <div className="flex items-center gap-2">
-                <Rows className="w-5 h-5 text-muted-foreground" />
-                <Label className="text-base">Content Density</Label>
-            </div>
-            <div className="rounded-md border p-4 space-y-2">
-                <div className="grid grid-cols-3 gap-2 rounded-lg bg-muted p-1">
-                    {densityOptions.map(opt => (
-                        <Button
-                            key={opt.name}
-                            variant={contentDensity === opt.name ? "primary" : "ghost"}
-                            size="sm"
-                            onClick={() => setContentDensity(opt.name as 'comfortable' | 'cozy' | 'compact')}
-                            className={cn("flex flex-col h-auto py-2", contentDensity === opt.name && "bg-background shadow-sm text-foreground")}
-                        >
-                            <opt.icon className="mb-1 h-5 w-5" />
-                            {opt.label}
-                        </Button>
-                    ))}
-                </div>
-                <p className="text-xs text-muted-foreground">Adjust the spacing of content carousels.</p>
-            </div>
         </div>
 
         <Separator />

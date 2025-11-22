@@ -71,7 +71,7 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
           {items.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
-              className="basis-[var(--carousel-basis)] sm:basis-[var(--carousel-basis-sm)] lg:basis-[var(--carousel-basis-lg)] pl-4 pr-2"
+              className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4 pr-2"
             >
               <motion.div layout variants={itemVariants}>
                 <MediaCard item={item} />
