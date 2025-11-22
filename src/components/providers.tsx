@@ -16,8 +16,6 @@ function genId() {
 }
 
 const TOAST_LIMIT = 3;
-const TOAST_REMOVE_DELAY = 5000;
-
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = React.useState<ToasterToast[]>([]);
@@ -41,10 +39,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       open: true,
       onOpenChange: (open) => {
         if (!open) {
-          update({ open: false });
-          setTimeout(() => {
-            dismiss();
-          }, 500); // Give it time to animate out
+          dismiss();
         }
       },
     };
@@ -75,9 +70,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
             <VideoProvider>
                 <LoadingProvider>
                     <FirebaseClientProvider>
-                        <WatchlistProvider>
-                            {children}
-                        </WatchlistProvider>
+                        {children}
                     </FirebaseClientProvider>
                 </LoadingProvider>
             </VideoProvider>

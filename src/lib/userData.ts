@@ -2,14 +2,14 @@
 'use client'
 
 import type { Media } from "@/types/tmdb";
-import { getSdks } from "@/firebase";
 import { 
   collection, 
   doc, 
   getDocs, 
   writeBatch,
   setDoc,
-  deleteDoc
+  deleteDoc,
+  Firestore
 } from "firebase/firestore";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
@@ -42,13 +42,13 @@ export const setLocalWatchlist = (watchlist: Media[]) => {
 
 // --- Firebase Implementation (for logged-in users) ---
 
-export const addToFirebaseWatchlist = (userId: string, item: Media) => {
-    const { firestore } = getSdks();
+export const addToFirebaseWatchlist = (firestore: Firestore, userId: string, item: Media) => {
+    if (!firestore) return;
     const watchlistItemRef = doc(firestore, 'users', userId, 'watchlists', String(item.id));
     
     const itemWithUser = { ...item, userId: userId };
 
-    setDoc(watchlistItemRef, itemWithUser).catch(error => {
+    setDoc(watchlistItemRef, itemWithUser, { merge: true }).catch(error => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
             path: watchlistItemRef.path,
             operation: 'create',
@@ -57,8 +57,8 @@ export const addToFirebaseWatchlist = (userId: string, item: Media) => {
     });
 };
 
-export const removeFromFirebaseWatchlist = (userId: string, itemId: number) => {
-    const { firestore } = getSdks();
+export const removeFromFirebaseWatchlist = (firestore: Firestore, userId: string, itemId: number) => {
+    if (!firestore) return;
     const watchlistItemRef = doc(firestore, 'users', userId, 'watchlists', String(itemId));
 
     deleteDoc(watchlistItemRef).catch(error => {
@@ -69,49 +69,47 @@ export const removeFromFirebaseWatchlist = (userId: string, itemId: number) => {
     });
 };
 
-export const mergeLocalWatchlistToFirebase = (userId: string) => {
-    if (!userId) return;
+export const mergeLocalWatchlistToFirebase = async (userId: string) => {
+  if (typeof window === "undefined") return;
+  const { initializeFirebase } = await import('@/firebase');
+  const { firestore } = initializeFirebase();
+  if (!firestore || !userId) return;
 
-    const localWatchlist = getLocalWatchlist();
-    if (localWatchlist.length === 0) return;
+  const localWatchlist = getLocalWatchlist();
+  if (localWatchlist.length === 0) return;
 
-    console.log('Checking for local watchlist to merge to Firebase...');
+  console.log('Checking for local watchlist to merge to Firebase...');
+  const watchlistColRef = collection(firestore, 'users', userId, 'watchlists');
 
-    const { firestore } = getSdks();
-    const watchlistColRef = collection(firestore, 'users', userId, 'watchlists');
+  try {
+    const firebaseWatchlistSnapshot = await getDocs(watchlistColRef);
+    const firebaseIds = new Set(firebaseWatchlistSnapshot.docs.map(d => d.id));
+    const itemsToMerge = localWatchlist.filter(localItem => !firebaseIds.has(String(localItem.id)));
 
-    getDocs(watchlistColRef).then(firebaseWatchlistSnapshot => {
-        const firebaseIds = new Set(firebaseWatchlistSnapshot.docs.map(d => d.id));
-        const itemsToMerge = localWatchlist.filter(localItem => !firebaseIds.has(String(localItem.id)));
+    if (itemsToMerge.length > 0) {
+      const batch = writeBatch(firestore);
+      itemsToMerge.forEach(item => {
+        const docRef = doc(firestore, 'users', userId, 'watchlists', String(item.id));
+        const itemWithUser = { ...item, userId: userId };
+        batch.set(docRef, itemWithUser);
+      });
 
-        if (itemsToMerge.length > 0) {
-            const batch = writeBatch(firestore);
-            itemsToMerge.forEach(item => {
-                const docRef = doc(firestore, 'users', userId, 'watchlists', String(item.id));
-                const itemWithUser = { ...item, userId: userId };
-                batch.set(docRef, itemWithUser);
-            });
-            
-            batch.commit().then(() => {
-                console.log(`${itemsToMerge.length} items merged to Firebase.`);
-                setLocalWatchlist([]); // Clear local watchlist
-            }).catch(error => {
-                console.error("Error committing batch to Firebase:", error);
-                errorEmitter.emit('permission-error', new FirestorePermissionError({
-                    path: watchlistColRef.path,
-                    operation: 'write',
-                    requestResourceData: { note: `${itemsToMerge.length} items in a batch write.` }
-                }));
-            });
-        } else {
-            console.log('Local watchlist was already in sync. Clearing local data.');
-            setLocalWatchlist([]); // Clear local watchlist
-        }
-    }).catch(error => {
-        console.error("Error reading Firebase watchlist for merge:", error);
-        errorEmitter.emit('permission-error', new FirestorePermissionError({
-            path: watchlistColRef.path,
-            operation: 'list'
-        }));
-    });
+      await batch.commit();
+      console.log(`${itemsToMerge.length} items merged to Firebase.`);
+      setLocalWatchlist([]); // Clear local watchlist
+    } else {
+      console.log('Local watchlist was already in sync. Clearing local data.');
+      setLocalWatchlist([]); // Clear local watchlist
+    }
+  } catch (error) {
+    console.error("Error merging watchlist:", error);
+    if (error instanceof FirestorePermissionError) {
+      errorEmitter.emit('permission-error', error);
+    } else {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: watchlistColRef.path,
+        operation: 'list' // or 'write' if it's a batch commit issue
+      }));
+    }
+  }
 };

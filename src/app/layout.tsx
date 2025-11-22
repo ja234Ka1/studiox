@@ -13,6 +13,7 @@ import { Toaster } from "@/components/ui/toaster";
 import VideoPlayer from "@/components/video-player";
 import LoadingScreen from "@/components/loading-screen";
 import { useTheme } from "@/context/theme-provider";
+import { WatchlistProvider } from "@/context/watchlist-provider";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -25,7 +26,7 @@ function ThemedBodyContent({ children }: { children: ReactNode }) {
 
 
   return (
-      <>
+      <WatchlistProvider>
         <LoadingScreen />
         <Background />
         <div className="relative z-10 flex min-h-screen flex-col">
@@ -34,7 +35,7 @@ function ThemedBodyContent({ children }: { children: ReactNode }) {
         </div>
         <VideoPlayer />
         <Toaster />
-      </>
+      </WatchlistProvider>
   );
 }
 
