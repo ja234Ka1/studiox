@@ -13,6 +13,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { MediaCard } from "./media-card";
+import { cn } from "@/lib/utils";
 
 interface Top10CarouselProps {
   title: string;
@@ -71,7 +72,6 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
       <Carousel
         opts={{
           align: "start",
-          loop: true,
         }}
         className="w-full mt-4"
       >
@@ -79,14 +79,17 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
           {items.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
-              className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 pl-28 group"
+              className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 pl-28 pr-4 group"
             >
               <motion.div
                 className="relative flex items-center justify-end h-full"
                 layout
                 variants={itemVariants}
               >
-                <span className="absolute -left-28 bottom-0 text-[18rem] font-black text-transparent text-outline leading-none select-none transition-all duration-300 group-hover:scale-105 group-hover:text-glow">
+                <span className={cn(
+                  "absolute bottom-0 text-[18rem] font-black text-transparent text-outline leading-none select-none transition-all duration-300 group-hover:scale-105 group-hover:text-glow",
+                   index === 9 ? "-left-40" : "-left-28" // Shift "10" further left
+                )}>
                   {index + 1}
                 </span>
                 <div className="w-full relative z-10">
