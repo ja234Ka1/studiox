@@ -7,7 +7,6 @@ import Image from "next/image";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Clapperboard } from "lucide-react";
 import type { Media } from "@/types/tmdb";
-import Top10Carousel from "@/components/top10-carousel";
 import ContinueWatchingCarousel from "@/components/continue-watching-carousel";
 
 interface Category {
@@ -35,7 +34,6 @@ export default async function Home() {
   let trendingWeekly: Media[] = [];
   let categories: Category[] = [];
   let error: string | null = null;
-  let top10MoviesToday: Media[] = [];
   
   try {
     const trendingWeeklyPromise = getTrending("all", "week");
@@ -51,12 +49,6 @@ export default async function Home() {
     } else {
       console.error('Failed to fetch trending:', trendingWeeklyResult.reason);
       throw new Error("Failed to fetch trending data.");
-    }
-    
-    // The first category config is "Trending Movies Today", which we use for the Top 10
-    const top10Result = categoriesResults[0];
-    if (top10Result.status === 'fulfilled') {
-        top10MoviesToday = top10Result.value.slice(0, 10);
     }
 
     categories = categoriesConfig.map((config, index) => {
@@ -113,13 +105,10 @@ export default async function Home() {
         {!error && (
           <div className="space-y-16">
             <ContinueWatchingCarousel />
-            {top10MoviesToday.length > 0 && (
-              <Top10Carousel title="Top 10 Movies Today" items={top10MoviesToday} />
-            )}
             {trendingWeekly.length > 0 && (
               <MediaCarousel title="Trending This Week" items={trendingWeekly} />
             )}
-            {categories.slice(1).map((category) => ( // .slice(1) to skip the Top 10 data we already used
+            {categories.map((category) => (
               <MediaCarousel key={category.title} title={category.title} items={category.items} />
             ))}
           </div>
@@ -128,5 +117,3 @@ export default async function Home() {
     </div>
   );
 }
-
-    
