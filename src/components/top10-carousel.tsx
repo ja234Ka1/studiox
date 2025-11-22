@@ -98,3 +98,4 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
     </motion.section>
   );
 }
+
