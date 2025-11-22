@@ -7,6 +7,7 @@ import Image from "next/image";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Clapperboard } from "lucide-react";
 import type { Media } from "@/types/tmdb";
+import VidfastContinueWatching from "@/components/vidfast-continue-watching";
 
 interface Category {
   title: string;
@@ -103,6 +104,7 @@ export default async function Home() {
 
         {!error && (
           <div className="space-y-16">
+            <VidfastContinueWatching />
             {trendingWeekly.length > 0 && (
               <MediaCarousel title="Trending This Week" items={trendingWeekly} />
             )}

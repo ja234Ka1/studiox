@@ -7,7 +7,16 @@ import type { MediaType } from "@/types/tmdb";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+
+const vidfastOrigins = [
+    'https://vidfast.pro',
+    'https://vidfast.in',
+    'https://vidfast.io',
+    'https://vidfast.me',
+    'https://vidfast.net',
+    'https://vidfast.pm',
+    'https://vidfast.xyz'
+];
 
 export default function StreamPage() {
   const params = useParams<{ mediaType: MediaType; id: string }>();
@@ -20,6 +29,24 @@ export default function StreamPage() {
   
   const season = searchParams.get('s');
   const episode = searchParams.get('e');
+
+  useEffect(() => {
+    const handleMessage = ({ origin, data }: MessageEvent) => {
+      if (!vidfastOrigins.includes(origin) || !data) {
+        return;
+      }
+      if (data.type === 'MEDIA_DATA') {
+        localStorage.setItem('vidFastProgress', JSON.stringify(data.data));
+        window.dispatchEvent(new CustomEvent('vidfast-progress-change'));
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, []);
 
   if (mediaType !== "tv" && mediaType !== "movie") {
     notFound();
