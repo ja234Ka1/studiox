@@ -9,9 +9,9 @@ import { LoadingProvider } from "@/context/loading-provider";
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-        <VideoProvider>
-          <LoadingProvider>{children}</LoadingProvider>
-        </VideoProvider>
+      <VideoProvider>
+        <LoadingProvider>{children}</LoadingProvider>
+      </VideoProvider>
     </ThemeProvider>
   );
 }
