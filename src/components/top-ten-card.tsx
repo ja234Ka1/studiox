@@ -46,7 +46,7 @@ export function TopTenCard({ item, rank }: TopTenCardProps) {
     <motion.div
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
-      className="relative aspect-[2/3] w-full rounded-md overflow-visible cursor-pointer group flex-shrink-0"
+      className="relative aspect-[2/3] w-full rounded-md cursor-pointer group flex-shrink-0"
       transition={{ duration: 0.3 }}
       layoutId={`top-10-card-${item.id}`}
     >
