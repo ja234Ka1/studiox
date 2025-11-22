@@ -93,6 +93,7 @@ export default function StreamPage() {
           allow="autoplay; fullscreen"
           allowFullScreen
           className="w-full h-full border-0"
+          sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
       />
     </div>
   );
