@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlayCircle, Plus, Check, VolumeX, Volume2 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
+import type { YouTubePlayer } from "react-youtube";
 
 import type { MediaDetails } from "@/types/tmdb";
 import { getTmdbImageUrl } from "@/lib/utils";
@@ -25,8 +26,9 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
   const { toast } = useToast();
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [showTrailer, setShowTrailer] = useState(false);
-  const [isMuted, setIsMuted] = useState(true); // Start muted, will be unmuted on hover
+  const [isMuted, setIsMuted] = useState(true);
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
+  const playerRef = useRef<YouTubePlayer | null>(null);
 
   const title = item.title || item.name;
   const releaseDate = item.release_date || item.first_air_date;
@@ -48,12 +50,18 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
     window.addEventListener('willow-watchlist-change', handleWatchlistChange);
     return () => window.removeEventListener('willow-watchlist-change', handleWatchlistChange);
   }, [item.id]);
+
+  useEffect(() => {
+    if (showTrailer && playerRef.current) {
+        playerRef.current.unMute();
+        setIsMuted(false);
+    }
+  }, [showTrailer]);
   
   const handleMouseEnter = () => {
     if (trailer) {
       hoverTimeout.current = setTimeout(() => {
         setShowTrailer(true);
-        setIsMuted(false);
       }, 3000);
     }
   };
@@ -63,7 +71,7 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
       clearTimeout(hoverTimeout.current);
     }
     setShowTrailer(false);
-    // Don't set isMuted back to true here, let it be controlled by the button
+    setIsMuted(true);
   };
 
 
@@ -121,7 +129,12 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
                 transition={{ duration: 0.5 }}
                 className="absolute inset-0"
               >
-                  <YouTubeEmbed videoId={trailer.key} isMuted={isMuted} />
+                  <YouTubeEmbed 
+                    videoId={trailer.key} 
+                    onReady={(event) => {
+                      playerRef.current = event.target;
+                    }}
+                  />
             </motion.div>
           )}
         </AnimatePresence>
@@ -181,7 +194,14 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
             variant="secondary"
             onClick={(e) => {
               e.stopPropagation();
-              setIsMuted((prev) => !prev);
+              if (playerRef.current) {
+                if (isMuted) {
+                    playerRef.current.unMute();
+                } else {
+                    playerRef.current.mute();
+                }
+                setIsMuted((prev) => !prev);
+              }
             }}
             className="rounded-full h-12 w-12"
           >
