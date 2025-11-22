@@ -16,28 +16,36 @@ export default function LoadingScreen() {
       transition: {
         duration: 0.3,
         ease: "easeInOut",
-        when: "beforeChildren",
-        staggerChildren: 0.1,
       },
     },
     exit: {
-        opacity: 0,
-        transition: {
-            duration: 0.3,
-            ease: "easeInOut"
-        }
-    }
+      opacity: 0,
+      transition: {
+        duration: 0.3,
+        ease: "easeInOut",
+        delay: 0.5,
+      },
+    },
   };
 
-  const letterVariants = {
-    hidden: { opacity: 0, y: 20 },
+  const textContainerVariants = {
+    hidden: {},
     visible: {
-      opacity: 1,
-      y: 0,
       transition: {
-        type: "spring",
-        damping: 12,
-        stiffness: 200,
+        staggerChildren: 0.08,
+        delayChildren: 0.1,
+      },
+    },
+  };
+  
+  const letterVariants = {
+    hidden: { y: "100%", opacity: 0 },
+    visible: {
+      y: "0%",
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+        ease: [0.6, 0.01, -0.05, 0.95],
       },
     },
   };
@@ -45,14 +53,14 @@ export default function LoadingScreen() {
   const lineVariants = {
     hidden: { width: 0 },
     visible: {
-        width: '100%',
-        transition: {
-            duration: 1.2,
-            ease: [0.6, 0.01, -0.05, 0.95],
-            delay: 0.5
-        }
-    }
-  }
+      width: "100%",
+      transition: {
+        duration: 1,
+        ease: [0.83, 0, 0.17, 1],
+        delay: 0.4,
+      },
+    },
+  };
 
   return (
     <AnimatePresence>
@@ -68,6 +76,7 @@ export default function LoadingScreen() {
             <motion.div
               className="flex overflow-hidden text-4xl font-bold tracking-widest"
               aria-label={brandName}
+              variants={textContainerVariants}
             >
               {letters.map((letter, index) => (
                 <motion.span
@@ -80,10 +89,10 @@ export default function LoadingScreen() {
               ))}
             </motion.div>
             <div className="w-48 h-0.5 bg-muted overflow-hidden">
-                <motion.div 
-                    className="h-full bg-accent"
-                    variants={lineVariants}
-                />
+              <motion.div
+                className="h-full bg-accent"
+                variants={lineVariants}
+              />
             </div>
           </div>
         </motion.div>
