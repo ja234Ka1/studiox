@@ -6,7 +6,7 @@ import { useTheme } from "@/context/theme-provider";
 import { cn } from "@/lib/utils";
 
 export function Background() {
-  const { backgroundEffects, theme } = useTheme();
+  const { backgroundEffects, theme, blobSpeed } = useTheme();
 
   // Use a state to prevent SSR/hydration mismatch for randomized values
   const [isMounted, setIsMounted] = useState(false);
@@ -32,19 +32,19 @@ export function Background() {
           className={cn(
             "absolute h-96 w-96 rounded-full bg-accent/10 blur-3xl animate-blob-move"
           )}
-          style={{ animationDelay: '0s', animationDuration: '30s' }}
+          style={{ animationDelay: '0s', animationDuration: `${blobSpeed}s` }}
         />
         <div
           className={cn(
             "absolute h-96 w-96 rounded-full bg-accent/10 blur-3xl animate-blob-move"
           )}
-          style={{ animationDelay: '-15s', animationDuration: '32s' }}
+          style={{ animationDelay: `-${blobSpeed * 0.5}s`, animationDuration: `${blobSpeed + 2}s` }}
         />
          <div
           className={cn(
             "absolute h-80 w-80 rounded-full bg-primary/5 blur-3xl animate-blob-move"
           )}
-          style={{ animationDelay: '-7s', animationDuration: '35s' }}
+          style={{ animationDelay: `-${blobSpeed * 0.25}s`, animationDuration: `${blobSpeed + 5}s` }}
         />
       </div>
 

@@ -22,6 +22,8 @@ type ThemeProviderState = {
   setBackgroundEffects: (effects: Partial<BackgroundEffects>) => void;
   animationsEnabled: boolean;
   setAnimationsEnabled: (enabled: boolean) => void;
+  blobSpeed: number;
+  setBlobSpeed: (speed: number) => void;
 };
 
 const ThemeProviderContext = React.createContext<ThemeProviderState | undefined>(undefined);
@@ -40,6 +42,8 @@ export function ThemeProvider({
   });
 
   const [animationsEnabled, setAnimationsEnabledState] = React.useState<boolean>(true);
+  const [blobSpeed, setBlobSpeedState] = React.useState<number>(30);
+
 
   const [isMounted, setIsMounted] = React.useState(false);
 
@@ -56,6 +60,8 @@ export function ThemeProvider({
       starfield: localStorage.getItem("willow-bg-starfield") === "true",
     });
     setAnimationsEnabledState(localStorage.getItem("willow-animations-enabled") !== "false");
+    const storedBlobSpeed = localStorage.getItem("willow-blob-speed");
+    setBlobSpeedState(storedBlobSpeed ? parseInt(storedBlobSpeed, 10) : 30);
 
   }, [isMounted, defaultTheme]);
 
@@ -116,13 +122,23 @@ export function ThemeProvider({
     }
   };
 
+  const setBlobSpeed = (speed: number) => {
+    setBlobSpeedState(speed);
+    if (typeof window !== "undefined" && isMounted) {
+      localStorage.setItem("willow-blob-speed", String(speed));
+      window.dispatchEvent(new CustomEvent("willow-storage-change", { detail: { key: 'blobSpeed' } }));
+    }
+  };
+
   const value = {
     theme,
     setTheme,
     backgroundEffects,
     setBackgroundEffects,
     animationsEnabled,
-    setAnimationsEnabled
+    setAnimationsEnabled,
+    blobSpeed,
+    setBlobSpeed
   };
 
   if (!isMounted) {

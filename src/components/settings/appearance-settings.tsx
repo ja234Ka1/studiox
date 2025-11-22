@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Separator } from "../ui/separator";
+import { Slider } from "../ui/slider";
 
 const themes = [
   { name: "light", label: "Willow Light", icon: Sun, accentColor: "hsl(0 0% 0%)" },
@@ -17,7 +18,7 @@ const themes = [
 ];
 
 export function AppearanceSettings() {
-  const { theme, setTheme, backgroundEffects, setBackgroundEffects, animationsEnabled, setAnimationsEnabled } = useTheme();
+  const { theme, setTheme, backgroundEffects, setBackgroundEffects, animationsEnabled, setAnimationsEnabled, blobSpeed, setBlobSpeed } = useTheme();
 
   return (
     <div className="space-y-6">
@@ -100,15 +101,33 @@ export function AppearanceSettings() {
                 id="blobs-switch"
                 checked={backgroundEffects.blobs}
                 onCheckedChange={(checked) =>
-                  setBackgroundEffects({ blobs: checked })
+                  setBackgroundEffects({ ...backgroundEffects, blobs: checked })
                 }
               />
             </div>
+            {backgroundEffects.blobs && (
+              <div className="space-y-3 pl-2">
+                <Label htmlFor="blob-speed-slider">Blob Animation Speed</Label>
+                <div className="flex items-center gap-4">
+                  <span className="text-xs text-muted-foreground">Slow</span>
+                  <Slider
+                    id="blob-speed-slider"
+                    min={5}
+                    max={60}
+                    step={5}
+                    value={[65 - blobSpeed]}
+                    onValueChange={(value) => setBlobSpeed(65 - value[0])}
+                    className="w-full"
+                  />
+                  <span className="text-xs text-muted-foreground">Fast</span>
+                </div>
+              </div>
+            )}
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="starfield-switch" className="font-medium">
                   Starfield
-                </Label>
+                Label>
                 <p className="text-xs text-muted-foreground">
                   A subtle starfield effect for extra depth (dark mode only).
                 </p>
@@ -117,7 +136,7 @@ export function AppearanceSettings() {
                 id="starfield-switch"
                 checked={backgroundEffects.starfield}
                 onCheckedChange={(checked) =>
-                  setBackgroundEffects({ starfield: checked })
+                  setBackgroundEffects({ ...backgroundEffects, starfield: checked })
                 }
               />
             </div>
