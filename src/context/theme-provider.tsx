@@ -20,6 +20,8 @@ type ThemeProviderState = {
   setTheme: (theme: string) => void;
   backgroundEffects: BackgroundEffects;
   setBackgroundEffects: (effects: Partial<BackgroundEffects>) => void;
+  animationsEnabled: boolean;
+  setAnimationsEnabled: (enabled: boolean) => void;
 };
 
 const ThemeProviderContext = React.createContext<ThemeProviderState | undefined>(undefined);
@@ -30,19 +32,14 @@ export function ThemeProvider({
     enableSystem = true,
     ...props 
 }: CustomThemeProviderProps) {
-  const [theme, setThemeState] = React.useState<string>(() => {
-    // On the server, always return the default so there's no mismatch
-    if (typeof window === 'undefined') {
-      return defaultTheme;
-    }
-    // On the client, read from localStorage
-    return localStorage.getItem("willow-theme") || defaultTheme;
-  });
+  const [theme, setThemeState] = React.useState<string>(() => 'system');
   
   const [backgroundEffects, setBackgroundEffectsState] = React.useState<BackgroundEffects>({
     blobs: true,
     starfield: false,
   });
+
+  const [animationsEnabled, setAnimationsEnabledState] = React.useState<boolean>(true);
 
   const [isMounted, setIsMounted] = React.useState(false);
 
@@ -51,13 +48,15 @@ export function ThemeProvider({
   }, []);
 
   React.useEffect(() => {
-    if (!isMounted) return; // Only run effect after mount
+    if (!isMounted) return;
 
-    const storedTheme = localStorage.getItem("willow-theme") || defaultTheme;
-    setTheme(storedTheme);
-    const storedBlobs = localStorage.getItem("willow-bg-blobs") !== "false";
-    const storedStarfield = localStorage.getItem("willow-bg-starfield") === "true";
-    setBackgroundEffectsState({ blobs: storedBlobs, starfield: storedStarfield });
+    setThemeState(localStorage.getItem("willow-theme") || defaultTheme);
+    setBackgroundEffectsState({
+      blobs: localStorage.getItem("willow-bg-blobs") !== "false",
+      starfield: localStorage.getItem("willow-bg-starfield") === "true",
+    });
+    setAnimationsEnabledState(localStorage.getItem("willow-animations-enabled") !== "false");
+
   }, [isMounted, defaultTheme]);
 
   const setTheme = (newTheme: string) => {
@@ -84,7 +83,7 @@ export function ThemeProvider({
   React.useEffect(() => {
     if (typeof window === 'undefined' || !isMounted) return;
     
-    setTheme(theme); // Apply theme on change
+    setTheme(theme);
     
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = () => {
@@ -100,7 +99,7 @@ export function ThemeProvider({
   const setBackgroundEffects = (effects: Partial<BackgroundEffects>) => {
     setBackgroundEffectsState(prev => {
       const newEffects = { ...prev, ...effects };
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && isMounted) {
         localStorage.setItem("willow-bg-blobs", String(newEffects.blobs));
         localStorage.setItem("willow-bg-starfield", String(newEffects.starfield));
         window.dispatchEvent(new CustomEvent("willow-storage-change", { detail: { key: 'backgroundEffects' } }));
@@ -109,11 +108,21 @@ export function ThemeProvider({
     });
   };
 
+  const setAnimationsEnabled = (enabled: boolean) => {
+    setAnimationsEnabledState(enabled);
+    if (typeof window !== 'undefined' && isMounted) {
+      localStorage.setItem("willow-animations-enabled", String(enabled));
+      window.dispatchEvent(new CustomEvent("willow-storage-change", { detail: { key: 'animationsEnabled' } }));
+    }
+  };
+
   const value = {
     theme,
     setTheme,
     backgroundEffects,
     setBackgroundEffects,
+    animationsEnabled,
+    setAnimationsEnabled
   };
 
   if (!isMounted) {

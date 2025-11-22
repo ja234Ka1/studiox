@@ -1,8 +1,11 @@
+
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
+import { useEffect } from "react"
+import { updateProfile } from "firebase/auth"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -16,6 +19,9 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { useUser } from "@/firebase"
+import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/firebase/provider"
+
 
 const profileFormSchema = z.object({
   username: z
@@ -37,21 +43,53 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>
 
 export function ProfileSettings() {
   const { user } = useUser()
-  
-  const defaultValues: Partial<ProfileFormValues> = {
-    username: user?.displayName || "",
-    email: user?.email || "",
-  }
-  
+  const auth = useAuth()
+  const { toast } = useToast()
+
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
-    defaultValues,
+    defaultValues: {
+      username: "",
+      email: "",
+    },
     mode: "onChange",
   })
+  
+  useEffect(() => {
+    if (user) {
+      form.reset({
+        username: user.displayName || "",
+        email: user.email || "",
+      });
+    }
+  }, [user, form]);
 
-  function onSubmit(data: ProfileFormValues) {
-    // TODO: Implement profile update logic
-    console.log(data)
+  async function onSubmit(data: ProfileFormValues) {
+    if (!auth?.currentUser) {
+        toast({
+          variant: "destructive",
+          title: "Not authenticated",
+          description: "You must be logged in to update your profile.",
+        });
+        return;
+      }
+  
+      try {
+        await updateProfile(auth.currentUser, {
+          displayName: data.username,
+        });
+        toast({
+          title: "Profile updated",
+          description: "Your username has been successfully updated.",
+        });
+      } catch (error: any) {
+        console.error("Error updating profile:", error);
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Something went wrong.",
+          description: error.message || "Could not update your profile.",
+        });
+      }
   }
 
   return (
@@ -97,7 +135,9 @@ export function ProfileSettings() {
               </FormItem>
             )}
           />
-          <Button type="submit">Update profile</Button>
+          <Button type="submit" disabled={!form.formState.isDirty || form.formState.isSubmitting}>
+            {form.formState.isSubmitting ? "Saving..." : "Update profile"}
+          </Button>
         </form>
       </Form>
     </div>

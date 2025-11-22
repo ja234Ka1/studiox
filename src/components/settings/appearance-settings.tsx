@@ -8,15 +8,16 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Separator } from "../ui/separator";
 
 const themes = [
-  { name: "light", label: "Willow Light", icon: Sun, accentColor: "hsl(45 90% 55%)" },
+  { name: "light", label: "Willow Light", icon: Sun, accentColor: "hsl(0 0% 0%)" },
   { name: "dark", label: "Willow", icon: Moon, accentColor: "hsl(0 0% 100%)" },
   { name: "theme-rose", label: "Rose", accentColor: "hsl(346.8 77.2% 49.8%)" },
 ];
 
 export function AppearanceSettings() {
-  const { theme, setTheme, backgroundEffects, setBackgroundEffects } = useTheme();
+  const { theme, setTheme, backgroundEffects, setBackgroundEffects, animationsEnabled, setAnimationsEnabled } = useTheme();
 
   return (
     <div className="space-y-6">
@@ -41,7 +42,7 @@ export function AppearanceSettings() {
                 onClick={() => setTheme(t.name)}
               >
                 <div
-                  className="w-4 h-4 rounded-full mr-2"
+                  className="w-4 h-4 rounded-full mr-2 border"
                   style={{ backgroundColor: t.accentColor }}
                 />
                 <span className="flex-1 text-left">{t.label}</span>
@@ -65,10 +66,27 @@ export function AppearanceSettings() {
             </Button>
           </div>
         </div>
+        
+        <Separator />
 
         <div className="space-y-2">
-          <Label>Background Effects</Label>
+          <Label>UI Customization</Label>
           <div className="space-y-4 rounded-md border p-4">
+            <div className="flex items-center justify-between">
+                <div>
+                    <Label htmlFor="animations-switch" className="font-medium">
+                    UI Animations
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                    Enable or disable animations throughout the app.
+                    </p>
+                </div>
+                <Switch
+                    id="animations-switch"
+                    checked={animationsEnabled}
+                    onCheckedChange={setAnimationsEnabled}
+                />
+            </div>
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="blobs-switch" className="font-medium">

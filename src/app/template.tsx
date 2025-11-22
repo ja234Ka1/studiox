@@ -1,8 +1,16 @@
+
 "use client";
 
 import { motion } from "framer-motion";
+import { useTheme } from "@/context/theme-provider";
 
 export default function Template({ children }: { children: React.ReactNode }) {
+  const { animationsEnabled } = useTheme();
+
+  if (!animationsEnabled) {
+    return <>{children}</>;
+  }
+
   return (
     <motion.div
       initial={{ y: 20, opacity: 0 }}
