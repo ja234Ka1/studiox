@@ -11,10 +11,7 @@ type Props = {
   };
 };
 
-export default function StreamPage({ params }: Props) {
-  const mediaType = params.mediaType;
-  const id = params.id;
-
+export default function StreamPage({ params: { mediaType, id } }: Props) {
   if (mediaType !== "tv" && mediaType !== "movie") {
     notFound();
   }
