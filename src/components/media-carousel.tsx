@@ -1,4 +1,7 @@
 
+"use client";
+
+import * as React from "react";
 import type { Media } from "@/types/tmdb";
 import { MediaCard } from "./media-card";
 import {
@@ -15,6 +18,8 @@ interface MediaCarouselProps {
 }
 
 export default function MediaCarousel({ title, items }: MediaCarouselProps) {
+  const [hoveredCard, setHoveredCard] = React.useState<number | null>(null);
+
   if (!items || items.length === 0) {
     return null;
   }
@@ -36,7 +41,14 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
               key={`${item.id}-${index}`}
               className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-[15%] pl-4"
             >
-              <MediaCard item={item} />
+              <div onMouseLeave={() => setHoveredCard(null)}>
+                <MediaCard 
+                  item={item} 
+                  isHovered={hoveredCard === item.id}
+                  onHoverStart={() => setHoveredCard(item.id)}
+                  onHoverEnd={() => setHoveredCard(null)}
+                />
+              </div>
             </CarouselItem>
           ))}
         </CarouselContent>
