@@ -1,13 +1,18 @@
 
-import { notFound } from "next/navigation";
+'use client'
+
+import { notFound, usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { getMediaDetails } from "@/lib/tmdb";
-import type { MediaType } from "@/types/tmdb";
+import type { MediaType, MediaDetails as MediaDetailsType } from "@/types/tmdb";
 import { getTmdbImageUrl } from "@/lib/utils";
 import { Star } from "lucide-react";
 import MediaCarousel from "@/components/media-carousel";
 import { DetailPageHero } from "@/components/detail-page-hero";
 import { EpisodeSelector } from "@/components/episode-selector";
+import { useEffect, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { motion } from "framer-motion";
 
 type Props = {
   params: {
@@ -16,25 +21,77 @@ type Props = {
   };
 };
 
-export default async function MediaDetailsPage({
-  params: { mediaType, id },
-}: Props) {
-  if (mediaType !== "movie" && mediaType !== "tv") {
+const castVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.05,
+      duration: 0.5,
+      ease: "easeOut",
+    },
+  }),
+};
+
+
+export default function MediaDetailsPage({ params }: Props) {
+  const { mediaType, id } = params;
+  const [item, setItem] = useState<MediaDetailsType | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (mediaType !== "movie" && mediaType !== "tv") {
+      notFound();
+    }
+    const numericId = parseInt(id, 10);
+    if (isNaN(numericId)) {
+      notFound();
+    }
+
+    async function fetchDetails() {
+      setIsLoading(true);
+      try {
+        const details = await getMediaDetails(numericId, mediaType);
+        setItem(details);
+      } catch (error) {
+        console.error("Failed to fetch media details:", error);
+        setItem(null);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchDetails();
+  }, [mediaType, id]);
+
+
+  if (isLoading) {
+    return (
+        <div className="flex flex-col">
+            {/* Skeleton for Hero */}
+            <div className="w-full h-[60vh] lg:h-[85vh] bg-muted animate-pulse" />
+            <div className="container mx-auto px-4 md:px-8 lg:px-16 space-y-12 py-12 pb-24">
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                    <div className="lg:col-span-3 space-y-8">
+                        <Skeleton className="h-24 w-full" />
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <Skeleton className="h-12 w-full" />
+                            <Skeleton className="h-12 w-full" />
+                            <Skeleton className="h-12 w-full" />
+                            <Skeleton className="h-12 w-full" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+  }
+
+  if (!item) {
     notFound();
   }
 
-  const numericId = parseInt(id, 10);
-  if (isNaN(numericId)) {
-    notFound();
-  }
-
-  let item;
-  try {
-    item = await getMediaDetails(numericId, mediaType);
-  } catch (error) {
-    console.error("Failed to fetch media details:", error);
-    notFound();
-  }
 
   // Manually add media_type to the item object, as it's not in the API response for details
   const itemWithMediaType = { ...item, media_type: mediaType };
@@ -95,27 +152,37 @@ export default async function MediaDetailsPage({
             )}
 
 
-            <div className="mt-12">
-              <h2 className="text-2xl font-bold mb-4">Top Cast</h2>
+            <motion.div 
+              className="mt-12"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+            >
+              <h2 className="text-2xl font-bold mb-6 text-center">Top Cast</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-6">
-                {topCast.map((member) => (
-                  <div key={member.id} className="text-center">
-                    <div className="relative aspect-[2/3] rounded-lg overflow-hidden mb-2 bg-muted">
+                {topCast.map((member, index) => (
+                  <motion.div 
+                    key={member.id} 
+                    className="text-center"
+                    variants={castVariants}
+                    custom={index}
+                  >
+                    <div className="relative aspect-[2/3] rounded-lg overflow-hidden mb-2 bg-muted shadow-lg">
                       <Image
                         src={getTmdbImageUrl(member.profile_path, "w500")}
                         alt={member.name}
                         fill
-                        className="object-cover"
+                        className="object-cover transition-transform duration-300 hover:scale-105"
                       />
                     </div>
                     <p className="font-semibold text-sm">{member.name}</p>
                     <p className="text-xs text-muted-foreground">
                       {member.character}
                     </p>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           </div>
 
           <div className="lg:col-span-1">
