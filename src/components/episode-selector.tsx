@@ -5,19 +5,11 @@ import { useState, useEffect, forwardRef } from 'react';
 import Image from 'next/image';
 import { getSeasonDetails } from '@/lib/tmdb';
 import type { SeasonDetails, Episode } from '@/types/tmdb';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from '@/components/ui/button';
 import LoadingLink from './loading-link';
 import { PlayCircle, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { getTmdbImageUrl } from '@/lib/utils';
-import { Skeleton } from './ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from './ui/tabs';
 import { ScrollArea, ScrollBar } from './ui/scroll-area';
 import { AnimatePresence, motion } from 'framer-motion';
