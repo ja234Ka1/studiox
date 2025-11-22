@@ -83,6 +83,7 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
         title: 'Added to Watchlist', 
         description: `"${title}" has been added.`,
         imageUrl: getTmdbImageUrl(item.poster_path, 'w500'),
+        status: "success",
       });
     }
   };

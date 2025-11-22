@@ -2,6 +2,9 @@
 "use client"
 
 import Image from "next/image"
+import { CheckCircle2, Info, XCircle } from "lucide-react"
+import { AnimatePresence, motion } from "framer-motion"
+
 import { useToast } from "@/hooks/use-toast"
 import {
   Toast,
@@ -12,37 +15,56 @@ import {
   ToastViewport,
 } from "@/components/ui/toast"
 
+const statusIcons = {
+  success: <CheckCircle2 className="text-green-500" />,
+  error: <XCircle className="text-destructive" />,
+  info: <Info className="text-blue-500" />,
+}
+
 export function Toaster() {
   const { toasts } = useToast()
 
   return (
     <ToastProvider>
-      {toasts.map(function ({ id, title, description, action, imageUrl, ...props }) {
-        return (
-          <Toast key={id} {...props}>
-            <div className="flex items-start gap-4">
-              {imageUrl && (
-                <div className="relative w-16 h-24 rounded-md overflow-hidden flex-shrink-0">
-                    <Image
-                      src={imageUrl}
-                      alt={title as string || 'Media Poster'}
-                      fill
-                      className="object-cover"
-                    />
+      <AnimatePresence>
+        {toasts.map(function ({ id, title, description, action, imageUrl, status, ...props }) {
+          const Icon = status ? statusIcons[status] : null
+
+          return (
+            <motion.li
+                key={id}
+                layout
+                initial={{ opacity: 0, y: 50, scale: 0.3 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
+            >
+              <Toast {...props}>
+                <div className="flex items-center gap-3 w-full">
+                  {Icon && <div className="flex-shrink-0">{Icon}</div>}
+                  {imageUrl && (
+                    <div className="relative w-12 h-16 rounded-sm overflow-hidden flex-shrink-0">
+                        <Image
+                          src={imageUrl}
+                          alt={title as string || 'Media Poster'}
+                          fill
+                          className="object-cover"
+                        />
+                    </div>
+                  )}
+                  <div className="grid gap-1 flex-grow">
+                    {title && <ToastTitle>{title}</ToastTitle>}
+                    {description && (
+                      <ToastDescription>{description}</ToastDescription>
+                    )}
+                  </div>
                 </div>
-              )}
-              <div className="grid gap-1 flex-grow">
-                {title && <ToastTitle>{title}</ToastTitle>}
-                {description && (
-                  <ToastDescription>{description}</ToastDescription>
-                )}
-              </div>
-            </div>
-            {action}
-            <ToastClose />
-          </Toast>
-        )
-      })}
+                {action}
+                <ToastClose />
+              </Toast>
+            </motion.li>
+          )
+        })}
+      </AnimatePresence>
       <ToastViewport />
     </ToastProvider>
   )

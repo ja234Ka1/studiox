@@ -74,6 +74,7 @@ export function Hero({ items }: HeroProps) {
         title: 'Added to Watchlist', 
         description: `"${title}" has been added.`,
         imageUrl: getTmdbImageUrl(item.poster_path, 'w500'),
+        status: "success",
       });
     }
   };

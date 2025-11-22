@@ -10,7 +10,7 @@ import type {
 } from "@/components/ui/toast"
 import { type Toast as ToastType } from "@/types/tmdb"
 
-const TOAST_LIMIT = 1
+const TOAST_LIMIT = 3
 const TOAST_REMOVE_DELAY = 1000000
 
 type ToasterToast = ToastProps & {
@@ -19,6 +19,7 @@ type ToasterToast = ToastProps & {
   description?: React.ReactNode
   action?: ToastActionElement
   imageUrl?: string
+  status?: "success" | "error" | "info"
 }
 
 const actionTypes = {

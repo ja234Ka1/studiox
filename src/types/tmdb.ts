@@ -1,3 +1,4 @@
+
 export type MediaType = "movie" | "tv";
 export type TimeRange = "day" | "week";
 
@@ -137,4 +138,5 @@ export type Toast = {
   variant?: "default" | "destructive";
   action?: React.ReactElement<any, string | React.JSXElementConstructor<any>>;
   imageUrl?: string;
+  status?: "success" | "error" | "info";
 };
