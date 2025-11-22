@@ -31,7 +31,8 @@ const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({ videoId, onReady }) => {
         videoId={videoId}
         opts={opts}
         onReady={onReady}
-        className="absolute top-1/2 left-1/2 w-[calc(100vw*1.5)] h-[calc(56.25vw*1.5)] min-h-[calc(100vh*1.5)] min-w-[calc(177.77vh*1.5)] -translate-x-1/2 -translate-y-1/2"
+        className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto -translate-x-1/2 -translate-y-1/2"
+        iframeClassName="w-[177.77vh] min-w-[100vw] h-[100vw] min-h-[56.25vw]"
       />
     </div>
   );
