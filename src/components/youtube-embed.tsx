@@ -1,15 +1,18 @@
 
 "use client"
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import YouTube, { type YouTubeProps } from 'react-youtube';
 
 interface YouTubeEmbedProps {
   videoId: string;
+  isMuted: boolean;
   onReady: YouTubeProps['onReady'];
 }
 
-const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({ videoId, onReady }) => {
+const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({ videoId, isMuted, onReady }) => {
+  const playerRef = useRef<any>(null);
+
   const opts: YouTubeProps['opts'] = {
     playerVars: {
       autoplay: 1,
@@ -25,12 +28,27 @@ const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({ videoId, onReady }) => {
     },
   };
 
+  const handleReady: YouTubeProps['onReady'] = (event) => {
+    playerRef.current = event.target;
+    onReady(event);
+  };
+  
+  useEffect(() => {
+    if (playerRef.current) {
+        if (isMuted) {
+            playerRef.current.mute();
+        } else {
+            playerRef.current.unMute();
+        }
+    }
+  }, [isMuted]);
+
   return (
     <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden">
        <YouTube
         videoId={videoId}
         opts={opts}
-        onReady={onReady}
+        onReady={handleReady}
         className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto -translate-x-1/2 -translate-y-1/2"
         iframeClassName="w-[177.77vh] min-w-[100vw] h-[100vw] min-h-[56.25vw]"
       />
