@@ -75,7 +75,7 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
         }}
         className="w-full mt-4"
       >
-        <CarouselContent className="-ml-4 md:px-4">
+        <CarouselContent className="-ml-8 md:px-4">
           {items.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
