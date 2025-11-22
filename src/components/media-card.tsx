@@ -11,7 +11,6 @@ import type { Media } from "@/types/tmdb";
 import { getTmdbImageUrl } from "@/lib/utils";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Button } from "./ui/button";
-import { useRouter } from "next/navigation";
 import { addToWatchlist, getWatchlist, removeFromWatchlist } from "@/lib/userData";
 import LoadingLink from "./loading-link";
 
@@ -23,7 +22,6 @@ interface MediaCardProps {
 export function MediaCard({ item }: MediaCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
-  const router = useRouter();
   const { toast } = useToast();
 
   const fallbackImage = PlaceHolderImages.find(p => p.id === 'media-fallback');
@@ -58,12 +56,6 @@ export function MediaCard({ item }: MediaCardProps) {
       addToWatchlist(itemToAdd);
       toast({ title: 'Added to Watchlist', description: `"${title}" has been added.` });
     }
-  };
-
-  const handleNavigation = (e: React.MouseEvent, path: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    router.push(path);
   };
   
   return (
@@ -104,8 +96,10 @@ export function MediaCard({ item }: MediaCardProps) {
                   <span>{year}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Button size="icon" className="h-8 w-8 rounded-full" onClick={(e) => handleNavigation(e, detailPath)}>
-                    <PlayCircle className="w-4 h-4" />
+                <Button size="icon" className="h-8 w-8 rounded-full" asChild>
+                    <LoadingLink href={detailPath}>
+                      <PlayCircle className="w-4 h-4" />
+                    </LoadingLink>
                 </Button>
                 <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full" onClick={handleWatchlistToggle}>
                   {isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
