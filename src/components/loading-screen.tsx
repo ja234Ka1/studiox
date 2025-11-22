@@ -3,24 +3,25 @@
 
 import { useLoading } from "@/context/loading-provider";
 import { AnimatePresence, motion, useAnimate } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 export default function LoadingScreen() {
   const { isLoading } = useLoading();
   const brandName = "Willow";
   const [scope, animate] = useAnimate();
-  const [percentage, setPercentage] = useState(0);
 
   useEffect(() => {
     if (!scope.current) return;
 
     if (isLoading) {
+      // Animate to 90% over a longer duration to simulate loading
       animate(
         scope.current,
         { width: "90%" },
         { duration: 10, ease: "easeOut" }
       );
     } else {
+      // When loading is finished, quickly animate to 100%
       animate(
         scope.current,
         { width: "100%" },
@@ -33,7 +34,7 @@ export default function LoadingScreen() {
     <AnimatePresence>
       {isLoading && (
         <motion.div
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
           exit={{
             opacity: 0,
@@ -92,21 +93,9 @@ export default function LoadingScreen() {
                     ref={scope}
                     className="h-full bg-accent"
                     style={{ width: "0%" }}
-                    onUpdate={latest => {
-                        const widthPercentage = parseFloat(latest.width);
-                        setPercentage(Math.round(widthPercentage));
-                    }}
                 />
             </div>
             
-            <motion.div
-              className="mt-4 text-sm tabular-nums text-muted-foreground"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.8, duration: 0.5 }}
-            >
-              Loading... {percentage}%
-            </motion.div>
           </motion.div>
         </motion.div>
       )}
