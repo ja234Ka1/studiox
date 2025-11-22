@@ -20,6 +20,16 @@ interface UserAuthState {
   userError: Error | null;
 }
 
+// Exported mutable object to hold the current auth state for non-hook access
+export const authState: { current: UserAuthState } = {
+  current: {
+    user: null,
+    isUserLoading: true,
+    userError: null,
+  },
+};
+
+
 // Combined state for the Firebase context
 export interface FirebaseContextState {
   areServicesAvailable: boolean; // True if core services (app, firestore, auth instance) are provided
@@ -60,29 +70,35 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
   firestore,
   auth,
 }) => {
-  const [userAuthState, setUserAuthState] = useState<UserAuthState>({
-    user: null,
-    isUserLoading: true, // Start loading until first auth event
-    userError: null,
-  });
+  const [userAuthState, setUserAuthState] = useState<UserAuthState>(authState.current);
 
   // Effect to subscribe to Firebase auth state changes
   useEffect(() => {
     if (!auth) { // If no Auth service instance, cannot determine user state
-      setUserAuthState({ user: null, isUserLoading: false, userError: new Error("Auth service not provided.") });
+      const error = new Error("Auth service not provided.");
+      const state = { user: null, isUserLoading: false, userError: error };
+      setUserAuthState(state);
+      authState.current = state;
       return;
     }
 
-    setUserAuthState({ user: null, isUserLoading: true, userError: null }); // Reset on auth instance change
+    const initialState = { user: null, isUserLoading: true, userError: null };
+    setUserAuthState(initialState);
+    authState.current = initialState;
+
 
     const unsubscribe = onAuthStateChanged(
       auth,
       (firebaseUser) => { // Auth state determined
-        setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null });
+        const state = { user: firebaseUser, isUserLoading: false, userError: null };
+        setUserAuthState(state);
+        authState.current = state;
       },
       (error) => { // Auth listener error
         console.error("FirebaseProvider: onAuthStateChanged error:", error);
-        setUserAuthState({ user: null, isUserLoading: false, userError: error });
+        const state = { user: null, isUserLoading: false, userError: error };
+        setUserAuthState(state);
+        authState.current = state;
       }
     );
     return () => unsubscribe(); // Cleanup
