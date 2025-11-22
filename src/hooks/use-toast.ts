@@ -95,6 +95,7 @@ export const reducer = (state: State, action: Action): State => {
     case "DISMISS_TOAST": {
       const { toastId } = action
 
+      // Side-effect to dismiss the toast after a timeout
       if (toastId) {
         addToRemoveQueue(toastId)
       } else {
