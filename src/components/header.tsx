@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Clapperboard, Film, List, Menu, Search, Settings, Tv } from "lucide-react";
+import { Clapperboard, Film, List, Menu, Search, Settings, Tv, Radio } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
@@ -14,6 +14,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 const navItems = [
   { href: "/tv-shows", label: "Shows", icon: Tv },
   { href: "/movies", label: "Movies", icon: Film },
+  { href: "/live-tv", label: "Live TV", icon: Radio },
   { href: "/watchlist", label: "Watchlist", icon: List },
 ];
 
@@ -23,7 +24,7 @@ export function Header() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const isStreamPage = pathname.startsWith('/stream');
+  const isStreamPage = pathname.startsWith('/stream') || pathname.startsWith('/live-tv/');
 
   useEffect(() => {
     const handleScroll = () => {

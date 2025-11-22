@@ -1,5 +1,6 @@
 
 
+
 export type MediaType = "movie" | "tv";
 export type TimeRange = "day" | "week";
 
@@ -141,3 +142,41 @@ export type Toast = {
   imageUrl?: string;
   status?: "success" | "error" | "info";
 };
+
+// --- IPTV API Types ---
+export interface IptvChannel {
+    id: string;
+    name: string;
+    alt_names?: string[];
+    network?: string;
+    owners?: string[];
+    country: string;
+    subdivision?: string;
+    city?: string;
+    broadcast_area: string[];
+    languages: string[];
+    categories: string[];
+    is_nsfw: boolean;
+    launched?: string;
+    closed?: string;
+    replaced_by?: string;
+    website?: string;
+    logo: string;
+}
+
+export interface IptvStream {
+    channel: string;
+    url: string;
+    http_referrer?: string;
+    user_agent?: string;
+    status: string;
+    width?: number;
+    height?: number;
+    bitrate?: number;
+    framerate?: number;
+}
+
+export interface IptvCategory {
+    id: string;
+    name: string;
+}
