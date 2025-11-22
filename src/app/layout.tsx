@@ -13,7 +13,7 @@ import LoadingScreen from "@/components/loading-screen";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
 import { useTheme } from "@/context/theme-provider";
 
-function ThemedLayout({ children }: { children: ReactNode }) {
+function ThemedBody({ children }: { children: ReactNode }) {
   const { radius, contentDensity } = useTheme();
 
   const carouselBasis = {
@@ -33,7 +33,7 @@ function ThemedLayout({ children }: { children: ReactNode }) {
   };
 
   return (
-    <body 
+    <body
       className={cn("antialiased font-sans")}
       style={{
         '--radius': `${radius}rem`,
@@ -43,7 +43,6 @@ function ThemedLayout({ children }: { children: ReactNode }) {
       } as React.CSSProperties}
     >
       <FirebaseClientProvider>
-        <AppProviders>
           <LoadingScreen />
           <Background />
           <div className="relative z-10 flex min-h-screen flex-col">
@@ -52,7 +51,6 @@ function ThemedLayout({ children }: { children: ReactNode }) {
           </div>
           <VideoPlayer />
           <Toaster />
-        </AppProviders>
       </FirebaseClientProvider>
     </body>
   );
@@ -78,9 +76,9 @@ export default function RootLayout({
       </head>
       {/* We wrap the body in a client component to access theme context */}
       <AppProviders>
-        <ThemedLayout>
+        <ThemedBody>
             {children}
-        </ThemedLayout>
+        </ThemedBody>
       </AppProviders>
     </html>
   );
