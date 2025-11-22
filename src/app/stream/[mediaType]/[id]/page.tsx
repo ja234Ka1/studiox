@@ -13,7 +13,8 @@ type Props = {
 };
 
 export default function StreamPage({ params }: Props) {
-  const { mediaType, id } = params;
+  const mediaType = params.mediaType;
+  const id = params.id;
   const fullscreenRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
