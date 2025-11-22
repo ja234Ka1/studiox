@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Check, Monitor, Gamepad2, User, Run, Rows, Columns, AlignJustify } from "lucide-react";
+import { Check, Monitor, Gamepad2, User, Gauge, Rows, Columns, AlignJustify } from "lucide-react";
 import { useTheme } from "@/context/theme-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -228,7 +228,7 @@ export function AppearanceSettings() {
         
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Run className="w-5 h-5 text-muted-foreground" />
+            <Gauge className="w-5 h-5 text-muted-foreground" />
             <Label className="text-base">Data Saver</Label>
           </div>
           <div className="space-y-4 rounded-md border p-4">
