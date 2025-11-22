@@ -27,35 +27,45 @@ export function Toaster() {
 
   return (
     <RadixToastProvider>
-      {toasts.map(function ({ id, title, description, action, imageUrl, status, ...props }) {
-        const Icon = status ? statusIcons[status] : null
+      <AnimatePresence>
+        {toasts.map(function ({ id, title, description, action, imageUrl, status, ...props }) {
+          const Icon = status ? statusIcons[status] : null
 
-        return (
-          <Toast key={id} {...props}>
-            <div className="flex items-center gap-3 w-full">
-              {Icon && <div className="flex-shrink-0">{Icon}</div>}
-              {imageUrl && (
-                <div className="relative w-12 h-16 rounded-sm overflow-hidden flex-shrink-0">
-                  <Image
-                    src={imageUrl}
-                    alt={title as string || 'Media Poster'}
-                    fill
-                    className="object-cover"
-                  />
+          return (
+            <motion.div
+              key={id}
+              layout
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20, transition: { duration: 0.2 } }}
+            >
+              <Toast {...props}>
+                <div className="flex items-center gap-3 w-full">
+                  {Icon && <div className="flex-shrink-0">{Icon}</div>}
+                  {imageUrl && (
+                    <div className="relative w-12 h-16 rounded-sm overflow-hidden flex-shrink-0">
+                      <Image
+                        src={imageUrl}
+                        alt={title as string || 'Media Poster'}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  )}
+                  <div className="grid gap-1 flex-grow">
+                    {title && <ToastTitle>{title}</ToastTitle>}
+                    {description && (
+                      <ToastDescription>{description}</ToastDescription>
+                    )}
+                  </div>
                 </div>
-              )}
-              <div className="grid gap-1 flex-grow">
-                {title && <ToastTitle>{title}</ToastTitle>}
-                {description && (
-                  <ToastDescription>{description}</ToastDescription>
-                )}
-              </div>
-            </div>
-            {action}
-            <ToastClose />
-          </Toast>
-        )
-      })}
+                {action}
+                <ToastClose />
+              </Toast>
+            </motion.div>
+          )
+        })}
+      </AnimatePresence>
       <ToastViewport />
     </RadixToastProvider>
   )

@@ -12,9 +12,7 @@ import { Background } from "@/components/background";
 import { Toaster } from "@/components/ui/toaster";
 import VideoPlayer from "@/components/video-player";
 import LoadingScreen from "@/components/loading-screen";
-import { FirebaseClientProvider } from "@/firebase/client-provider";
 import { useTheme } from "@/context/theme-provider";
-import { WatchlistProvider } from "@/context/watchlist-provider";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -27,18 +25,16 @@ function ThemedBodyContent({ children }: { children: ReactNode }) {
 
 
   return (
-      <FirebaseClientProvider>
-        <WatchlistProvider>
-          <LoadingScreen />
-          <Background />
-          <div className="relative z-10 flex min-h-screen flex-col">
-            <Header />
-            <main className="flex-1 w-full mx-auto">{children}</main>
-          </div>
-          <VideoPlayer />
-          <Toaster />
-        </WatchlistProvider>
-      </FirebaseClientProvider>
+      <>
+        <LoadingScreen />
+        <Background />
+        <div className="relative z-10 flex min-h-screen flex-col">
+          <Header />
+          <main className="flex-1 w-full mx-auto">{children}</main>
+        </div>
+        <VideoPlayer />
+        <Toaster />
+      </>
   );
 }
 
