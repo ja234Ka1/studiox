@@ -61,7 +61,7 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
         className="text-left px-4 md:px-8 flex items-baseline gap-4"
         variants={itemVariants}
       >
-        <h2 className="text-3xl font-bold tracking-tight text-blue-400/90">{mainTitle}</h2>
+        <h2 className="text-3xl font-bold tracking-tight text-primary">{mainTitle}</h2>
         <p className="text-lg font-semibold text-muted-foreground">{subTitle}</p>
       </motion.div>
 
@@ -72,18 +72,18 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
         }}
         className="w-full mt-4"
       >
-        <CarouselContent className="-ml-4">
+        <CarouselContent className="-ml-12 md:-ml-16">
           {items.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
-              className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 pl-28 pr-4 group"
+              className="basis-2/5 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 pl-20 pr-4 group"
             >
               <motion.div
                 className="relative flex items-center"
                 layout
                 variants={itemVariants}
               >
-                <span className="absolute -left-40 bottom-0 text-[16rem] font-black text-transparent text-outline leading-none select-none z-0 transition-all duration-300 group-hover:scale-105 group-hover:text-glow">
+                <span className="absolute -left-20 bottom-0 text-[10rem] font-black text-transparent text-outline leading-none select-none z-0 transition-all duration-300 group-hover:scale-105 group-hover:text-glow">
                   {index + 1}
                 </span>
                 <div className="relative z-10 w-full">
@@ -99,5 +99,6 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
     </motion.section>
   );
 }
+
 
 
