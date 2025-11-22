@@ -1,3 +1,4 @@
+
 import type { ApiResponse, Media, MediaDetails, MediaType, TimeRange, Video, SeasonDetails, PersonDetails } from "@/types/tmdb";
 
 const API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
@@ -62,6 +63,15 @@ export async function getTopRated(mediaType: MediaType, params: Record<string, s
 export async function getDiscover(mediaType: MediaType, params: Record<string, string> = {}): Promise<Media[]> {
     try {
         const data = await fetcher<ApiResponse<Media>>(`/discover/${mediaType}`, params);
+        return data.results.map(item => ({...item, media_type: mediaType}));
+    } catch (error) {
+        return [];
+    }
+}
+
+export async function getUpcoming(mediaType: 'movie'): Promise<Media[]> {
+    try {
+        const data = await fetcher<ApiResponse<Media>>(`/${mediaType}/upcoming`);
         return data.results.map(item => ({...item, media_type: mediaType}));
     } catch (error) {
         return [];

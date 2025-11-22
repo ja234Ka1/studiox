@@ -1,4 +1,5 @@
-import { getTrending, getPopular, getTopRated, getDiscover } from "@/lib/tmdb";
+
+import { getTrending, getPopular, getTopRated, getDiscover, getUpcoming } from "@/lib/tmdb";
 import { Hero } from "@/components/hero";
 import MediaCarousel from "@/components/media-carousel";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
@@ -14,6 +15,7 @@ interface Category {
 
 const categoriesConfig = [
   { title: "Trending This Week", fetcher: () => getTrending("all", "week"), slice: 1 },
+  { title: "Upcoming Movies", fetcher: () => getUpcoming("movie") },
   { title: "Popular Movies", fetcher: () => getPopular("movie") },
   { title: "Top Rated Movies", fetcher: () => getTopRated("movie") },
   { title: "Popular TV Shows", fetcher: () => getPopular("tv") },
