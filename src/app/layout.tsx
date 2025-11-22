@@ -13,7 +13,7 @@ import LoadingScreen from "@/components/loading-screen";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
 import { useTheme } from "@/context/theme-provider";
 
-function ThemedBody({ children }: { children: ReactNode }) {
+function ThemedBodyContent({ children }: { children: ReactNode }) {
   const { radius, contentDensity } = useTheme();
 
   const carouselBasis = {
@@ -32,16 +32,19 @@ function ThemedBody({ children }: { children: ReactNode }) {
     compact: '1/7',
   };
 
+  // This component's purpose is to apply styles to the parent body
+  // We can't put the body tag here, as it needs to be in the root layout
+  // We can instead apply a data-theme attribute or similar if needed,
+  // but for now, we apply style variables to the root element.
+  React.useEffect(() => {
+    document.documentElement.style.setProperty('--radius', `${radius}rem`);
+    document.documentElement.style.setProperty('--carousel-basis', carouselBasis[contentDensity]);
+    document.documentElement.style.setProperty('--carousel-basis-sm', carouselBasisSm[contentDensity]);
+    document.documentElement.style.setProperty('--carousel-basis-lg', carouselBasisLg[contentDensity]);
+  }, [radius, contentDensity]);
+
+
   return (
-    <body
-      className={cn("antialiased font-sans")}
-      style={{
-        '--radius': `${radius}rem`,
-        '--carousel-basis': carouselBasis[contentDensity],
-        '--carousel-basis-sm': carouselBasisSm[contentDensity],
-        '--carousel-basis-lg': carouselBasisLg[contentDensity],
-      } as React.CSSProperties}
-    >
       <FirebaseClientProvider>
           <LoadingScreen />
           <Background />
@@ -52,7 +55,6 @@ function ThemedBody({ children }: { children: ReactNode }) {
           <VideoPlayer />
           <Toaster />
       </FirebaseClientProvider>
-    </body>
   );
 }
 
@@ -74,12 +76,13 @@ export default function RootLayout({
         <meta name="description" content="A sophisticated, ultra-luxurious content discovery experience." />
         <title>Willow</title>
       </head>
-      {/* We wrap the body in a client component to access theme context */}
-      <AppProviders>
-        <ThemedBody>
+      <body className={cn("antialiased font-sans")}>
+        <AppProviders>
+          <ThemedBodyContent>
             {children}
-        </ThemedBody>
-      </AppProviders>
+          </ThemedBodyContent>
+        </AppProviders>
+      </body>
     </html>
   );
 }
