@@ -48,7 +48,10 @@ const addToLocalWatchlist = (item: Media) => {
 
 const removeFromLocalWatchlist = (itemId: number) => {
   const watchlist = getLocalWatchlist();
-  setLocalWatchlist(watchlist.filter(item => item.id !== itemId));
+  const updatedWatchlist = watchlist.filter(item => item.id !== itemId);
+  setLocalWatchlist(updatedWatchlist);
+  // Fire a specific event for removals for optimistic UI updates
+  window.dispatchEvent(new CustomEvent('willow-watchlist-change', { detail: { removed: itemId } }));
 };
 
 // --- Firebase Implementation (for logged-in users) ---
@@ -82,7 +85,10 @@ const removeFromFirebaseWatchlist = (userId: string, itemId: number) => {
     const watchlistItemRef = doc(firestore, 'users', userId, 'watchlists', String(itemId));
 
     // Non-blocking delete
-    deleteDoc(watchlistItemRef).catch(error => {
+    deleteDoc(watchlistItemRef).then(() => {
+        // Fire a specific event for removals for optimistic UI updates
+        window.dispatchEvent(new CustomEvent('willow-watchlist-change', { detail: { removed: itemId } }));
+    }).catch(error => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
             path: watchlistItemRef.path,
             operation: 'delete'
