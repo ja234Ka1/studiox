@@ -11,6 +11,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { motion } from "framer-motion";
 
 interface MediaCarouselProps {
   title: string;
@@ -30,22 +31,23 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
         opts={{
           align: "start",
           dragFree: true,
-          containScroll: 'keepSnaps',
         }}
-        className="w-full"
+        className="w-full group"
       >
-        <CarouselContent className="-ml-4">
-          {items.map((item) => (
+        <CarouselContent className="-ml-2">
+          {items.map((item, index) => (
             <CarouselItem
-              key={item.id}
-              className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-[15%] pl-4"
+              key={`${item.id}-${index}`}
+              className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-[15%] pl-2"
             >
-              <MediaCard item={item} />
+              <motion.div layout>
+                <MediaCard item={item} />
+              </motion.div>
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="hidden md:flex" />
-        <CarouselNext className="hidden md:flex" />
+        <CarouselPrevious className="opacity-0 group-hover:opacity-100 transition-opacity" />
+        <CarouselNext className="opacity-0 group-hover:opacity-100 transition-opacity" />
       </Carousel>
     </section>
   );
