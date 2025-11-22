@@ -4,8 +4,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Check, Star, Info } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Plus, Check, Star, Info, PlayCircle } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 import type { Media } from "@/types/tmdb";
@@ -24,6 +24,7 @@ export function MediaCard({ item }: MediaCardProps) {
   const router = useRouter();
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
   
   const fallbackImage = PlaceHolderImages.find(p => p.id === 'media-fallback');
   const posterUrl = item.poster_path ? getTmdbImageUrl(item.poster_path) : fallbackImage?.imageUrl;
@@ -65,20 +66,24 @@ export function MediaCard({ item }: MediaCardProps) {
     router.push(detailPath);
   }
 
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+  };
+  
   return (
     <motion.div
+      ref={cardRef}
       layout
-      className="relative aspect-[2/3]"
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className="relative aspect-[2/3] z-0"
       transition={{ layout: { duration: 0.2, ease: "easeOut" } }}
     >
-      <motion.div
-        layout="position"
-        className="w-full h-full rounded-lg shadow-lg bg-card overflow-hidden cursor-pointer"
-        onClick={handleCardClick}
-      >
-        <div className="w-full h-full">
+        <div className="w-full h-full rounded-lg shadow-lg bg-card overflow-hidden cursor-pointer" onClick={handleCardClick}>
             {posterUrl && (
                 <Image
                     src={posterUrl}
@@ -90,51 +95,50 @@ export function MediaCard({ item }: MediaCardProps) {
                 />
             )}
         </div>
-        
-        <AnimatePresence>
+      
+      <AnimatePresence>
         {isHovered && (
           <motion.div
-            layoutId={`details-${item.id}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1, transition: { delay: 0.2 } }}
-            exit={{ opacity: 0, transition: { duration: 0.1 } }}
-            className="absolute top-0 left-0 right-0 bottom-0 flex flex-col"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1, transition: { delay: 0.3, duration: 0.2 } }}
+            exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[160%] z-50"
           >
-            <div className="relative w-full aspect-video">
-                {backdropUrl && (
-                    <Image
-                        src={backdropUrl}
-                        alt={`${title} backdrop`}
-                        fill
-                        className="object-cover rounded-t-lg"
-                    />
-                )}
-               <div className="absolute inset-0 bg-gradient-to-t from-card via-card/80 to-transparent rounded-t-lg" />
-            </div>
-            <div className="p-3 space-y-2 bg-card rounded-b-lg flex-grow">
-              <h3 className="font-bold text-base text-card-foreground truncate">{title}</h3>
-              {item.vote_average > 0 && (
-                  <div className="flex items-center text-xs text-amber-400">
-                      <Star className="w-3 h-3 mr-1 fill-current" />
-                      <span>{item.vote_average.toFixed(1)}</span>
-                  </div>
-              )}
-              <div className="flex gap-2 w-full mt-1">
-                  <Button size="sm" className="flex-1 text-xs" asChild>
-                  <Link href={detailPath}>
-                      <Info className="w-3.5 h-3.5 mr-1" />
-                      Details
-                  </Link>
+            <div className="bg-card rounded-lg shadow-2xl overflow-hidden w-full">
+              <div className="relative w-full aspect-video">
+                  {backdropUrl && (
+                      <Image
+                          src={backdropUrl}
+                          alt={`${title} backdrop`}
+                          fill
+                          className="object-cover"
+                      />
+                  )}
+                 <div className="absolute inset-0 bg-gradient-to-t from-card via-card/50 to-transparent" />
+                 <Button size="icon" className="absolute bottom-2 left-2 rounded-full h-10 w-10" asChild>
+                    <Link href={detailPath}>
+                      <PlayCircle />
+                    </Link>
                   </Button>
-                  <Button size="sm" variant="secondary" className="px-2" onClick={handleWatchlistToggle}>
-                      {isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                  </Button>
+              </div>
+              <div className="p-3 space-y-2">
+                <h3 className="font-bold text-sm text-card-foreground truncate">{title}</h3>
+                <div className="flex items-center justify-between">
+                    {item.vote_average > 0 && (
+                        <div className="flex items-center text-xs text-amber-400">
+                            <Star className="w-3 h-3 mr-1 fill-current" />
+                            <span>{item.vote_average.toFixed(1)}</span>
+                        </div>
+                    )}
+                    <Button size="icon" variant="secondary" className="h-8 w-8 rounded-full" onClick={handleWatchlistToggle}>
+                        {isInWatchlist ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                    </Button>
+                </div>
               </div>
             </div>
           </motion.div>
         )}
-        </AnimatePresence>
-      </motion.div>
+      </AnimatePresence>
     </motion.div>
   );
 }
