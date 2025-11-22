@@ -79,7 +79,7 @@ export default function Top10Carousel({ title, items }: Top10CarouselProps) {
           {items.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
-              className="basis-2/5 sm:basis-1/4 md:basis-1/5 lg:basis-1/6 xl:basis-1/7 pl-4 group"
+              className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-8 group"
             >
               <motion.div
                 className="relative flex items-center justify-end h-full"
