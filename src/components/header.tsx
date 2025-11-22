@@ -2,12 +2,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Clapperboard, Compass, Film, List, Menu, Radio, Search, Settings, Tv } from "lucide-react";
+import { Clapperboard, Film, List, Menu, Search, Settings, Tv } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import LoadingLink from "./loading-link";
 import { AuthButton } from "./auth-button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -16,7 +15,6 @@ const navItems = [
   { href: "/tv-shows", label: "Shows", icon: Tv },
   { href: "/movies", label: "Movies", icon: Film },
   { href: "/watchlist", label: "Watchlist", icon: List },
-  { href: "/live-tv", label: "Live TV", icon: Radio },
 ];
 
 export function Header() {
@@ -25,7 +23,7 @@ export function Header() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const isStreamPage = pathname.startsWith('/stream') || pathname.startsWith('/live-tv/');
+  const isStreamPage = pathname.startsWith('/stream');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -41,16 +39,6 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [pathname, isStreamPage]);
   
-  const handleSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
-      const query = event.currentTarget.value;
-      if (query.trim()) {
-        router.push(`/search?q=${encodeURIComponent(query)}`);
-        setIsMobileMenuOpen(false);
-      }
-    }
-  };
-
   if (isStreamPage) {
     return null;
   }

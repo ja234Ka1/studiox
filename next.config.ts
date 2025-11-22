@@ -32,12 +32,6 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
-      {
-        protocol: 'https',
-        hostname: 'streamed.pk',
-        port: '',
-        pathname: '/api/images/**',
-      }
     ],
   },
 };
