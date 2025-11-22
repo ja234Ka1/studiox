@@ -1,10 +1,6 @@
 
 "use client"
 
-import Image from "next/image"
-import { CheckCircle2, Info, XCircle } from "lucide-react"
-
-import { useToast } from "@/hooks/use-toast"
 import {
   Toast,
   ToastClose,
@@ -13,6 +9,9 @@ import {
   ToastTitle,
   ToastViewport,
 } from "@/components/ui/toast"
+import { useToast } from "@/hooks/use-toast"
+import Image from "next/image"
+import { CheckCircle2, Info, XCircle } from "lucide-react"
 
 const statusIcons = {
   success: <CheckCircle2 className="text-green-500" />,

@@ -59,7 +59,7 @@ interface State {
   toasts: ToasterToast[]
 }
 
-const toastTimeouts = new Map()
+const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 
 const addToRemoveQueue = (toastId: string) => {
   if (toastTimeouts.has(toastId)) {
@@ -96,7 +96,7 @@ export const reducer = (state: State, action: Action): State => {
     case "DISMISS_TOAST": {
       const { toastId } = action
 
-      // ! Side effects ! - This could break purity of reducer but meh
+      // Side-effect to add to remove queue
       if (toastId) {
         addToRemoveQueue(toastId)
       } else {
@@ -193,4 +193,14 @@ function useToast() {
   }
 }
 
-export { useToast, toast }
+interface ToastProviderProps {
+  children: React.ReactNode;
+}
+
+function ToastProvider({ children }: ToastProviderProps) {
+  return (
+    <>{children}</>
+  )
+}
+
+export { useToast, toast, ToastProvider }
