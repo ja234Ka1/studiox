@@ -19,7 +19,7 @@ const platforms = [
   { name: "Paramount+", logo: "https://upload.wikimedia.org/wikipedia/commons/3/35/Paramount_Plus.svg_%281%29.png" },
   { name: "Tubi", logo: "https://upload.wikimedia.org/wikipedia/commons/c/c5/Tubi_logo_2024_purple.svg" },
   { name: "NBC", logo: "https://upload.wikimedia.org/wikipedia/commons/3/3f/NBC_logo.svg" },
-  { name: "Netflix", logo: "https://upload.wikimedia.org/wikipedia/commons/0/0c/Netflix_2015_N_logo.svg" },
+  { name: "Netflix", logo: "https://upload.wikimedia.org/wikipedia/commons/1/18/Netflix_2016_N_logo.svg" },
   { name: "Disney+", logo: "https://upload.wikimedia.org/wikipedia/commons/7/77/Disney_Plus_logo.svg" },
   { name: "Crunchyroll", logo: "https://upload.wikimedia.org/wikipedia/commons/8/85/Crunchyroll_2024_stacked.svg" },
 ];
