@@ -46,7 +46,7 @@ export default function TopTenCarousel({ items }: TopTenCarouselProps) {
 
   return (
     <motion.section 
-      className="text-left w-full group relative overflow-hidden py-8"
+      className="text-left w-full group relative overflow-hidden py-12"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.1 }}
@@ -54,15 +54,15 @@ export default function TopTenCarousel({ items }: TopTenCarouselProps) {
     >
       <div className="container mx-auto px-4 md:px-8">
         <motion.div 
-          className="flex items-end gap-4 mb-6"
+          className="flex items-end gap-4 mb-8"
           variants={itemVariants}
         >
-            <h2 className="text-8xl font-black tracking-tighter leading-none text-outline text-glow">
+            <h2 className="text-6xl md:text-8xl font-black tracking-tighter leading-none text-outline text-glow">
                 TOP 10
             </h2>
             <div>
-                <h3 className="text-xl font-bold">MOVIES</h3>
-                <p className="text-muted-foreground">TODAY</p>
+                <h3 className="text-lg md:text-xl font-bold">MOVIES</h3>
+                <p className="text-sm text-muted-foreground">TODAY</p>
             </div>
         </motion.div>
       </div>
@@ -74,11 +74,11 @@ export default function TopTenCarousel({ items }: TopTenCarouselProps) {
         }}
         className="w-full"
       >
-        <CarouselContent className="-ml-2">
+        <CarouselContent className="-ml-8">
           {items.map((item, index) => (
             <CarouselItem
               key={item.id}
-              className="basis-[40%] sm:basis-[30%] md:basis-[20%] lg:basis-[15%] pl-4 pr-2"
+              className="basis-[45%] sm:basis-[30%] md:basis-[25%] lg:basis-[20%] xl:basis-[18%] pl-8"
             >
               <motion.div layout variants={itemVariants}>
                 <TopTenCard item={item} rank={index} />
