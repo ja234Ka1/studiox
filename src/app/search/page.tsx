@@ -36,11 +36,12 @@ const SearchPage = () => {
 
   useEffect(() => {
     const newUrl = debouncedSearchTerm ? `${pathname}?q=${encodeURIComponent(debouncedSearchTerm)}` : pathname;
+    // Use replace to avoid adding to history, which is better for search queries
     router.replace(newUrl, { scroll: false });
 
     if (debouncedSearchTerm) {
       setIsLoading(true);
-      setResults([]);
+      // Don't clear previous results, just fetch new ones
       setPage(1);
       setError(null);
       searchMedia(debouncedSearchTerm, 1)
@@ -54,7 +55,9 @@ const SearchPage = () => {
       setResults([]);
       setTotalPages(0);
     }
-  }, [debouncedSearchTerm, pathname, router]);
+  // We only want this effect to re-run when the debounced search term changes.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearchTerm]);
 
   const loadMore = () => {
     if (debouncedSearchTerm && page < totalPages) {
@@ -68,6 +71,8 @@ const SearchPage = () => {
         .finally(() => setIsLoading(false));
     }
   };
+
+  const showSkeleton = isLoading && results.length === 0;
 
   return (
     <div className="container px-4 md:px-8 lg:px-16 space-y-8 py-12 pb-24 mx-auto">
@@ -85,7 +90,7 @@ const SearchPage = () => {
 
       {error && <p className="text-destructive text-center">{error}</p>}
 
-      {isLoading && results.length === 0 && (
+      {showSkeleton && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4">
             {Array.from({ length: 14 }).map((_, i) => (
                 <div key={i} className="aspect-[2/3] w-full">
