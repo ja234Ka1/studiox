@@ -12,9 +12,13 @@ export default function Template({ children }: { children: React.ReactNode }) {
   const { stopLoading } = useLoading();
   const pathname = usePathname();
 
-  // Ensure loading stops on route change.
+  // Ensure loading stops on route change, with a small delay for transition.
   useEffect(() => {
-    stopLoading();
+    const timer = setTimeout(() => {
+      stopLoading();
+    }, 100); // Small delay to allow page transition to start
+
+    return () => clearTimeout(timer);
   }, [pathname, stopLoading]);
 
   if (!animationsEnabled) {
