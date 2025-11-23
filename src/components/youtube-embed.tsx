@@ -1,8 +1,8 @@
 
 "use client"
 
-import React, { useEffect, useRef } from 'react';
-import YouTube, { type YouTubeProps } from 'react-youtube';
+import React, { useEffect, useRef, useState } from 'react';
+import YouTube, { type YouTubePlayer, type YouTubeProps } from 'react-youtube';
 
 interface YouTubeEmbedProps {
   videoId: string;
@@ -11,7 +11,7 @@ interface YouTubeEmbedProps {
 }
 
 const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({ videoId, isMuted, onReady }) => {
-  const playerRef = useRef<any>(null);
+  const [player, setPlayer] = useState<YouTubePlayer | null>(null);
 
   const opts: YouTubeProps['opts'] = {
     playerVars: {
@@ -29,19 +29,19 @@ const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({ videoId, isMuted, onReady }
   };
 
   const handleReady: YouTubeProps['onReady'] = (event) => {
-    playerRef.current = event.target;
+    setPlayer(event.target);
     onReady(event);
   };
   
   useEffect(() => {
-    if (playerRef.current) {
-        if (isMuted) {
-            playerRef.current.mute();
-        } else {
-            playerRef.current.unMute();
-        }
+    if (player) {
+      if (isMuted) {
+        player.mute();
+      } else {
+        player.unMute();
+      }
     }
-  }, [isMuted]);
+  }, [isMuted, player]);
 
   return (
     <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden">
