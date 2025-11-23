@@ -3,18 +3,19 @@
 
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { PlayCircle, VolumeX, Volume2 } from "lucide-react";
-import { useState, useRef } from "react";
+import { PlayCircle, VolumeX, Volume2, Bookmark, BookmarkCheck, Loader2 } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import type { YouTubePlayer } from "react-youtube";
 import { useRouter } from "next/navigation";
 
 import type { MediaDetails } from "@/types/tmdb";
-import { getTmdbImageUrl } from "@/lib/utils";
+import { getTmdbImageUrl, cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import YouTubeEmbed from "./youtube-embed";
 import { useTheme, type StreamSource } from "@/context/theme-provider";
 import { StreamSourceDialog } from "./stream-source-dialog";
+import { useWatchlist } from "@/context/watchlist-provider";
 
 interface DetailPageHeroProps {
   item: MediaDetails;
@@ -28,6 +29,10 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
   const playerRef = useRef<YouTubePlayer | null>(null);
   const { dataSaver, setStreamSource } = useTheme();
 
+  const { isInWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
+  const [isWatchlistLoading, setIsWatchlistLoading] = useState(false);
+  const onWatchlist = isInWatchlist(item.id);
+
   const [showSourceDialog, setShowSourceDialog] = useState(false);
   
   const title = item.title || item.name;
@@ -36,6 +41,25 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
 
   const trailer = item.videos?.results?.find(v => v.type === 'Trailer' && v.official) 
                   || item.videos?.results?.find(v => v.type === 'Trailer');
+
+  useEffect(() => {
+    // When the onWatchlist status changes (via context), we know the operation is complete.
+    setIsWatchlistLoading(false);
+  }, [onWatchlist]);
+
+  const handleToggleWatchlist = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setIsWatchlistLoading(true);
+
+    const itemWithMediaType = { ...item, media_type: item.media_type || 'movie' };
+
+    if (onWatchlist) {
+      removeFromWatchlist(item.id);
+    } else {
+      addToWatchlist(itemWithMediaType);
+    }
+  };
 
 
   const handleMouseEnter = () => {
@@ -133,6 +157,16 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
             <Button size="lg" onClick={() => setShowSourceDialog(true)}>
                 <PlayCircle className="mr-2" />
                 Watch
+            </Button>
+            <Button size="lg" variant="secondary" onClick={handleToggleWatchlist} disabled={isWatchlistLoading}>
+              {isWatchlistLoading ? (
+                <Loader2 className="mr-2 animate-spin" />
+              ) : onWatchlist ? (
+                <BookmarkCheck className="mr-2" />
+              ) : (
+                <Bookmark className="mr-2" />
+              )}
+              {onWatchlist ? "On Watchlist" : "Add to Watchlist"}
             </Button>
           </div>
         </motion.div>
