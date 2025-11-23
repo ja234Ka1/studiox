@@ -116,11 +116,11 @@ export function TopTenCarousel() {
         onMouseLeave={() => autoplayPlugin.current && autoplayPlugin.current.play()}
         className="w-full"
       >
-        <CarouselContent className="-ml-28">
+        <CarouselContent className="-ml-8">
           {mediaItems.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
-              className="basis-auto pl-28"
+              className="basis-auto"
             >
               <motion.div 
                 variants={itemVariants} 
@@ -133,8 +133,7 @@ export function TopTenCarousel() {
                     {index + 1}
                 </span>
                 <div className={cn(
-                  "w-[200px] z-10 transition-transform duration-300 ease-in-out group-hover/item:scale-110",
-                  "-ml-8" // This creates the overlap
+                  "w-[200px] z-10 transition-transform duration-300 ease-in-out group-hover/item:scale-110 -ml-8"
                 )}>
                     <MediaCard item={item} />
                 </div>
