@@ -5,6 +5,8 @@ import { useWatchlist } from "@/context/watchlist-provider";
 import type { Media } from "@/types/tmdb";
 import { MediaCard } from "@/components/media-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useUser } from "@/firebase";
+import { GuestWatchlistPrompt } from "@/components/guest-watchlist-prompt";
 
 function WatchlistGrid({ items }: { items: Media[] }) {
   if (items.length === 0) {
@@ -38,6 +40,7 @@ function WatchlistSkeleton() {
 
 export default function WatchlistPage() {
   const { watchlist, isLoading } = useWatchlist();
+  const { user } = useUser();
 
   return (
     <div className="container px-4 md:px-8 lg:px-16 space-y-12 py-12 pb-24 mx-auto">
@@ -48,6 +51,10 @@ export default function WatchlistPage() {
         </p>
       </header>
       
+      {user?.isAnonymous && (
+        <GuestWatchlistPrompt />
+      )}
+
       {isLoading ? <WatchlistSkeleton /> : <WatchlistGrid items={watchlist} />}
       
     </div>
