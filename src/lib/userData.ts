@@ -12,6 +12,7 @@ import {
   getDoc,
   Firestore
 } from "firebase/firestore";
+import { getApp } from "firebase/app";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 import { useUser } from "@/firebase/auth/use-user";
@@ -36,7 +37,7 @@ export const setLocalWatchlist = (watchlist: Media[]) => {
   try {
     localStorage.setItem(WATCHLIST_KEY, JSON.stringify(watchlist));
     // Dispatch event for other hooks/tabs to listen to
-    window.dispatchEvent(new CustomEvent('willow-watchlist-change', { detail: { key: WATCHLIST_KEY } }));
+    window.dispatchEvent(new CustomEvent('willow-storage-change', { detail: { key: WATCHLIST_KEY } }));
   } catch (error) {
     console.error("Error writing watchlist to localStorage:", error);
   }
@@ -51,7 +52,7 @@ const getAuthAndDb = () => {
     // This is a bit of a hack to get the firestore instance without being in a component
     // It assumes that if a user exists, the firebase app has been initialized.
     const firebase = require('@/firebase');
-    const { firestore } = firebase.getSdks(firebase.getApp());
+    const { firestore } = firebase.getSdks(getApp());
     return { user, firestore };
 };
 
@@ -98,7 +99,6 @@ export const addToWatchlist = async (item: Media): Promise<void> => {
             setLocalWatchlist(newWatchlist);
         }
     }
-    // No need to dispatch here if components listen to storage events
 };
 
 
