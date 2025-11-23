@@ -12,17 +12,10 @@ export default function Template({ children }: { children: React.ReactNode }) {
   const { stopLoading } = useLoading();
   const pathname = usePathname();
 
-  // On any path change, stop the loading animation.
-  // This effect runs when the new page's template is mounted.
+  // This effect will run whenever the page (and thus the template) changes.
+  // It's responsible for turning OFF the loading screen.
   useEffect(() => {
-    // A small delay ensures that the page has had a moment to begin rendering
-    // before the loading screen is hidden. This prevents a "flash" of the old
-    // content if the new content loads very quickly.
-    const timer = setTimeout(() => {
-      stopLoading();
-    }, 100); 
-
-    return () => clearTimeout(timer);
+    stopLoading();
   }, [pathname, stopLoading]);
 
   if (!animationsEnabled) {

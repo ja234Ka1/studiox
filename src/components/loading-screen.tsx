@@ -6,7 +6,7 @@ import { AnimatePresence, motion, useAnimate } from "framer-motion";
 import { useEffect } from "react";
 
 export default function LoadingScreen() {
-  const { isLoading } = useLoading();
+  const { isLoading, stopLoading } = useLoading();
   const brandName = "Willow";
   const [scope, animate] = useAnimate();
 
@@ -31,7 +31,15 @@ export default function LoadingScreen() {
   }, [isLoading, animate, scope]);
 
   return (
-    <AnimatePresence>
+    <AnimatePresence
+      onExitComplete={() => {
+        // This is a failsafe in case the stopLoading call in the template doesn't fire
+        // for some reason, we ensure the state is correct after animation.
+        if (!isLoading) {
+          stopLoading();
+        }
+      }}
+    >
       {isLoading && (
         <motion.div
           initial={{ opacity: 1 }}

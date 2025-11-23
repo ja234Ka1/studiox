@@ -4,7 +4,7 @@
 import Link, { type LinkProps } from "next/link";
 import { usePathname } from "next/navigation";
 import { useLoading } from "@/context/loading-provider";
-import React, { useEffect } from "react";
+import React from "react";
 
 interface LoadingLinkProps extends LinkProps {
   children: React.ReactNode;
@@ -13,27 +13,21 @@ interface LoadingLinkProps extends LinkProps {
 }
 
 const LoadingLink = ({ children, href, className, onClick, ...props }: LoadingLinkProps) => {
-  const { startLoading, stopLoading } = useLoading();
+  const { startLoading } = useLoading();
   const pathname = usePathname();
-
-  // Effect to ensure loading stops if the component unmounts for any reason
-  // during a page transition (e.g., user hits the back button).
-  useEffect(() => {
-    return () => {
-      stopLoading();
-    };
-  }, [stopLoading]);
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (onClick) {
       onClick(e);
     }
     
+    // Check if the href is an external link or just a hash link on the same page
     const targetUrl = href.toString();
-    const isSamePage = pathname === targetUrl;
+    const isSamePage = pathname === targetUrl.split('#')[0];
+    const isHashLink = targetUrl.startsWith('#');
 
-    // Only start the loading animation if navigating to a different page.
-    if (!isSamePage) {
+    // Only start the loading animation if navigating to a truly different page.
+    if (!isSamePage && !isHashLink) {
       startLoading();
     }
   };
