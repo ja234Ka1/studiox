@@ -23,24 +23,27 @@ const settingsNavItems = [
 
 export default function SettingsPage({ params }: { params: { slug: string[] }}) {
     const router = useRouter();
-    const pathname = usePathname();
+    const initialSlug = params.slug?.[0] || 'profile';
+    const [activeSlug, setActiveSlug] = useState(initialSlug);
 
-    const activeSlug = params.slug?.[0] || 'profile';
+    useEffect(() => {
+        setActiveSlug(initialSlug);
+    }, [initialSlug]);
 
     const handleNav = (href: string) => {
-        // We use Next.js router to update the URL, but the content is swapped via state
-        // This keeps the URL in sync without a full page reload.
+        // We use Next.js router to update the URL for deep linking
         router.replace(href, { scroll: false });
+        
+        // And update the state to swap content instantly
+        const slug = settingsNavItems.find(item => item.href === href)?.slug || 'profile';
+        setActiveSlug(slug);
     };
-    
-    // Find the current active tab based on slug
-    const activeTab = settingsNavItems.find(item => item.slug === activeSlug) || settingsNavItems[0];
 
     return (
-        <div className="container max-w-5xl mx-auto py-8 px-4 md:px-8">
-            <header className="mb-6">
-                <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
-                <p className="text-muted-foreground mt-1">
+        <div className="container max-w-5xl mx-auto py-6 px-4 md:px-8">
+            <header className="mb-4">
+                <h1 className="text-xl font-bold tracking-tight">Settings</h1>
+                <p className="text-sm text-muted-foreground mt-1">
                 Manage your account and app preferences.
                 </p>
             </header>
@@ -50,8 +53,8 @@ export default function SettingsPage({ params }: { params: { slug: string[] }}) 
                     <SettingsSidebarNav items={settingsNavItems} onNavigate={handleNav} />
                 </aside>
                 <div className="flex-1">
-                    {activeTab.slug === 'profile' && <ProfileSettings />}
-                    {activeTab.slug === 'appearance' && <SettingsAppearancePage />}
+                    {activeSlug === 'profile' && <ProfileSettings />}
+                    {activeSlug === 'appearance' && <SettingsAppearancePage />}
                 </div>
             </div>
         </div>
