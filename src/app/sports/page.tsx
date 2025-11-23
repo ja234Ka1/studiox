@@ -12,6 +12,29 @@ import { PlayCircle, Loader2 } from "lucide-react";
 import { getStreamedImageUrl } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { motion } from "framer-motion";
+
+const gridVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05,
+      },
+    },
+};
+  
+const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut",
+      },
+    },
+};
 
 function MatchCard({ match }: { match: APIMatch }) {
     const homeTeam = match.teams?.home;
@@ -159,11 +182,18 @@ export default function SportsPage() {
                     {categories.map((category) => (
                         <TabsContent key={category.id} value={category.id}>
                             {category.matches.length > 0 ? (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
+                                <motion.div 
+                                    className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6"
+                                    variants={gridVariants}
+                                    initial="hidden"
+                                    animate="visible"
+                                >
                                     {category.matches.map((match) => (
-                                        <MatchCard key={match.id} match={match} />
+                                        <motion.div key={match.id} variants={cardVariants}>
+                                            <MatchCard match={match} />
+                                        </motion.div>
                                     ))}
-                                </div>
+                                </motion.div>
                             ) : (
                                 <div className="text-center py-16">
                                     <p className="text-muted-foreground">No live matches for {category.name} right now.</p>
