@@ -57,7 +57,6 @@ export function MediaCard({ item }: MediaCardProps) {
     } else {
       addToWatchlist(item);
     }
-    // No need to set loading to false here, as the re-render from context will handle it.
   };
 
   useEffect(() => {
@@ -66,13 +65,10 @@ export function MediaCard({ item }: MediaCardProps) {
   }, [onWatchlist]);
 
   return (
-    <motion.div
-      layout
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
+    <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className="relative aspect-[2/3] w-full rounded-md overflow-hidden bg-card shadow-md cursor-pointer group"
-      whileHover={{ scale: 1.05, zIndex: 10 }}
-      transition={{ duration: 0.3 }}
     >
       <LoadingLink href={detailPath}>
         <Image
@@ -80,7 +76,7 @@ export function MediaCard({ item }: MediaCardProps) {
           alt={title || "Media"}
           fill
           sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
-          className="object-cover"
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
           data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
         />
       </LoadingLink>
@@ -122,6 +118,6 @@ export function MediaCard({ item }: MediaCardProps) {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 }
