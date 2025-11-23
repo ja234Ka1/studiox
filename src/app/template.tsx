@@ -16,7 +16,8 @@ export default function Template({ children }: { children: React.ReactNode }) {
   // This effect runs when the new page's template is mounted.
   useEffect(() => {
     // A small delay ensures that the page has had a moment to begin rendering
-    // before the loading screen is hidden.
+    // before the loading screen is hidden. This prevents a "flash" of the old
+    // content if the new content loads very quickly.
     const timer = setTimeout(() => {
       stopLoading();
     }, 100); 

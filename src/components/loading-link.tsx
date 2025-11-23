@@ -16,8 +16,9 @@ const LoadingLink = ({ children, href, className, onClick, ...props }: LoadingLi
   const { startLoading, stopLoading } = useLoading();
   const pathname = usePathname();
 
+  // Effect to ensure loading stops if the component unmounts for any reason
+  // during a page transition (e.g., user hits the back button).
   useEffect(() => {
-    // When the component unmounts (e.g., page change), ensure loading stops.
     return () => {
       stopLoading();
     };
@@ -31,6 +32,7 @@ const LoadingLink = ({ children, href, className, onClick, ...props }: LoadingLi
     const targetUrl = href.toString();
     const isSamePage = pathname === targetUrl;
 
+    // Only start the loading animation if navigating to a different page.
     if (!isSamePage) {
       startLoading();
     }
