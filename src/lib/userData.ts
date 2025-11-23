@@ -49,8 +49,6 @@ const getAuthAndDb = () => {
     const { user } = useUser.getState();
     if (!user) return { user: null, firestore: null };
 
-    // This is a bit of a hack to get the firestore instance without being in a component
-    // It assumes that if a user exists, the firebase app has been initialized.
     const firebase = require('@/firebase');
     const { firestore } = firebase.getSdks(getApp());
     return { user, firestore };
@@ -62,7 +60,7 @@ export const addToWatchlist = (item: Media): void => {
     
     if (user && !user.isAnonymous && firestore) {
         const watchlistItemRef = doc(firestore, 'users', user.uid, 'watchlists', String(item.id));
-        const itemWithUser = { ...item, userId: user.uid };
+        const itemWithUser = { ...item, userId: user.uid, media_type: item.media_type || 'movie' };
         
         // Use non-blocking write and handle errors with the emitter
         setDoc(watchlistItemRef, itemWithUser, { merge: true }).catch(error => {
@@ -71,8 +69,6 @@ export const addToWatchlist = (item: Media): void => {
                 operation: 'create',
                 requestResourceData: itemWithUser,
             }));
-            // We don't re-throw here so the UI can update optimistically,
-            // but the error will be caught by the global error handler.
         });
     } else {
         const localWatchlist = getLocalWatchlist();
@@ -113,23 +109,20 @@ export const mergeLocalWatchlistToFirebase = async (firestore: Firestore, userId
   const watchlistColRef = collection(firestore, 'users', userId, 'watchlists');
 
   try {
-    // We get the remote list to avoid adding duplicates.
     const firebaseWatchlistSnapshot = await getDocs(watchlistColRef);
     const firebaseIds = new Set(firebaseWatchlistSnapshot.docs.map(d => d.id));
     
-    // Filter local items that are not already in Firebase.
     const itemsToMerge = localWatchlist.filter(localItem => !firebaseIds.has(String(localItem.id)));
 
     if (itemsToMerge.length > 0) {
       const batch = writeBatch(firestore);
       itemsToMerge.forEach(item => {
         const docRef = doc(firestore, 'users', userId, 'watchlists', String(item.id));
-        const itemWithUser = { ...item, userId: userId };
+        const itemWithUser = { ...item, userId: userId, media_type: item.media_type || 'movie' };
         batch.set(docRef, itemWithUser);
       });
 
       await batch.commit();
-      console.log(`${itemsToMerge.length} items merged to Firebase.`);
     }
     
     // Clear the local watchlist after merging
@@ -137,14 +130,12 @@ export const mergeLocalWatchlistToFirebase = async (firestore: Firestore, userId
 
   } catch (error) {
     console.error("Error merging watchlist:", error);
-    // Handle specific permission errors if necessary
     if (error instanceof FirestorePermissionError) {
       errorEmitter.emit('permission-error', error);
     } else {
-      // Create a generic error for the operation
       errorEmitter.emit('permission-error', new FirestorePermissionError({
         path: watchlistColRef.path,
-        operation: 'list' // Or 'write' depending on what failed.
+        operation: 'list'
       }));
     }
   }

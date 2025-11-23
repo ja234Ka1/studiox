@@ -1,10 +1,10 @@
 
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode, useMemo } from 'react';
 import type { Media } from '@/types/tmdb';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { getLocalWatchlist, addToWatchlist, removeFromWatchlist } from '@/lib/userData';
+import { getLocalWatchlist, addToWatchlist as writeToWatchlist, removeFromWatchlist as deleteFromWatchlist, mergeLocalWatchlistToFirebase } from '@/lib/userData';
 import { collection } from 'firebase/firestore';
 import { useNotification } from './notification-provider';
 
@@ -22,8 +22,6 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const { showNotification } = useNotification();
-  
-  const [guestWatchlist, setGuestWatchlist] = useState<Media[]>([]);
   const [isMounted, setIsMounted] = useState(false);
 
   // Firestore state for logged-in (non-anonymous) user
@@ -33,80 +31,85 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
   );
   const { data: firebaseWatchlist, isLoading: isFirestoreLoading } = useCollection<Media>(watchlistQuery);
 
-  // Effect to load initial guest watchlist and handle guest storage events
+  // Local state for optimistic updates
+  const [optimisticWatchlist, setOptimisticWatchlist] = useState<Media[]>([]);
+
+  // Effect to load initial data and merge on login
   useEffect(() => {
     setIsMounted(true);
-
-    const loadAndListenForGuestData = () => {
-      setGuestWatchlist(getLocalWatchlist());
-
-      const handleStorageChange = (e: Event) => {
-        const customEvent = e as CustomEvent;
-        if (customEvent.detail?.key === 'willow-watchlist' || (e as StorageEvent).key === 'willow-watchlist') {
-             setGuestWatchlist(getLocalWatchlist());
+    if (user && !user.isAnonymous && firestore) {
+      // User is logged in, merge local data and then rely on Firestore
+      mergeLocalWatchlistToFirebase(firestore, user.uid);
+    } else if (!isUserLoading) {
+      // User is a guest or not yet loaded
+      setOptimisticWatchlist(getLocalWatchlist());
+    }
+    
+    // Listen for local storage changes (for guest users in other tabs)
+    const handleStorageChange = (e: StorageEvent | CustomEvent) => {
+        if (!user || user.isAnonymous) {
+            const detail = (e as CustomEvent).detail;
+            if ((e as StorageEvent).key === 'willow-watchlist' || (detail && detail.key === 'willow-watchlist')) {
+                setOptimisticWatchlist(getLocalWatchlist());
+            }
         }
-      };
+    };
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('willow-storage-change', handleStorageChange);
 
-      window.addEventListener('storage', handleStorageChange);
-      window.addEventListener('willow-storage-change', handleStorageChange);
-      
-      return () => {
+    return () => {
         window.removeEventListener('storage', handleStorageChange);
         window.removeEventListener('willow-storage-change', handleStorageChange);
-      };
     };
 
-    // Only set up listeners if user is a guest or not yet known
-    if (!user || user.isAnonymous) {
-      const cleanup = loadAndListenForGuestData();
-      return cleanup;
-    }
-  }, [user]);
+  }, [user, firestore, isUserLoading]);
 
-  // Determine which watchlist and loading state to use
-  const isGuest = !user || user.isAnonymous;
-  const watchlist = isGuest ? guestWatchlist : (firebaseWatchlist || []);
-  const isLoading = !isMounted || isUserLoading || (!isGuest && isFirestoreLoading);
+  // Sync optimistic state with Firestore's state when it updates
+  useEffect(() => {
+    if (user && !user.isAnonymous && firebaseWatchlist) {
+      setOptimisticWatchlist(firebaseWatchlist);
+    }
+  }, [firebaseWatchlist, user]);
+
+  const isLoading = !isMounted || isUserLoading || isFirestoreLoading;
 
   const isInWatchlist = useCallback((mediaId: number) => {
-    return watchlist.some(item => item.id === mediaId);
-  }, [watchlist]);
+    return optimisticWatchlist.some(item => item.id === mediaId);
+  }, [optimisticWatchlist]);
 
-  const handleAddToWatchlist = useCallback((item: Media) => {
+  const addToWatchlist = useCallback((item: Media) => {
     if (isInWatchlist(item.id)) {
       showNotification(item, 'exists');
       return;
     }
-    // This function from userData handles both guest and logged-in cases
-    addToWatchlist(item); 
-    
-    // For guests, we need to manually update state as there's no real-time listener
-    if (isGuest) {
-      setGuestWatchlist(prev => [item, ...prev]);
-    }
-    
+
+    // Optimistically update UI
+    setOptimisticWatchlist(prev => [item, ...prev]);
     showNotification(item, 'added');
-  }, [isInWatchlist, showNotification, isGuest]);
-
-  const handleRemoveFromWatchlist = useCallback((mediaId: number) => {
-    const itemToRemove = watchlist.find(item => item.id === mediaId);
-    if (!itemToRemove) return;
     
-    // This function from userData handles both guest and logged-in cases
-    removeFromWatchlist(mediaId);
+    // Persist change in the background
+    writeToWatchlist(item);
 
-    // For guests, we need to manually update state
-    if (isGuest) {
-      setGuestWatchlist(prev => prev.filter(item => item.id !== mediaId));
-    }
-  }, [watchlist, isGuest]);
-  
+  }, [isInWatchlist, showNotification]);
+
+  const removeFromWatchlist = useCallback((mediaId: number) => {
+    const itemToRemove = optimisticWatchlist.find(i => i.id === mediaId);
+    if (!itemToRemove) return;
+
+    // Optimistically update UI
+    setOptimisticWatchlist(prev => prev.filter(item => item.id !== mediaId));
+    
+    // Persist change in the background
+    deleteFromWatchlist(mediaId);
+
+  }, [optimisticWatchlist]);
+
   const value = {
-    watchlist,
+    watchlist: optimisticWatchlist,
     isLoading,
     isInWatchlist,
-    addToWatchlist: handleAddToWatchlist,
-    removeFromWatchlist: handleRemoveFromWatchlist,
+    addToWatchlist,
+    removeFromWatchlist,
   };
 
   return (

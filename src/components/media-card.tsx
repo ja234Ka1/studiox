@@ -35,7 +35,6 @@ const itemVariants = {
 
 export function MediaCard({ item }: MediaCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const router = useRouter();
   
   const { isInWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
   const [isWatchlistLoading, setIsWatchlistLoading] = useState(false);
@@ -54,9 +53,9 @@ export function MediaCard({ item }: MediaCardProps) {
     e.preventDefault();
     setIsWatchlistLoading(true);
     if (onWatchlist) {
-      await removeFromWatchlist(item.id);
+      removeFromWatchlist(item.id);
     } else {
-      await addToWatchlist(item);
+      addToWatchlist(item);
     }
     // No need to set loading to false here, as the re-render from context will handle it.
   };
