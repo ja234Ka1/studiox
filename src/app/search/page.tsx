@@ -263,6 +263,8 @@ const SearchPage = () => {
                             hidden: { opacity: 0, scale: 0.8 },
                             visible: { opacity: 1, scale: 1 }
                         }}
+                        whileHover={{ scale: 1.1 }}
+                        transition={{ type: 'spring', stiffness: 300 }}
                     >
                         <Button 
                             variant={genre.popular ? "secondary" : "outline"}
