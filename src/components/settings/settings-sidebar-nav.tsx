@@ -1,20 +1,27 @@
 "use client"
 
-import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 
 interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
   items: {
     href: string
     title: string
-  }[]
+  }[],
+  onNavigate?: (href: string) => void;
 }
 
-export function SettingsSidebarNav({ className, items, ...props }: SidebarNavProps) {
+export function SettingsSidebarNav({ className, items, onNavigate, ...props }: SidebarNavProps) {
   const pathname = usePathname()
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>, href: string) => {
+    if (onNavigate) {
+      e.preventDefault();
+      onNavigate(href);
+    }
+  }
 
   return (
     <nav
@@ -25,9 +32,9 @@ export function SettingsSidebarNav({ className, items, ...props }: SidebarNavPro
       {...props}
     >
       {items.map((item) => (
-        <Link
+        <Button
           key={item.href}
-          href={item.href}
+          variant="ghost"
           className={cn(
             buttonVariants({ variant: "ghost" }),
             pathname === item.href
@@ -35,9 +42,10 @@ export function SettingsSidebarNav({ className, items, ...props }: SidebarNavPro
               : "hover:bg-transparent hover:underline",
             "justify-start"
           )}
+          onClick={(e) => handleClick(e, item.href)}
         >
           {item.title}
-        </Link>
+        </Button>
       ))}
     </nav>
   )
