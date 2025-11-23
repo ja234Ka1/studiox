@@ -16,12 +16,6 @@ const sources: { id: StreamSource; name: string; description: string; icon: Reac
     icon: <Crown className="w-6 h-6" />,
     recommended: true,
   },
-  {
-    id: "Elite",
-    name: "Elite",
-    description: "A reliable backup source.",
-    icon: <Shield className="w-6 h-6" />,
-  },
 ];
 
 interface StreamSourceDialogProps {

@@ -25,11 +25,6 @@ const sourceConfig: Record<StreamSource, { movie: string, tv: string, origin: st
         tv: 'https://vidfast.pro/tv/{id}/{season}/{episode}',
         origin: vidfastOrigins,
     },
-    Elite: {
-        movie: 'https://player.vidify.top/embed/movie/{id}',
-        tv: 'https://player.vidify.top/embed/tv/{id}?s={season}&e={episode}',
-        origin: 'https://player.vidify.top',
-    },
 }
 
 /**
@@ -76,22 +71,6 @@ export default function StreamPage() {
                 playing: isPlaying,
                 rawProgressData: progressData
              };
-        }
-
-        // Handle 'Elite' source (vidify)
-        const eliteOrigin = sourceConfig['Elite'].origin as string;
-        if (origin === eliteOrigin && data.type === 'WATCH_PROGRESS') {
-            const payload = {
-                ...data.data,
-                lastWatched: Date.now(),
-                mediaType,
-                season: season ? Number(season) : undefined,
-                episode: episode ? Number(episode) : undefined,
-            };
-            // Vidify doesn't give a 'playing' state, so we assume playing on update
-            updatePlayerState(true, payload);
-            dispatchProgressEvent(progressKey, payload);
-            return;
         }
 
         // Handle 'Prime' source (vidfast)
