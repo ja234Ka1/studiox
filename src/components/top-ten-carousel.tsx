@@ -36,8 +36,7 @@ export function TopTenCarousel() {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
+        staggerChildren: 0.05,
       },
     },
   };
@@ -88,7 +87,7 @@ export function TopTenCarousel() {
         viewport={{ once: true, amount: 0.2 }}
       >
         <h2 className="text-3xl md:text-4xl font-black flex items-baseline gap-x-2">
-          <span className="text-transparent text-outline-primary">
+          <span className="text-transparent" style={{ WebkitTextStroke: '2px hsl(var(--primary))' }}>
             {'TOP'.split('').map((char, i) => <motion.span key={i} variants={charVariants} className="inline-block">{char}</motion.span>)}
           </span>
           <span className="text-primary text-glow">
@@ -106,11 +105,11 @@ export function TopTenCarousel() {
         onMouseLeave={() => autoplayPlugin.current?.play()}
         className="w-full"
       >
-        <CarouselContent className="-ml-28">
+        <CarouselContent className="px-4">
           {mediaItems.map((item, index) => (
             <CarouselItem
               key={item.id}
-              className="pl-28"
+              className={cn("basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5", index > 0 && "-ml-8")}
             >
               <div className="group flex items-center transition-transform duration-300 ease-in-out hover:!transform-none">
                 <span className="
@@ -126,7 +125,7 @@ export function TopTenCarousel() {
                   {index + 1}
                 </span>
                 <motion.div 
-                    className="relative z-10 -ml-12 transition-transform duration-300 ease-in-out group-hover:scale-110"
+                    className="relative z-10 -ml-8 transition-transform duration-300 ease-in-out group-hover:scale-110"
                     initial={{ opacity: 0, scale: 0.8 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true, amount: 0.3 }}
