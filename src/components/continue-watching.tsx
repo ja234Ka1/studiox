@@ -3,8 +3,8 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
-import { PlayCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { PlayCircle, X } from "lucide-react";
 import {
   Carousel,
   CarouselContent,
@@ -19,6 +19,7 @@ import type { MediaType, MediaDetails } from "@/types/tmdb";
 import { Card } from "./ui/card";
 import { Skeleton } from "./ui/skeleton";
 import { getMediaDetails } from "@/lib/tmdb";
+import { Button } from "./ui/button";
 
 // This is the UNIFIED/NORMALIZED data structure we will use internally
 interface NormalizedProgress {
@@ -173,7 +174,7 @@ const getWatchingItemsFromStorage = async (): Promise<NormalizedProgress[]> => {
 }
 
 
-const ContinueWatchingCard = ({ item }: { item: NormalizedProgress }) => {
+const ContinueWatchingCard = ({ item, onRemove }: { item: NormalizedProgress, onRemove: (mediaType: MediaType, mediaId: string) => void }) => {
   if (!item.details) return null;
 
   const watchedPercentage = (item.currentTime / item.duration) * 100;
@@ -187,20 +188,44 @@ const ContinueWatchingCard = ({ item }: { item: NormalizedProgress }) => {
     
     subTitle = `S${item.season} E${item.episode}${episodeTitle ? `: ${episodeTitle}` : ''}`;
   }
+  
+  const handleRemoveClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onRemove(item.mediaType, item.id);
+  }
 
 
   return (
-    <LoadingLink href={streamPath} className="group block">
+    <LoadingLink href={streamPath} className="group/card block">
         <Card className="relative aspect-video w-full rounded-md overflow-hidden shadow-md">
             <Image
                 src={getTmdbImageUrl(item.details.backdrop_path, 'w500')}
                 alt={item.details.title || item.details.name || ''}
                 fill
                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                className="object-cover transition-transform duration-300 group-hover/card:scale-105"
             />
+             <AnimatePresence>
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute top-2 right-2 z-20 opacity-0 group-hover/card:opacity-100 transition-opacity"
+                >
+                    <Button
+                        size="icon"
+                        variant="destructive"
+                        className="h-7 w-7 rounded-full bg-black/50 backdrop-blur-sm hover:bg-destructive"
+                        onClick={handleRemoveClick}
+                    >
+                        <X className="h-4 w-4" />
+                        <span className="sr-only">Remove from continue watching</span>
+                    </Button>
+                </motion.div>
+            </AnimatePresence>
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40">
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 bg-black/40">
                 <PlayCircle className="w-12 h-12 text-white/80" />
             </div>
             <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
@@ -226,6 +251,16 @@ export default function ContinueWatching() {
     setWatchingItems(items);
     setLoading(false);
   }, []);
+
+  const handleRemove = React.useCallback((mediaType: MediaType, mediaId: string) => {
+    if (typeof window === 'undefined') return;
+    const key = `progress_${mediaType}_${mediaId}`;
+    localStorage.removeItem(key);
+    // Manually trigger a re-load to update the UI
+    loadProgress();
+    // Dispatch a storage event so other tabs/components can update
+    window.dispatchEvent(new StorageEvent('storage', { key }));
+  }, [loadProgress]);
 
   React.useEffect(() => {
     loadProgress();
@@ -299,7 +334,7 @@ export default function ContinueWatching() {
               className="basis-2/3 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5 pl-4 pr-2"
             >
               <motion.div layout variants={itemVariants}>
-                <ContinueWatchingCard item={item} />
+                <ContinueWatchingCard item={item} onRemove={handleRemove} />
               </motion.div>
             </CarouselItem>
           ))}
