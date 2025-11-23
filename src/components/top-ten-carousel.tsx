@@ -56,11 +56,11 @@ export default function TopTenCarousel() {
             onMouseLeave={plugin.current.reset}
             className="w-full"
         >
-            <CarouselContent className="-ml-8">
+            <CarouselContent className="-ml-4 md:-ml-8">
             {items.map((item, index) => (
                 <CarouselItem
                     key={item.id}
-                    className="basis-auto pl-8 group"
+                    className="basis-auto pl-4 md:pl-8 group"
                 >
                     <div className="flex items-center transition-transform duration-500 ease-out group-hover:scale-105">
                         <span 
