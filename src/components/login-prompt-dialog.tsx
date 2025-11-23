@@ -22,9 +22,9 @@ export function LoginPromptDialog() {
     }
 
     const timer = setTimeout(() => {
+      // Only show the prompt if the user is anonymous (a guest)
       if (user?.isAnonymous) {
         setIsLoginDialogOpen(true);
-        sessionStorage.setItem(PROMPT_DISMISSED_KEY, 'true');
       }
     }, PROMPT_DELAY);
 
@@ -33,15 +33,13 @@ export function LoginPromptDialog() {
 
   const handleOpenChange = (isOpen: boolean) => {
     setIsLoginDialogOpen(isOpen);
+    // If the dialog is being closed, mark it as dismissed for this session.
     if (!isOpen) {
       sessionStorage.setItem(PROMPT_DISMISSED_KEY, 'true');
     }
   };
 
-  if (!user?.isAnonymous) {
-    return null;
-  }
-
+  // The dialog will only render if the user is a guest and the timer has triggered it.
   return (
     <LoginDialog
       isOpen={isLoginDialogOpen}
