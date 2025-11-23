@@ -4,7 +4,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import type { Media } from '@/types/tmdb';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { getLocalWatchlist, setLocalWatchlist, addToWatchlist, removeFromWatchlist } from '@/lib/userData';
+import { getLocalWatchlist, addToWatchlist, removeFromWatchlist } from '@/lib/userData';
 import { collection } from 'firebase/firestore';
 import { useNotification } from './notification-provider';
 
@@ -23,59 +23,49 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
   const firestore = useFirestore();
   const { showNotification } = useNotification();
   
-  const [localWatchlist, setLocalWatchlistState] = useState<Media[]>([]);
+  const [guestWatchlist, setGuestWatchlist] = useState<Media[]>([]);
   const [isMounted, setIsMounted] = useState(false);
 
-  useEffect(() => {
-    setIsMounted(true);
-    // Load initial guest watchlist on mount
-    setLocalWatchlistState(getLocalWatchlist());
-  }, []);
-
-  // Firestore state for logged-in user
+  // Firestore state for logged-in (non-anonymous) user
   const watchlistQuery = useMemoFirebase(
     () => (user && !user.isAnonymous && firestore ? collection(firestore, 'users', user.uid, 'watchlists') : null),
     [user, firestore]
   );
-  
   const { data: firebaseWatchlist, isLoading: isFirestoreLoading } = useCollection<Media>(watchlistQuery);
 
-  // This effect handles changes in user state (login/logout)
+  // Effect to load initial guest watchlist and handle guest storage events
   useEffect(() => {
-    if (isUserLoading) return; // Wait until we know the user's status
+    setIsMounted(true);
 
-    if (user && !user.isAnonymous) {
-      // User is logged in, clear local state. The source of truth is now firebaseWatchlist.
-      if (localWatchlist.length > 0) {
-        setLocalWatchlistState([]);
-      }
-    } else {
-      // User is a guest or logged out, ensure local state is loaded.
-      setLocalWatchlistState(getLocalWatchlist());
-    }
-  }, [user, isUserLoading, localWatchlist.length]);
+    const loadAndListenForGuestData = () => {
+      setGuestWatchlist(getLocalWatchlist());
 
-  // This effect handles listening for guest watchlist changes from other tabs
-  useEffect(() => {
-    if (user && !user.isAnonymous) return; // Only for guests
-
-    const handleStorageChange = (e: Event) => {
+      const handleStorageChange = (e: Event) => {
         const customEvent = e as CustomEvent;
         if (customEvent.detail?.key === 'willow-watchlist' || (e as StorageEvent).key === 'willow-watchlist') {
-             setLocalWatchlistState(getLocalWatchlist());
+             setGuestWatchlist(getLocalWatchlist());
         }
+      };
+
+      window.addEventListener('storage', handleStorageChange);
+      window.addEventListener('willow-storage-change', handleStorageChange);
+      
+      return () => {
+        window.removeEventListener('storage', handleStorageChange);
+        window.removeEventListener('willow-storage-change', handleStorageChange);
+      };
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('willow-storage-change', handleStorageChange);
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('willow-storage-change', handleStorageChange);
-    };
+    // Only set up listeners if user is a guest or not yet known
+    if (!user || user.isAnonymous) {
+      const cleanup = loadAndListenForGuestData();
+      return cleanup;
+    }
   }, [user]);
-  
+
+  // Determine which watchlist and loading state to use
   const isGuest = !user || user.isAnonymous;
-  const watchlist = isGuest ? localWatchlist : (firebaseWatchlist || []);
+  const watchlist = isGuest ? guestWatchlist : (firebaseWatchlist || []);
   const isLoading = !isMounted || isUserLoading || (!isGuest && isFirestoreLoading);
 
   const isInWatchlist = useCallback((mediaId: number) => {
@@ -87,15 +77,29 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
       showNotification(item, 'exists');
       return;
     }
-    addToWatchlist(item);
+    // This function from userData handles both guest and logged-in cases
+    addToWatchlist(item); 
+    
+    // For guests, we need to manually update state as there's no real-time listener
+    if (isGuest) {
+      setGuestWatchlist(prev => [item, ...prev]);
+    }
+    
     showNotification(item, 'added');
-  }, [isInWatchlist, showNotification]);
+  }, [isInWatchlist, showNotification, isGuest]);
 
   const handleRemoveFromWatchlist = useCallback((mediaId: number) => {
     const itemToRemove = watchlist.find(item => item.id === mediaId);
     if (!itemToRemove) return;
+    
+    // This function from userData handles both guest and logged-in cases
     removeFromWatchlist(mediaId);
-  }, [watchlist]);
+
+    // For guests, we need to manually update state
+    if (isGuest) {
+      setGuestWatchlist(prev => prev.filter(item => item.id !== mediaId));
+    }
+  }, [watchlist, isGuest]);
   
   const value = {
     watchlist,
