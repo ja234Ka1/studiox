@@ -75,7 +75,10 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
   }, [watchlist]);
 
   const handleAddToWatchlist = (item: Media) => {
-    if (isInWatchlist(item.id)) return;
+    if (isInWatchlist(item.id)) {
+      showNotification(item, 'exists');
+      return;
+    }
 
     if (user && !user.isAnonymous && firestore) {
       addToFirebaseWatchlist(firestore, user.uid, item);
@@ -84,7 +87,7 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
       setLocalWatchlist(newWatchlist); // This also updates localStorage via the hook
       setLocalWatchlistState(newWatchlist);
     }
-    showNotification(item);
+    showNotification(item, 'added');
   };
 
   const handleRemoveFromWatchlist = (mediaId: number) => {

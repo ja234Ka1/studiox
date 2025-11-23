@@ -4,18 +4,25 @@
 import { createContext, useContext, useState, ReactNode, useCallback } from "react";
 import type { Media } from "@/types/tmdb";
 
+export type NotificationType = "added" | "exists";
+
+interface NotificationData {
+  item: Media;
+  type: NotificationType;
+}
+
 interface NotificationContextType {
-  notification: Media | null;
-  showNotification: (item: Media) => void;
+  notification: NotificationData | null;
+  showNotification: (item: Media, type: NotificationType) => void;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
-  const [notification, setNotification] = useState<Media | null>(null);
+  const [notification, setNotification] = useState<NotificationData | null>(null);
 
-  const showNotification = useCallback((item: Media) => {
-    setNotification(item);
+  const showNotification = useCallback((item: Media, type: NotificationType) => {
+    setNotification({ item, type });
     setTimeout(() => {
       setNotification(null);
     }, 4000); // Hide after 4 seconds

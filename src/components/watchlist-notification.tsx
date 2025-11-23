@@ -5,10 +5,15 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useNotification } from '@/context/notification-provider';
 import Image from 'next/image';
 import { getTmdbImageUrl } from '@/lib/utils';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Info } from 'lucide-react';
 
 export function WatchlistNotification() {
   const { notification } = useNotification();
+
+  if (!notification) return null;
+
+  const { item, type } = notification;
+  const isExisting = type === 'exists';
 
   return (
     <AnimatePresence>
@@ -24,19 +29,25 @@ export function WatchlistNotification() {
           <div className="flex items-center gap-4 rounded-lg bg-card/80 p-3 shadow-2xl backdrop-blur-lg border border-primary/20">
             <div className="relative h-20 w-14 flex-shrink-0 overflow-hidden rounded-md bg-muted">
               <Image
-                src={getTmdbImageUrl(notification.poster_path, 'w500')}
-                alt={notification.title || notification.name || ''}
+                src={getTmdbImageUrl(item.poster_path, 'w500')}
+                alt={item.title || item.name || ''}
                 fill
                 className="object-cover"
               />
             </div>
             <div className="flex-grow">
-              <p className="text-xs text-muted-foreground">Added to Watchlist</p>
+              <p className="text-xs text-muted-foreground">
+                {isExisting ? "Already in Watchlist" : "Added to Watchlist"}
+              </p>
               <p className="font-semibold leading-tight">
-                {notification.title || notification.name}
+                {item.title || item.name}
               </p>
             </div>
-            <CheckCircle2 className="h-7 w-7 flex-shrink-0 text-primary" />
+            {isExisting ? (
+              <Info className="h-7 w-7 flex-shrink-0 text-amber-500" />
+            ) : (
+              <CheckCircle2 className="h-7 w-7 flex-shrink-0 text-primary" />
+            )}
           </div>
         </motion.div>
       )}
