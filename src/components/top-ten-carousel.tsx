@@ -59,12 +59,12 @@ export function TopTenCarousel() {
         onMouseEnter={plugin.current.stop}
         onMouseLeave={plugin.current.reset}
       >
-        <CarouselContent className="px-4 md:px-8">
+        <CarouselContent>
           {mediaItems.map((item, index) => (
             <CarouselItem
               key={item.id}
               className={cn(
-                "basis-3/4 sm:basis-2/3 md:basis-1/2 lg:basis-1/3",
+                "basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5",
                 index > 0 && "-ml-8"
               )}
             >
