@@ -257,3 +257,22 @@
     }
   }
 }
+
+@layer components {
+    .theme-rose .btn-primary,
+    .theme-nintendo .btn-primary,
+    .theme-playstation .btn-primary,
+    .theme-xbox .btn-primary,
+    .theme-ghibli .btn-primary,
+    .theme-ghibli-dark .btn-primary {
+        @apply bg-gradient-to-br from-primary to-accent text-primary-foreground;
+    }
+    .theme-rose .btn-secondary,
+    .theme-nintendo .btn-secondary,
+    .theme-playstation .btn-secondary,
+    .theme-xbox .btn-secondary,
+    .theme-ghibli .btn-secondary,
+    .theme-ghibli-dark .btn-secondary {
+        @apply bg-gradient-to-br from-secondary to-muted text-secondary-foreground;
+    }
+}
