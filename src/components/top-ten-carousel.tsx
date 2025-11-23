@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from "react";
@@ -14,9 +15,7 @@ import {
 import { motion } from "framer-motion";
 import { Skeleton } from "./ui/skeleton";
 import Autoplay from "embla-carousel-autoplay";
-import { Button } from "./ui/button";
-import { PlayCircle } from "lucide-react";
-import LoadingLink from "./loading-link";
+import { cn } from "@/lib/utils";
 
 const carouselVariants = {
   hidden: { opacity: 0 },
@@ -67,7 +66,7 @@ export function TopTenCarousel() {
     return (
         <div className="container mx-auto px-4 md:px-8 space-y-6">
             <Skeleton className="h-16 w-1/2 mx-auto" />
-            <div className="flex gap-4 overflow-hidden -ml-8">
+            <div className="flex gap-4 overflow-hidden">
                 {Array.from({length: 5}).map((_, i) => (
                     <div key={i} className="flex items-center">
                         <Skeleton className="h-[200px] w-[100px] bg-transparent" />
@@ -95,11 +94,16 @@ export function TopTenCarousel() {
             className="text-center mb-6"
             variants={itemVariants}
         >
-            <h2 className="text-4xl font-black tracking-tighter flex items-center justify-center gap-x-1 sm:gap-x-2">
-                <span className="text-transparent text-outline-primary text-glow">TOP</span>
-                <span className="text-primary text-glow">10</span>
-                <span>MOVIES TODAY</span>
-            </h2>
+          <div className="flex items-center justify-center gap-x-2 sm:gap-x-4">
+              <h2 className="text-5xl md:text-6xl font-black tracking-tighter flex items-center justify-center gap-x-1 sm:gap-x-2">
+                  <span className="text-transparent text-outline-primary text-glow">TOP</span>
+                  <span className="text-primary text-glow">10</span>
+              </h2>
+              <div className="flex flex-col items-start leading-none -mt-1">
+                  <span className="text-lg md:text-xl font-bold text-foreground/80 tracking-tight">MOVIES</span>
+                  <span className="text-lg md:text-xl font-bold text-foreground/80 tracking-tight">TODAY</span>
+              </div>
+          </div>
         </motion.div>
       
       <Carousel
@@ -128,7 +132,10 @@ export function TopTenCarousel() {
                 >
                     {index + 1}
                 </span>
-                <div className="-ml-8 w-[200px] z-10 transition-transform duration-300 ease-in-out group-hover/item:scale-110">
+                <div className={cn(
+                  "w-[200px] z-10 transition-transform duration-300 ease-in-out group-hover/item:scale-110",
+                  "-ml-8" // This creates the overlap
+                )}>
                     <MediaCard item={item} />
                 </div>
               </motion.div>
