@@ -10,8 +10,14 @@ const NUM_BLOBS = 4;
 
 function AnimatedBlobs() {
   const { blobSpeed } = useTheme();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const blobs = useMemo(() => {
+    if (!isMounted) return [];
     return Array.from({ length: NUM_BLOBS }).map((_, i) => ({
       id: i,
       size: Math.random() * 200 + 150,
@@ -20,7 +26,11 @@ function AnimatedBlobs() {
       animationDuration: `${Math.random() * 20 + blobSpeed}s`,
       animationDelay: `-${Math.random() * 10}s`,
     }));
-  }, [blobSpeed]);
+  }, [blobSpeed, isMounted]);
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <>
