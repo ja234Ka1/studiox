@@ -65,7 +65,7 @@ export function TopTenCarousel() {
   if (isLoading) {
     return (
         <div className="container mx-auto px-4 md:px-8 space-y-6">
-            <Skeleton className="h-16 w-1/2 mx-auto" />
+            <Skeleton className="h-20 w-1/2" />
             <div className="flex gap-4 overflow-hidden">
                 {Array.from({length: 5}).map((_, i) => (
                     <div key={i} className="flex items-center">
@@ -91,17 +91,17 @@ export function TopTenCarousel() {
       variants={carouselVariants}
     >
         <motion.div 
-            className="text-center mb-6"
+            className="mb-6 container px-4 md:px-8 mx-auto"
             variants={itemVariants}
         >
-          <div className="flex items-center justify-center gap-x-2 sm:gap-x-4">
-              <h2 className="text-5xl md:text-6xl font-black tracking-tighter flex items-center justify-center gap-x-1 sm:gap-x-2">
+          <div className="flex items-center justify-start gap-x-2 sm:gap-x-4">
+              <h2 className="text-7xl md:text-8xl font-black tracking-tighter flex items-center justify-center gap-x-1 sm:gap-x-2">
                   <span className="text-transparent text-outline-primary text-glow">TOP</span>
                   <span className="text-primary text-glow">10</span>
               </h2>
-              <div className="flex flex-col items-start leading-none -mt-1">
-                  <span className="text-lg md:text-xl font-bold text-foreground/80 tracking-tight">MOVIES</span>
-                  <span className="text-lg md:text-xl font-bold text-foreground/80 tracking-tight">TODAY</span>
+              <div className="flex flex-col items-start leading-none -mt-2">
+                  <span className="text-xl md:text-2xl font-bold text-foreground/80 tracking-tight">MOVIES</span>
+                  <span className="text-xl md:text-2xl font-bold text-foreground/80 tracking-tight">TODAY</span>
               </div>
           </div>
         </motion.div>
@@ -116,11 +116,11 @@ export function TopTenCarousel() {
         onMouseLeave={() => autoplayPlugin.current && autoplayPlugin.current.play()}
         className="w-full"
       >
-        <CarouselContent className="-ml-8">
+        <CarouselContent className="-ml-28">
           {mediaItems.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
-              className="basis-auto pl-8"
+              className="basis-auto pl-28"
             >
               <motion.div 
                 variants={itemVariants} 
