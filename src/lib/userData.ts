@@ -1,4 +1,3 @@
-
 'use client'
 
 import type { Media } from "@/types/tmdb";
@@ -69,16 +68,12 @@ export const removeFromFirebaseWatchlist = (firestore: Firestore, userId: string
     });
 };
 
-export const mergeLocalWatchlistToFirebase = async (userId: string) => {
-  if (typeof window === "undefined") return;
-  const { initializeFirebase } = await import('@/firebase');
-  const { firestore } = initializeFirebase();
-  if (!firestore || !userId) return;
+export const mergeLocalWatchlistToFirebase = async (firestore: Firestore, userId: string) => {
+  if (typeof window === "undefined" || !firestore || !userId) return;
 
   const localWatchlist = getLocalWatchlist();
   if (localWatchlist.length === 0) return;
 
-  console.log('Checking for local watchlist to merge to Firebase...');
   const watchlistColRef = collection(firestore, 'users', userId, 'watchlists');
 
   try {
@@ -96,11 +91,11 @@ export const mergeLocalWatchlistToFirebase = async (userId: string) => {
 
       await batch.commit();
       console.log(`${itemsToMerge.length} items merged to Firebase.`);
-      setLocalWatchlist([]); // Clear local watchlist
-    } else {
-      console.log('Local watchlist was already in sync. Clearing local data.');
-      setLocalWatchlist([]); // Clear local watchlist
     }
+    
+    // Always clear local data after attempting a merge
+    setLocalWatchlist([]);
+
   } catch (error) {
     console.error("Error merging watchlist:", error);
     if (error instanceof FirestorePermissionError) {

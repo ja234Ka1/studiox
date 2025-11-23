@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
@@ -36,7 +35,7 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setIsMounted(true);
-    // Load initial guest watchlist from local storage only if it's a guest user
+    // Load initial guest watchlist from local storage
     if (!user || user.isAnonymous) {
       setLocalWatchlistState(getLocalWatchlist());
     }
@@ -45,14 +44,13 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
 
   // Listen for local storage changes (for guest users in other tabs)
   useEffect(() => {
-    // Only for guests
-    if (user && !user.isAnonymous) return;
+    if (user && !user.isAnonymous) return; // Only for guests
 
     const handleStorageChange = (e: Event) => {
-        // Custom event from useLocalStorage hook
-        if ((e as CustomEvent).detail?.key === "willow-watchlist") {
+        const customEvent = e as CustomEvent;
+        if (customEvent.detail?.key === 'willow-watchlist') {
              setLocalWatchlistState(getLocalWatchlist());
-        } else if ((e as StorageEvent).key === "willow-watchlist") {
+        } else if ((e as StorageEvent).key === 'willow-watchlist') {
              setLocalWatchlistState(getLocalWatchlist());
         }
     };
@@ -82,14 +80,15 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
       addToFirebaseWatchlist(firestore, user.uid, item);
     } else {
       const newWatchlist = [item, ...localWatchlist];
-      setLocalWatchlist(newWatchlist); 
-      setLocalWatchlistState(newWatchlist);
+      setLocalWatchlist(newWatchlist); // Persist to local storage
+      setLocalWatchlistState(newWatchlist); // Update state
     }
     showNotification(item, 'added');
   };
 
   const handleRemoveFromWatchlist = (mediaId: number) => {
-    if (!isInWatchlist(mediaId)) return;
+    const itemToRemove = watchlist.find(item => item.id === mediaId);
+    if (!itemToRemove) return;
 
     if (user && !user.isAnonymous && firestore) {
       removeFromFirebaseWatchlist(firestore, user.uid, mediaId);

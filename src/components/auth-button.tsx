@@ -1,11 +1,12 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LogOut, User as UserIcon } from 'lucide-react';
-import { useUser } from '@/firebase';
+import { useUser, useFirestore } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { useAuth } from '@/firebase/provider';
+import { mergeLocalWatchlistToFirebase } from '@/lib/userData';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -22,7 +23,15 @@ import { LoginDialog } from './login-dialog';
 export function AuthButton() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
+  const firestore = useFirestore();
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
+
+  // Effect to merge watchlist on login
+  useEffect(() => {
+    if (user && !user.isAnonymous && firestore) {
+      mergeLocalWatchlistToFirebase(firestore, user.uid);
+    }
+  }, [user, firestore]);
 
   if (isUserLoading) {
     return <Button variant="ghost" size="sm">Loading...</Button>;
@@ -66,7 +75,8 @@ export function AuthButton() {
               <div className="flex flex-col space-y-2">
                 <p className="text-sm font-medium leading-none">Guest User</p>
                 <Button size="sm" onClick={() => {
-                  handleSignOut().then(() => setIsLoginDialogOpen(true));
+                  // Don't sign out, just open login
+                  setIsLoginDialogOpen(true);
                 }}>Sign In / Sign Up</Button>
               </div>
           </DropdownMenuLabel>
@@ -90,6 +100,7 @@ export function AuthButton() {
           </>
         )}
       </DropdownMenuContent>
+      <LoginDialog isOpen={isLoginDialogOpen} onOpenChange={setIsLoginDialogOpen} />
     </DropdownMenu>
   );
 }

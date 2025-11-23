@@ -1,4 +1,3 @@
-
 "use client";
 
 import { createContext, useContext, useState, ReactNode, useCallback } from "react";
@@ -20,13 +19,22 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const [notification, setNotification] = useState<NotificationData | null>(null);
+  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
   const showNotification = useCallback((item: Media, type: NotificationType) => {
+    // If there's an existing notification timeout, clear it
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
     setNotification({ item, type });
-    setTimeout(() => {
+    
+    // Set a new timeout to hide the notification
+    const newTimeoutId = setTimeout(() => {
       setNotification(null);
+      setTimeoutId(null);
     }, 4000); // Hide after 4 seconds
-  }, []);
+    setTimeoutId(newTimeoutId);
+  }, [timeoutId]);
 
   return (
     <NotificationContext.Provider value={{ notification, showNotification }}>
