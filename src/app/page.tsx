@@ -11,7 +11,6 @@ import ContinueWatching from "@/components/continue-watching";
 import TopTenCarousel from "@/components/top-ten-carousel";
 import PlatformCarousel from "@/components/platform-carousel";
 import { FeaturedContent } from "@/components/featured-content";
-import TopTenTvCarousel from "@/components/top-ten-tv-carousel";
 
 interface Category {
   title: string;
@@ -81,6 +80,7 @@ export default async function Home() {
   
   const heroItems = trendingWeekly.slice(0, 5);
   const heroFallbackImage = PlaceHolderImages.find(p => p.id === 'hero-fallback');
+  const topTenMovies = categories.find(c => c.title === 'Trending Movies Today')?.items.slice(0, 10) || [];
 
   return (
     <div className="flex flex-col">
@@ -120,15 +120,15 @@ export default async function Home() {
         {!error && (
           <div className="space-y-16">
             <ContinueWatching />
-            <TopTenCarousel />
-            <TopTenTvCarousel />
             
+            {topTenMovies.length > 0 && <TopTenCarousel title="Top 10 Movies Today" items={topTenMovies} />}
+
             {trendingWeekly.length > 0 && (
               <MediaCarousel title="Trending This Week" items={trendingWeekly} />
             )}
             
             {categories.slice(0, 2).map((category) => (
-              <MediaCarousel key={category.title} title={category.title} items={category.items} />
+              category.title !== 'Trending Movies Today' && <MediaCarousel key={category.title} title={category.title} items={category.items} />
             ))}
 
             {featuredAction && <FeaturedContent media={featuredAction} textPosition="left" />}
