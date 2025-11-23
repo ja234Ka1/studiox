@@ -13,7 +13,6 @@ import { getTmdbImageUrl } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useVideo } from "@/context/video-provider";
-import { useToast } from "@/hooks/use-toast";
 import { useWatchlist } from "@/context/watchlist-provider";
 import YouTubeEmbed from "./youtube-embed";
 import { useTheme, type StreamSource } from "@/context/theme-provider";
@@ -26,7 +25,6 @@ interface DetailPageHeroProps {
 
 export function DetailPageHero({ item }: DetailPageHeroProps) {
   const router = useRouter();
-  const { toast } = useToast();
   const { isInWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
   
   const [showTrailer, setShowTrailer] = useState(false);
@@ -60,19 +58,8 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
     const itemToAdd = { ...item, media_type: item.media_type || (item.title ? 'movie' : 'tv') };
     if (isItemInWatchlist) {
       removeFromWatchlist(item.id);
-      toast({ 
-        title: `Removed from Watchlist`, 
-        description: `"${title}" has been removed.`,
-        imageUrl: getTmdbImageUrl(item.poster_path, 'w500'),
-      });
     } else {
       addToWatchlist(itemToAdd);
-      toast({ 
-        title: 'Added to Watchlist', 
-        description: `"${title}" has been added.`,
-        imageUrl: getTmdbImageUrl(item.poster_path, 'w500'),
-        status: "success",
-      });
     }
   };
 

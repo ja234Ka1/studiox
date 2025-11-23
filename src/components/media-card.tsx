@@ -5,7 +5,6 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, PlayCircle, Star, Check, X } from "lucide-react";
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 import { useRouter, usePathname } from 'next/navigation';
 
 import type { Media } from "@/types/tmdb";
@@ -38,7 +37,6 @@ const itemVariants = {
 
 export function MediaCard({ item }: MediaCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const { toast } = useToast();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -60,19 +58,8 @@ export function MediaCard({ item }: MediaCardProps) {
 
     if (isItemInWatchlist) {
       removeFromWatchlist(item.id);
-      toast({ 
-        title: `Removed from Watchlist`, 
-        description: `"${title}" has been removed.`,
-        imageUrl: getTmdbImageUrl(item.poster_path, 'w500'),
-      });
     } else {
       addToWatchlist(itemToAdd);
-      toast({ 
-        title: 'Added to Watchlist', 
-        description: `"${title}" has been added.`,
-        imageUrl: getTmdbImageUrl(item.poster_path, 'w500'),
-        status: "success",
-      });
     }
   };
   

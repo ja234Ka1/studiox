@@ -11,7 +11,6 @@ import { getTmdbImageUrl } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import LoadingLink from "./loading-link";
-import { useToast } from "@/hooks/use-toast";
 import { useWatchlist } from "@/context/watchlist-provider";
 
 interface HeroProps {
@@ -20,7 +19,6 @@ interface HeroProps {
 
 export function Hero({ items }: HeroProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const { toast } = useToast();
   const { isInWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
 
   const item = items[currentIndex];
@@ -49,19 +47,8 @@ export function Hero({ items }: HeroProps) {
     const itemToAdd = { ...item, media_type: item.media_type || (item.title ? 'movie' : 'tv') };
     if (isItemInWatchlist) {
       removeFromWatchlist(item.id);
-      toast({ 
-        title: `Removed from Watchlist`, 
-        description: `"${title}" has been removed.`,
-        imageUrl: getTmdbImageUrl(item.poster_path, 'w500'),
-      });
     } else {
       addToWatchlist(itemToAdd);
-      toast({ 
-        title: 'Added to Watchlist', 
-        description: `"${title}" has been added.`,
-        imageUrl: getTmdbImageUrl(item.poster_path, 'w500'),
-        status: "success",
-      });
     }
   };
 

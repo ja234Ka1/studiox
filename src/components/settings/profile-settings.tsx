@@ -27,7 +27,6 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { useUser } from "@/firebase"
-import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/firebase/provider"
 
 
@@ -52,7 +51,6 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>
 export function ProfileSettings() {
   const { user } = useUser()
   const auth = useAuth()
-  const { toast } = useToast()
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -74,11 +72,7 @@ export function ProfileSettings() {
 
   async function onSubmit(data: ProfileFormValues) {
     if (!auth?.currentUser) {
-        toast({
-          variant: "destructive",
-          title: "Not authenticated",
-          description: "You must be logged in to update your profile.",
-        });
+        console.error("Not authenticated");
         return;
       }
   
@@ -86,17 +80,9 @@ export function ProfileSettings() {
         await updateProfile(auth.currentUser, {
           displayName: data.username,
         });
-        toast({
-          title: "Profile updated",
-          description: "Your username has been successfully updated.",
-        });
+        console.log("Profile updated");
       } catch (error: any) {
         console.error("Error updating profile:", error);
-        toast({
-          variant: "destructive",
-          title: "Uh oh! Something went wrong.",
-          description: error.message || "Could not update your profile.",
-        });
       }
   }
 
