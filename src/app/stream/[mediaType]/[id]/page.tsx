@@ -71,28 +71,47 @@ export default function StreamPage() {
       }
 
       // Vidfast handler for 'Prime' source
-      if (vidfastOrigins.includes(event.origin) && event.data?.type === 'MEDIA_DATA' && event.data.data) {
-        const d = event.data.data;
-        const progressKey = `progress_${d.type}_${d.id}`;
-        
-        const isMovie = d.type === 'movie';
-        const progress = isMovie ? d.progress : (d.show_progress?.[`${d.last_season_watched}-${d.last_episode_watched}`]?.progress);
-        
-        if (!progress) return;
+      if (vidfastOrigins.includes(event.origin) && event.data) {
+        let progressPayload;
 
-        const progressPayload = {
-            currentTime: progress.watched,
-            duration: progress.duration,
-            lastWatched: d.last_updated,
-            eventType: 'timeupdate',
-            mediaType: d.type,
-            title: d.title,
-            poster: d.poster_path,
-            watched_percentage: (progress.watched / progress.duration) * 100,
-            season: d.last_season_watched,
-            episode: d.last_episode_watched,
+        if (event.data.type === 'PLAYER_EVENT' && event.data.data) {
+            const d = event.data.data;
+            progressPayload = {
+                currentTime: d.currentTime,
+                duration: d.duration,
+                lastWatched: Date.now(),
+                eventType: d.event,
+                mediaType: d.mediaType,
+                season: d.season,
+                episode: d.episode,
+            };
+        } else if (event.data.type === 'MEDIA_DATA' && event.data.data) {
+            const d = event.data.data;
+            const isMovie = d.type === 'movie';
+            const progress = isMovie 
+                ? d.progress 
+                : (d.show_progress?.[`s${d.last_season_watched}e${d.last_episode_watched}`]?.progress);
+
+            if (!progress) return;
+
+            progressPayload = {
+                currentTime: progress.watched,
+                duration: progress.duration,
+                lastWatched: d.last_updated,
+                eventType: 'timeupdate',
+                mediaType: d.type,
+                title: d.title,
+                poster: d.poster_path,
+                backdrop: d.backdrop_path,
+                season: d.last_season_watched,
+                episode: d.last_episode_watched,
+            };
         }
-        dispatchProgressEvent(progressKey, progressPayload);
+
+        if (progressPayload) {
+            const progressKey = `progress_${progressPayload.mediaType}_${id}`;
+            dispatchProgressEvent(progressKey, progressPayload);
+        }
       }
     };
 
@@ -101,7 +120,7 @@ export default function StreamPage() {
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, [handleProgress]);
+  }, [id, handleProgress]);
 
   if (mediaType !== "tv" && mediaType !== "movie") {
     notFound();
