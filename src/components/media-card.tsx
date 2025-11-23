@@ -5,13 +5,12 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlayCircle, Star, Bookmark, BookmarkCheck, Loader2 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 import type { Media } from "@/types/tmdb";
 import { getTmdbImageUrl, cn } from "@/lib/utils";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Button } from "./ui/button";
-import LoadingLink from "./loading-link";
 import { useWatchlist } from "@/context/watchlist-provider";
 
 interface MediaCardProps {
@@ -70,7 +69,7 @@ export function MediaCard({ item }: MediaCardProps) {
       onMouseLeave={() => setIsHovered(false)}
       className="relative aspect-[2/3] w-full rounded-md overflow-hidden bg-card shadow-md cursor-pointer group"
     >
-      <LoadingLink href={detailPath}>
+      <Link href={detailPath}>
         <Image
           src={posterUrl!}
           alt={title || "Media"}
@@ -79,7 +78,7 @@ export function MediaCard({ item }: MediaCardProps) {
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
         />
-      </LoadingLink>
+      </Link>
 
       <AnimatePresence>
         {isHovered && (
@@ -101,9 +100,9 @@ export function MediaCard({ item }: MediaCardProps) {
             </motion.div>
             <motion.div variants={itemVariants} className="flex items-center gap-2">
               <Button size="icon" className="h-8 w-8 rounded-full" asChild >
-                <LoadingLink href={detailPath} onClick={(e) => e.stopPropagation()}>
+                <Link href={detailPath} onClick={(e) => e.stopPropagation()}>
                     <PlayCircle className="w-4 h-4" />
-                </LoadingLink>
+                </Link>
               </Button>
               <Button size="icon" className="h-8 w-8 rounded-full" variant="outline" onClick={handleToggleWatchlist}>
                 {isWatchlistLoading ? (

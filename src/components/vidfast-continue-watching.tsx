@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/carousel";
 import { getTmdbImageUrl } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
-import LoadingLink from "./loading-link";
+import Link from "next/link";
 import type { MediaType } from "@/types/tmdb";
 import { Card } from "./ui/card";
 
@@ -79,7 +79,7 @@ const ContinueWatchingCard = ({ item }: { item: VidFastMedia }) => {
   }
 
   return (
-    <LoadingLink href={streamPath} className="group block">
+    <Link href={streamPath} className="group block">
         <Card className="relative aspect-video w-full rounded-md overflow-hidden shadow-md">
             <Image
                 src={getTmdbImageUrl(item.backdrop_path, 'w500')}
@@ -100,7 +100,7 @@ const ContinueWatchingCard = ({ item }: { item: VidFastMedia }) => {
                 <Progress value={progressPercent} className="h-1 bg-white/20 border-0" />
             </div>
         </Card>
-    </LoadingLink>
+    </Link>
   );
 };
 

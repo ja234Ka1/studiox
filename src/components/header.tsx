@@ -5,10 +5,10 @@ import { useEffect, useState } from "react";
 import { Film, ListVideo, Menu, Search, Settings, Tv, MessageCircle } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import LoadingLink from "./loading-link";
 import { AuthButton } from "./auth-button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { StreamSourceDialog } from "./stream-source-dialog";
@@ -63,10 +63,10 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="pr-0">
-              <LoadingLink href="/" className="mr-6 flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
+              <Link href="/" className="mr-6 flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
                 <Image src="https://upload.wikimedia.org/wikipedia/commons/7/7a/A-symmetrical-silhouette-of-a-tree-with-many-branches-and-leaves-cutouts-png.svg" alt="Willow logo" width={40} height={40} className="h-10 w-10 filter-glow" />
                 <span className="font-bold sm:inline-block text-2xl">Willow</span>
-              </LoadingLink>
+              </Link>
               <div className="flex flex-col space-y-2 mt-6">
                   {navItems.map((item) => (
                       <Button
@@ -81,20 +81,20 @@ export function Header() {
                           )}
                           onClick={() => setIsMobileMenuOpen(false)}
                       >
-                      <LoadingLink href={item.href}>
+                      <Link href={item.href}>
                           <item.icon className="mr-2 h-5 w-5" />
                           {item.label}
-                      </LoadingLink>
+                      </Link>
                       </Button>
                   ))}
               </div>
             </SheetContent>
           </Sheet>
 
-          <LoadingLink href="/" className="mr-6 flex items-center space-x-2">
+          <Link href="/" className="mr-6 flex items-center space-x-2">
             <Image src="https://upload.wikimedia.org/wikipedia/commons/7/7a/A-symmetrical-silhouette-of-a-tree-with-many-branches-and-leaves-cutouts-png.svg" alt="Willow logo" width={40} height={40} className="h-10 w-10 filter-glow" />
             <span className="hidden font-bold sm:inline-block text-2xl">Willow</span>
-          </LoadingLink>
+          </Link>
           <nav className="hidden md:flex items-center space-x-1">
             {navItems.map((item) => (
               <Button
@@ -108,22 +108,22 @@ export function Header() {
                     : "text-muted-foreground hover:text-primary"
                 )}
               >
-                <LoadingLink href={item.href}>
+                <Link href={item.href}>
                   {item.label}
-                </LoadingLink>
+                </Link>
               </Button>
             ))}
           </nav>
           <div className="flex flex-1 items-center justify-end space-x-2">
             <Button asChild variant="ghost" size="icon">
-              <LoadingLink href="/search">
+              <Link href="/search">
                   <Search />
-              </LoadingLink>
+              </Link>
             </Button>
             <Button asChild variant="ghost" size="icon">
-              <LoadingLink href="/settings">
+              <Link href="/settings">
                   <Settings />
-              </LoadingLink>
+              </Link>
             </Button>
             <AuthButton />
           </div>

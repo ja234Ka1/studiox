@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { getSeasonDetails } from '@/lib/tmdb';
 import type { SeasonDetails, Episode } from '@/types/tmdb';
 import { Button } from '@/components/ui/button';
-import LoadingLink from './loading-link';
+import Link from 'next/link';
 import { PlayCircle, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { getTmdbImageUrl } from '@/lib/utils';
@@ -45,10 +45,10 @@ const EpisodeListItem = forwardRef<HTMLDivElement, { episode: Episode; showId: n
                 <h4 className="font-semibold mb-1">E{episode.episode_number}: {episode.name}</h4>
                 <p className="text-muted-foreground text-sm line-clamp-2 mb-3">{episode.overview}</p>
                 <Button size="sm" asChild>
-                    <LoadingLink href={streamPath}>
+                    <Link href={streamPath}>
                         <PlayCircle className="mr-2 h-4 w-4" />
                         Watch Episode
-                    </LoadingLink>
+                    </Link>
                 </Button>
             </div>
         </div>

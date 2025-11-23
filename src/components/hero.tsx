@@ -5,12 +5,12 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlayCircle, Info } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
+import Link from 'next/link';
 
 import type { Media } from "@/types/tmdb";
 import { getTmdbImageUrl } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import LoadingLink from "./loading-link";
 import { Skeleton } from "./ui/skeleton";
 
 interface HeroProps {
@@ -72,16 +72,16 @@ function HeroContent({ item }: { item: Media }) {
       </motion.p>
       <motion.div variants={itemVariants} className="flex items-center gap-3">
         <Button size="lg" asChild className="button-bg-pan">
-          <LoadingLink href={streamPath}>
+          <Link href={streamPath}>
             <PlayCircle />
             Watch Now
-          </LoadingLink>
+          </Link>
         </Button>
         <Button size="lg" variant="outline" asChild className="bg-background/20 backdrop-blur-sm">
-          <LoadingLink href={detailPath}>
+          <Link href={detailPath}>
             <Info />
             More Info
-          </LoadingLink>
+          </Link>
         </Button>
       </motion.div>
     </motion.div>
@@ -150,7 +150,7 @@ export function Hero({ items }: HeroProps) {
 
   if (!items || items.length === 0) {
     return (
-      <div className="relative w-full h-[60vh] lg:h-[80vh]">
+      <div className="relative w-full h-[70vh] lg:h-[90vh]">
         <Skeleton className="w-full h-full" />
       </div>
     );

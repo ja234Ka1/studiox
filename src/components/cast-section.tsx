@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import LoadingLink from "./loading-link";
+import Link from "next/link";
 import { getTmdbImageUrl } from "@/lib/utils";
 import type { CastMember } from "@/types/tmdb";
 
@@ -35,7 +35,7 @@ export function CastSection({ topCast }: CastSectionProps) {
       <h2 className="text-2xl font-bold mb-6 text-center">Top Cast</h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-6">
         {topCast.map((member, index) => (
-          <LoadingLink
+          <Link
             key={member.id}
             href={`/person/${member.id}`}
             className="group"
@@ -58,7 +58,7 @@ export function CastSection({ topCast }: CastSectionProps) {
                 {member.character}
               </p>
             </motion.div>
-          </LoadingLink>
+          </Link>
         ))}
       </div>
     </motion.div>

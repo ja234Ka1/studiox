@@ -7,7 +7,7 @@ import { PlayCircle, Info } from 'lucide-react';
 import type { Media } from '@/types/tmdb';
 import { getTmdbImageUrl, cn } from '@/lib/utils';
 import { Button } from './ui/button';
-import LoadingLink from './loading-link';
+import Link from 'next/link';
 
 interface FeaturedContentProps {
   media: Media;
@@ -80,16 +80,16 @@ export function FeaturedContent({ media, textPosition = 'right' }: FeaturedConte
             )}
           >
             <Button size="lg" asChild className="button-bg-pan">
-              <LoadingLink href={streamPath}>
+              <Link href={streamPath}>
                 <PlayCircle />
                 Watch Now
-              </LoadingLink>
+              </Link>
             </Button>
             <Button size="lg" variant="outline" className="bg-white/10" asChild>
-              <LoadingLink href={detailPath}>
+              <Link href={detailPath}>
                 <Info />
                 Details
-              </LoadingLink>
+              </Link>
             </Button>
           </div>
         </motion.div>

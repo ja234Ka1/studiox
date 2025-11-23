@@ -10,7 +10,6 @@ import { AppProviders } from "@/components/providers";
 import { Header } from "@/components/header";
 import { Background } from "@/components/background";
 import VideoPlayer from "@/components/video-player";
-import LoadingScreen from "@/components/loading-screen";
 import { useTheme } from "@/context/theme-provider";
 import { LoginPromptDialog } from "@/components/login-prompt-dialog";
 import { WatchlistNotification } from "@/components/watchlist-notification";
@@ -31,7 +30,6 @@ function ThemedBodyContent({ children }: { children: ReactNode }) {
 
   return (
       <>
-        <LoadingScreen />
         <Background />
         <div className="relative z-10 flex min-h-screen flex-col">
           <Header />

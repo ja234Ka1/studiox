@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/carousel";
 import { getTmdbImageUrl } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
-import LoadingLink from "./loading-link";
+import Link from "next/link";
 import type { MediaType, MediaDetails } from "@/types/tmdb";
 import { Card } from "./ui/card";
 import { Skeleton } from "./ui/skeleton";
@@ -182,7 +182,7 @@ const ContinueWatchingCard = ({ item, onRemove }: { item: NormalizedProgress, on
 
 
   return (
-    <LoadingLink href={streamPath} className="group/card block">
+    <Link href={streamPath} className="group/card block">
         <Card className="relative aspect-video w-full rounded-md overflow-hidden shadow-md">
             <Image
                 src={getTmdbImageUrl(item.details.backdrop_path, 'w500')}
@@ -221,7 +221,7 @@ const ContinueWatchingCard = ({ item, onRemove }: { item: NormalizedProgress, on
                 <Progress value={watchedPercentage} className="h-1 bg-white/20 border-0" />
             </div>
         </Card>
-    </LoadingLink>
+    </Link>
   );
 };
 

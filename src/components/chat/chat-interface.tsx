@@ -13,7 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useUser } from '@/firebase';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import LoadingLink from '../loading-link';
+import Link from 'next/link';
 
 interface Message {
   id: number;
@@ -197,7 +197,7 @@ export function ChatInterface() {
                         >
                             <ReactMarkdown
                                 components={{
-                                    a: ({node, ...props}) => <LoadingLink {...props} className="underline" />
+                                    a: ({node, ...props}) => <Link {...props} className="underline" />
                                 }}
                             >{message.text}</ReactMarkdown>
                         </div>

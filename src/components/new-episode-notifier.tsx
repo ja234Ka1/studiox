@@ -10,7 +10,7 @@ import type { Media, MediaDetails } from '@/types/tmdb';
 import { getMediaDetails } from '@/lib/tmdb';
 import { getTmdbImageUrl } from '@/lib/utils';
 import { Button } from './ui/button';
-import LoadingLink from './loading-link';
+import Link from 'next/link';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 
 interface TvShowWatchData {
@@ -118,9 +118,9 @@ export function NewEpisodeNotifier() {
                     {notification.item.name}
                 </p>
                 <Button size="sm" asChild className="mt-2 h-7 px-2">
-                    <LoadingLink href={`/media/tv/${notification.item.id}`}>
+                    <Link href={`/media/tv/${notification.item.id}`}>
                         Watch Now
-                    </LoadingLink>
+                    </Link>
                 </Button>
                 </div>
                 <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => dismissNotification(notification.item.id)}>
