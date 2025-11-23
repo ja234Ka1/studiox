@@ -12,6 +12,7 @@ import { Background } from "@/components/background";
 import VideoPlayer from "@/components/video-player";
 import LoadingScreen from "@/components/loading-screen";
 import { useTheme } from "@/context/theme-provider";
+import { LoginPromptDialog } from "@/components/login-prompt-dialog";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -32,6 +33,7 @@ function ThemedBodyContent({ children }: { children: ReactNode }) {
           <main className="flex-1 w-full mx-auto">{children}</main>
         </div>
         <VideoPlayer />
+        <LoginPromptDialog />
       </>
   );
 }
