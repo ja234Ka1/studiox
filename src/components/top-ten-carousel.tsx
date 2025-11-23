@@ -37,12 +37,11 @@ export default function TopTenCarousel() {
       <div className="container px-4 md:px-8 mx-auto mb-6">
         <h2 className="text-3xl font-bold tracking-tighter flex items-end gap-2">
             <span 
-                className="text-5xl font-black"
-                style={{ WebkitTextStroke: '2px hsl(var(--primary))', color: 'transparent' }}
+                className="text-5xl font-black text-outline-primary"
             >
                 TOP
             </span>
-            <span className="text-7xl font-black text-primary text-shadow-primary">10</span>
+            <span className="text-7xl font-black text-primary text-glow">10</span>
             <span className="text-xl font-semibold text-muted-foreground">MOVIES TODAY</span>
         </h2>
       </div>
@@ -61,13 +60,12 @@ export default function TopTenCarousel() {
               key={item.id}
               className={cn(
                 "basis-2/3 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5 2xl:basis-1/6 pl-4 pr-2 group",
-                index > 0 && "-ml-8" // The crucial overlap
+                index > 0 && "-ml-12" // The crucial overlap
               )}
             >
-                <div className="flex items-center transition-transform duration-300 ease-in-out group-hover:scale-110">
+                <div className="flex items-center transition-transform duration-300 ease-in-out group-hover:scale-105">
                     <span 
-                        className="text-[200px] font-black transition-transform duration-300 ease-in-out text-shadow-primary"
-                        style={{ WebkitTextStroke: '3px hsl(var(--primary))', color: 'transparent' }}
+                        className="text-[200px] font-black transition-transform duration-300 ease-in-out text-glow text-outline-primary"
                     >
                         {index + 1}
                     </span>
