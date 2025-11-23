@@ -35,9 +35,17 @@ export function getTmdbImageUrl(path: string | null | undefined, size: TmdbImage
 
 export function getStreamedImageUrl(id: string, type: StreamedImageType = 'proxy'): string {
     if (!id) return "https://picsum.photos/seed/placeholder/200/200";
-    if (type === 'poster') {
-        // Assuming the 'id' for poster is something like 'team1-badge/team2-badge'
-        return `${STREAMED_IMAGE_BASE_URL}/poster/${id}.webp`;
+
+    // The API gives full paths for posters, so use them directly.
+    if (type === 'poster' && id.startsWith('/')) {
+        return `https://streamed.pk${id}`;
     }
-    return `${STREAMED_IMAGE_BASE_URL}/${type}/${id}.webp`;
+
+    // For badges, the ID is clean and just needs the path and extension.
+    if (type === 'badge') {
+        return `${STREAMED_IMAGE_BASE_URL}/badge/${id}.webp`;
+    }
+
+    // Default proxy behavior for other cases
+    return `${STREAMED_IMAGE_BASE_URL}/proxy/${id}.webp`;
 }
