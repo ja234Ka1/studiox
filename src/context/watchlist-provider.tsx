@@ -4,7 +4,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import type { Media } from '@/types/tmdb';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { getLocalWatchlist, setLocalWatchlist, addToFirebaseWatchlist, removeFromFirebaseWatchlist } from '@/lib/userData';
+import { getLocalWatchlist, setLocalWatchlist, addToWatchlist, removeFromWatchlist } from '@/lib/userData';
 import { collection } from 'firebase/firestore';
 import { useNotification } from './notification-provider';
 
@@ -82,41 +82,27 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
     return watchlist.some(item => item.id === mediaId);
   }, [watchlist]);
 
-  const addToWatchlist = useCallback((item: Media) => {
+  const handleAddToWatchlist = useCallback((item: Media) => {
     if (isInWatchlist(item.id)) {
       showNotification(item, 'exists');
       return;
     }
-
-    if (user && !user.isAnonymous && firestore) {
-      addToFirebaseWatchlist(firestore, user.uid, item);
-    } else {
-      const newWatchlist = [item, ...localWatchlist];
-      setLocalWatchlist(newWatchlist); // Persist to local storage
-      setLocalWatchlistState(newWatchlist); // Update state
-    }
+    addToWatchlist(item);
     showNotification(item, 'added');
-  }, [isInWatchlist, user, firestore, localWatchlist, showNotification]);
+  }, [isInWatchlist, showNotification]);
 
-  const removeFromWatchlist = useCallback((mediaId: number) => {
+  const handleRemoveFromWatchlist = useCallback((mediaId: number) => {
     const itemToRemove = watchlist.find(item => item.id === mediaId);
     if (!itemToRemove) return;
-
-    if (user && !user.isAnonymous && firestore) {
-      removeFromFirebaseWatchlist(firestore, user.uid, mediaId);
-    } else {
-      const newWatchlist = localWatchlist.filter(item => item.id !== mediaId);
-      setLocalWatchlist(newWatchlist);
-      setLocalWatchlistState(newWatchlist);
-    }
-  }, [watchlist, user, firestore, localWatchlist]);
+    removeFromWatchlist(mediaId);
+  }, [watchlist]);
   
   const value = {
     watchlist,
     isLoading,
     isInWatchlist,
-    addToWatchlist,
-    removeFromWatchlist,
+    addToWatchlist: handleAddToWatchlist,
+    removeFromWatchlist: handleRemoveFromWatchlist,
   };
 
   return (

@@ -1,5 +1,6 @@
 
 
+import { type ToastProps } from "@/components/ui/toast"
 
 
 export type MediaType = "movie" | "tv";
@@ -136,3 +137,4 @@ export interface PersonDetails {
 }
 
 export type Toast = Omit<import("@/hooks/use-toast").Toast, "id">;
+

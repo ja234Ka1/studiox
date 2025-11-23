@@ -3,16 +3,17 @@
 
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { PlayCircle, Star } from "lucide-react";
-import { useState } from "react";
+import { PlayCircle, Star, Bookmark, BookmarkCheck, Loader2 } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from 'next/navigation';
 
 import type { Media } from "@/types/tmdb";
-import { getTmdbImageUrl } from "@/lib/utils";
+import { getTmdbImageUrl, cn } from "@/lib/utils";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Button } from "./ui/button";
 import LoadingLink from "./loading-link";
-
+import { isInWatchlist, addToWatchlist, removeFromWatchlist } from "@/lib/userData";
+import { useToast } from "@/hooks/use-toast";
 
 interface MediaCardProps {
   item: Media;
@@ -33,11 +34,39 @@ const itemVariants = {
     visible: { opacity: 1, y: 0 }
 };
 
-
 export function MediaCard({ item }: MediaCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const router = useRouter();
+  const { toast } = useToast();
   
+  const [isWatchlisted, setIsWatchlisted] = useState(false);
+  const [isWatchlistLoading, setIsWatchlistLoading] = useState(true);
+
+  const checkWatchlistStatus = useCallback(async () => {
+    setIsWatchlistLoading(true);
+    const status = await isInWatchlist(item.id);
+    setIsWatchlisted(status);
+    setIsWatchlistLoading(false);
+  }, [item.id]);
+
+  useEffect(() => {
+    checkWatchlistStatus();
+
+    const handleWatchlistChange = (event: Event) => {
+        const customEvent = event as CustomEvent;
+        // Check if the change is for this specific item or a general refresh
+        if (!customEvent.detail || !customEvent.detail.mediaId || customEvent.detail.mediaId === item.id) {
+            checkWatchlistStatus();
+        }
+    };
+
+    window.addEventListener('willow-watchlist-change', handleWatchlistChange);
+
+    return () => {
+        window.removeEventListener('willow-watchlist-change', handleWatchlistChange);
+    };
+  }, [checkWatchlistStatus, item.id]);
+
   const fallbackImage = PlaceHolderImages.find(p => p.id === 'media-fallback');
   const posterUrl = item.poster_path ? getTmdbImageUrl(item.poster_path, 'w500') : fallbackImage?.imageUrl;
   
@@ -45,29 +74,46 @@ export function MediaCard({ item }: MediaCardProps) {
   const detailPath = `/media/${item.media_type}/${item.id}`;
   const year = item.release_date || item.first_air_date ? new Date(item.release_date || item.first_air_date!).getFullYear() : 'N/A';
 
-  
-  const handleNavigate = () => {
-    router.push(detailPath);
+  const handleToggleWatchlist = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setIsWatchlistLoading(true);
+    try {
+        if (isWatchlisted) {
+            await removeFromWatchlist(item.id);
+            toast({ title: "Removed from Watchlist", description: `${title} has been removed.` });
+        } else {
+            await addToWatchlist(item);
+            toast({ title: "Added to Watchlist", description: `${title} has been added.` });
+        }
+        // This will now trigger the listener in useEffect
+        window.dispatchEvent(new CustomEvent('willow-watchlist-change', { detail: { mediaId: item.id } }));
+    } catch (error) {
+        console.error("Failed to update watchlist:", error);
+        toast({ variant: 'destructive', title: "Error", description: "Could not update your watchlist." });
+        setIsWatchlistLoading(false); // Reset loading state on error
+    }
   };
-  
+
   return (
     <motion.div
       layout
-      onClick={handleNavigate}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
       className="relative aspect-[2/3] w-full rounded-md overflow-hidden bg-card shadow-md cursor-pointer group"
       whileHover={{ scale: 1.05, zIndex: 10 }}
       transition={{ duration: 0.3 }}
     >
-      <Image
-        src={posterUrl!}
-        alt={title || "Media"}
-        fill
-        sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
-        className="object-cover"
-        data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
-      />
+      <LoadingLink href={detailPath}>
+        <Image
+          src={posterUrl!}
+          alt={title || "Media"}
+          fill
+          sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
+          className="object-cover"
+          data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
+        />
+      </LoadingLink>
 
       <AnimatePresence>
         {isHovered && (
@@ -88,14 +134,19 @@ export function MediaCard({ item }: MediaCardProps) {
               <span>{year}</span>
             </motion.div>
             <motion.div variants={itemVariants} className="flex items-center gap-2">
-              <Button 
-                size="icon" 
-                className="h-8 w-8 rounded-full" 
-                asChild
-              >
+              <Button size="icon" className="h-8 w-8 rounded-full" asChild >
                 <LoadingLink href={detailPath} onClick={(e) => e.stopPropagation()}>
-                  <PlayCircle className="w-4 h-4" />
+                    <PlayCircle className="w-4 h-4" />
                 </LoadingLink>
+              </Button>
+              <Button size="icon" className="h-8 w-8 rounded-full" variant="outline" onClick={handleToggleWatchlist}>
+                {isWatchlistLoading ? (
+                  <Loader2 className="animate-spin" />
+                ) : isWatchlisted ? (
+                  <BookmarkCheck className="text-primary" />
+                ) : (
+                  <Bookmark />
+                )}
               </Button>
             </motion.div>
           </motion.div>
