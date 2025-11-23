@@ -44,7 +44,7 @@ function AnimatedBlobs() {
   }, [blobSpeed]);
 
   if (blobs.length === 0) {
-    return null; // Don't render anything on the server or initial client render
+    return null; // Don't render anything until blobs are generated
   }
 
   return (
@@ -115,16 +115,25 @@ const Starfield = () => {
 
 export function Background() {
   const { backgroundEffects, theme } = useTheme();
+  const [isClient, setIsClient] = useState(false);
 
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Render nothing on the server
+  if (!isClient) {
+    return null;
+  }
+
+  // Render the background effects on the client
   return (
     <div className="fixed inset-0 -z-10 h-full w-full overflow-hidden">
-      {backgroundEffects.blobs && (
+      {backgroundEffects.blobs ? (
         <div className="absolute inset-0 transition-opacity duration-1000 opacity-100">
           <AnimatedBlobs />
         </div>
-      )}
-      
-      {!backgroundEffects.blobs && (
+      ) : (
          <div className="absolute inset-0 transition-opacity duration-1000 opacity-100">
           <div className="absolute bottom-0 left-0 right-0 top-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-20"></div>
         </div>
