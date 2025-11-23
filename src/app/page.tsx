@@ -10,7 +10,6 @@ import type { Media } from "@/types/tmdb";
 import ContinueWatching from "@/components/continue-watching";
 import PlatformCarousel from "@/components/platform-carousel";
 import { FeaturedContent } from "@/components/featured-content";
-import TopTenCarousel from "@/components/top-ten-carousel";
 
 interface Category {
   title: string;
@@ -119,8 +118,6 @@ export default async function Home() {
         {!error && (
           <div className="space-y-16">
             <ContinueWatching />
-            
-            <TopTenCarousel />
             
             {trendingWeekly.length > 0 && (
               <MediaCarousel title="Trending This Week" items={trendingWeekly} />
