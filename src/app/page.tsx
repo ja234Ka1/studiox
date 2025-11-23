@@ -7,9 +7,8 @@ import Image from "next/image";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Clapperboard } from "lucide-react";
 import type { Media } from "@/types/tmdb";
-import VidfastContinueWatching from "@/components/vidfast-continue-watching";
+import ContinueWatching from "@/components/continue-watching";
 import TopTenCarousel from "@/components/top-ten-carousel";
-import VidifyContinueWatching from "@/components/vidify-continue-watching";
 import PlatformCarousel from "@/components/platform-carousel";
 import { FeaturedContent } from "@/components/featured-content";
 import TopTenTvCarousel from "@/components/top-ten-tv-carousel";
@@ -122,8 +121,7 @@ export default async function Home() {
           <div className="space-y-16">
             <TopTenCarousel />
             <TopTenTvCarousel />
-            <VidfastContinueWatching />
-            <VidifyContinueWatching />
+            <ContinueWatching />
             
             {trendingWeekly.length > 0 && (
               <MediaCarousel title="Trending This Week" items={trendingWeekly} />
