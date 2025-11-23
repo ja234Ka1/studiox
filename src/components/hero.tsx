@@ -4,8 +4,8 @@
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlayCircle, Info } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
-import Link from 'next/link';
+import { useState, useEffect, useCallback, useMemo } from "react";
+import LoadingLink from './loading-link';
 
 import type { Media } from "@/types/tmdb";
 import { getTmdbImageUrl } from "@/lib/utils";
@@ -72,16 +72,16 @@ function HeroContent({ item }: { item: Media }) {
       </motion.p>
       <motion.div variants={itemVariants} className="flex items-center gap-3">
         <Button size="lg" asChild className="button-bg-pan">
-          <Link href={streamPath}>
+          <LoadingLink href={streamPath}>
             <PlayCircle />
             Watch Now
-          </Link>
+          </LoadingLink>
         </Button>
         <Button size="lg" variant="outline" asChild className="bg-background/20 backdrop-blur-sm">
-          <Link href={detailPath}>
+          <LoadingLink href={detailPath}>
             <Info />
             More Info
-          </Link>
+          </LoadingLink>
         </Button>
       </motion.div>
     </motion.div>
@@ -163,14 +163,14 @@ export function Hero({ items }: HeroProps) {
         <motion.div
           key={activeItem.id}
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1, scale: 1.05, transition: { duration: 1.5, ease: "easeInOut" } }}
+          animate={{ opacity: 1, transition: { duration: 1.5, ease: "easeInOut" } }}
           exit={{ opacity: 0, transition: { duration: 1, ease: 'easeOut' } }}
           className="absolute inset-0"
         >
           <motion.div
             className="w-full h-full"
             initial={{ scale: 1, x: 0 }}
-            animate={{ scale: 1.1, x: '-2%', transition: { duration: 12, ease: "easeInOut", delay: 1 } }}
+            animate={{ scale: 1.05, x: '-2%', transition: { duration: 12, ease: "linear", delay: 1.5 } }}
           >
             <Image
               src={getTmdbImageUrl(activeItem.backdrop_path, "original")}

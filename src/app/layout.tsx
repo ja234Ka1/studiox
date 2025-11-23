@@ -16,6 +16,7 @@ import { WatchlistNotification } from "@/components/watchlist-notification";
 import { BackToTopButton } from "@/components/back-to-top-button";
 import { NewEpisodeNotifier } from "@/components/new-episode-notifier";
 import { Toaster } from "@/components/ui/toaster";
+import LoadingScreen from "@/components/loading-screen";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -30,6 +31,7 @@ function ThemedBodyContent({ children }: { children: ReactNode }) {
 
   return (
       <>
+        <LoadingScreen />
         <Background />
         <div className="relative z-10 flex min-h-screen flex-col">
           <Header />

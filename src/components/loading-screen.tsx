@@ -4,6 +4,7 @@
 import { useLoading } from "@/context/loading-provider";
 import { AnimatePresence, motion, useAnimate } from "framer-motion";
 import { useEffect } from "react";
+import Image from "next/image";
 
 export default function LoadingScreen() {
   const { isLoading, stopLoading } = useLoading();
@@ -59,8 +60,15 @@ export default function LoadingScreen() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.5, ease: "easeInOut", delay: 0.1 }}
-            className="text-center"
+            className="text-center flex flex-col items-center"
           >
+            <motion.div 
+                className="mb-6"
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1, transition: { duration: 0.8, ease: [0, 0.55, 0.45, 1], delay: 0.2 }}}
+            >
+                <Image src="https://upload.wikimedia.org/wikipedia/commons/7/7a/A-symmetrical-silhouette-of-a-tree-with-many-branches-and-leaves-cutouts-png.svg" alt="Willow logo" width={80} height={80} className="h-20 w-20 filter-glow" />
+            </motion.div>
             <motion.h1
               className="text-6xl md:text-8xl font-black tracking-tighter text-foreground flex overflow-hidden"
               aria-label={brandName}
@@ -70,7 +78,7 @@ export default function LoadingScreen() {
                 visible: {
                   transition: {
                     staggerChildren: 0.08,
-                    delayChildren: 0.2,
+                    delayChildren: 0.4,
                   },
                 },
               }}
