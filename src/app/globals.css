@@ -258,7 +258,14 @@
   }
 
   .button-bg-pan {
-    @apply bg-gradient-to-r from-primary via-accent to-primary bg-[200%_auto] transition-all duration-500 hover:bg-right;
+    background-image: linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--accent)) 50%, hsl(var(--primary)) 100%);
+    background-size: 200% 100%;
+    background-position: 0% 0%;
+    transition: background-position .5s ease-in-out;
+  }
+  
+  .button-bg-pan:hover {
+    background-position: -100% 0%;
   }
 }
 

@@ -171,7 +171,7 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
           </h1>
           
           <div className="flex items-center gap-4">
-            <Button size="lg" onClick={() => setShowSourceDialog(true)}>
+            <Button size="lg" onClick={() => setShowSourceDialog(true)} className="button-bg-pan">
                 <PlayCircle className="mr-2" />
                 Watch
             </Button>
