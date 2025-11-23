@@ -75,29 +75,35 @@ export default async function SportsPage() {
         </p>
       </header>
 
-      <Tabs defaultValue="all" className="w-full">
-        <TabsList>
-          {categories.map((category) => (
-            <TabsTrigger key={category.id} value={category.id}>{category.name}</TabsTrigger>
-          ))}
-        </TabsList>
-        
-        {categories.map((category) => (
-            <TabsContent key={category.id} value={category.id}>
-                {category.matches.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
-                        {category.matches.map((match) => (
-                            <MatchCard key={match.id} match={match} />
-                        ))}
-                    </div>
-                ) : (
-                    <div className="text-center py-16">
-                        <p className="text-muted-foreground">No live matches for {category.name} right now.</p>
-                    </div>
-                )}
-            </TabsContent>
-        ))}
-      </Tabs>
+      {liveMatches.length === 0 ? (
+         <div className="text-center py-16">
+            <p className="text-muted-foreground">There are no live matches right now. Please check back later.</p>
+        </div>
+      ) : (
+        <Tabs defaultValue="all" className="w-full">
+            <TabsList>
+            {categories.map((category) => (
+                <TabsTrigger key={category.id} value={category.id}>{category.name}</TabsTrigger>
+            ))}
+            </TabsList>
+            
+            {categories.map((category) => (
+                <TabsContent key={category.id} value={category.id}>
+                    {category.matches.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
+                            {category.matches.map((match) => (
+                                <MatchCard key={match.id} match={match} />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-16">
+                            <p className="text-muted-foreground">No live matches for {category.name} right now.</p>
+                        </div>
+                    )}
+                </TabsContent>
+            ))}
+        </Tabs>
+      )}
     </div>
   );
 }

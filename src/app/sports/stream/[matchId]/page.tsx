@@ -3,7 +3,7 @@
 
 import { notFound, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { getLiveMatches, getStream } from "@/lib/streamed";
+import { getLiveMatchesAction, getStreamAction } from "@/app/actions/streamed";
 import type { APIMatch, Stream } from "@/types/streamed";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2 } from "lucide-react";
@@ -31,7 +31,7 @@ export default function SportsStreamPage() {
       setIsLoading(true);
       setError(null);
       try {
-        const liveMatches = await getLiveMatches();
+        const liveMatches = await getLiveMatchesAction();
         const currentMatch = liveMatches.find(m => m.id === matchId);
 
         if (!currentMatch) {
@@ -42,7 +42,7 @@ export default function SportsStreamPage() {
         if (currentMatch.sources && currentMatch.sources.length > 0) {
           // For simplicity, we'll use the first available source.
           const source = currentMatch.sources[0];
-          const fetchedStreams = await getStream(source.source, source.id);
+          const fetchedStreams = await getStreamAction(source.source, source.id);
           
           if (fetchedStreams.length > 0) {
             setStreams(fetchedStreams);
