@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -110,13 +109,13 @@ export function TopTenCarousel() {
           {mediaItems.map((item, index) => (
             <CarouselItem
               key={item.id}
-              className={cn('basis-auto', index > 0 && '-ml-8')}
+              className={cn("basis-auto", index > 0 && "-ml-8")}
             >
               <div className="group flex items-center transition-transform duration-300 ease-in-out hover:!transform-none">
                 <span className="
                     text-[200px] font-black text-transparent opacity-50
                     transition-all duration-300 ease-in-out 
-                    group-hover:opacity-100 group-hover:text-primary group-hover:scale-110
+                    group-hover:text-primary group-hover:opacity-100 group-hover:scale-110
                     "
                     style={{
                         WebkitTextStroke: '3px hsl(var(--primary))',
