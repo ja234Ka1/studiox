@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from "next/image";
@@ -147,8 +148,8 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
                 Watch
             </Button>
             <Button size="lg" variant="outline" onClick={handleWatchlistToggle}>
-              {onWatchlist ? <Check className="mr-2" /> : <ListPlus className="mr-2" />}
-              {onWatchlist ? 'On Watchlist' : 'Add to Watchlist'}
+              {isInWatchlist(item.id) ? <Check className="mr-2" /> : <ListPlus className="mr-2" />}
+              {isInWatchlist(item.id) ? 'On Watchlist' : 'Add to Watchlist'}
             </Button>
           </div>
         </motion.div>
