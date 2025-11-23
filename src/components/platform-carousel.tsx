@@ -58,7 +58,7 @@ export default function PlatformCarousel() {
                                     fill
                                     className="object-contain p-4 brightness-50 dark:invert transition-all duration-300 group-hover:brightness-100 group-hover:dark:invert-0 group-hover:scale-105"
                                 />
-                                <div className="absolute -inset-px rounded-lg border border-transparent transition-all duration-300 group-hover:border-primary/50 group-hover:shadow-[0_0_20px_theme(colors.primary)]" />
+                                <div className="absolute -inset-px rounded-lg border border-transparent transition-all duration-300 group-hover:border-primary/50 group-hover:filter-glow" />
                             </div>
                         </div>
                     </CarouselItem>
