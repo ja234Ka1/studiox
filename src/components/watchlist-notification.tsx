@@ -19,7 +19,7 @@ export function WatchlistNotification() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.9 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] w-full max-w-sm"
+          className="fixed bottom-6 right-6 z-[100] w-full max-w-sm"
         >
           <div className="flex items-center gap-4 rounded-lg bg-card/80 p-3 shadow-2xl backdrop-blur-lg border border-primary/20">
             <div className="relative h-20 w-14 flex-shrink-0 overflow-hidden rounded-md bg-muted">
