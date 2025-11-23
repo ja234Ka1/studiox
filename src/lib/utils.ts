@@ -1,3 +1,4 @@
+
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { PlaceHolderImages } from "./placeholder-images";
@@ -7,10 +8,12 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/";
+const STREAMED_IMAGE_BASE_URL = "https://streamed.pk/api/images";
 
-type ImageSize = "w500" | "original";
+type TmdbImageSize = "w500" | "original";
+type StreamedImageType = "badge" | "poster" | "proxy";
 
-export function getTmdbImageUrl(path: string | null | undefined, size: ImageSize = "w500"): string {
+export function getTmdbImageUrl(path: string | null | undefined, size: TmdbImageSize = "w500"): string {
   if (path) {
     let finalSize = size;
     // Check if data saver is enabled from localStorage
@@ -27,4 +30,14 @@ export function getTmdbImageUrl(path: string | null | undefined, size: ImageSize
   
   // Return a default placeholder if the specific one isn't found
   return fallbackImage?.imageUrl || "https://picsum.photos/seed/placeholder/500/750";
+}
+
+
+export function getStreamedImageUrl(id: string, type: StreamedImageType = 'proxy'): string {
+    if (!id) return "https://picsum.photos/seed/placeholder/200/200";
+    if (type === 'poster') {
+        // Assuming the 'id' for poster is something like 'team1-badge/team2-badge'
+        return `${STREAMED_IMAGE_BASE_URL}/poster/${id}.webp`;
+    }
+    return `${STREAMED_IMAGE_BASE_URL}/${type}/${id}.webp`;
 }
