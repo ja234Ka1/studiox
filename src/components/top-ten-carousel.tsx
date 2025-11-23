@@ -12,7 +12,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { cn } from "@/lib/utils";
 import Autoplay from "embla-carousel-autoplay";
 
 export default function TopTenCarousel() {
@@ -56,7 +55,7 @@ export default function TopTenCarousel() {
             onMouseLeave={plugin.current.reset}
             className="w-full"
         >
-            <CarouselContent className="-ml-4 md:-ml-8">
+            <CarouselContent className="-ml-4 md:ml-0 container">
             {items.map((item, index) => (
                 <CarouselItem
                     key={item.id}
