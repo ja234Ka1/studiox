@@ -10,13 +10,16 @@ import { EpisodeSelector } from "@/components/episode-selector";
 import { CastSection } from "@/components/cast-section";
 
 interface MediaDetailsPageProps {
-    params: {
+    params?: {
         mediaType: MediaType;
         id: string;
     }
 }
 
 export default async function MediaDetailsPage({ params }: MediaDetailsPageProps) {
+  if (!params) {
+    notFound();
+  }
   const { mediaType, id } = params;
   
   if (mediaType !== "movie" && mediaType !== "tv") {
