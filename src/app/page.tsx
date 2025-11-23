@@ -12,6 +12,7 @@ import TopTenCarousel from "@/components/top-ten-carousel";
 import VidifyContinueWatching from "@/components/vidify-continue-watching";
 import PlatformCarousel from "@/components/platform-carousel";
 import { FeaturedContent } from "@/components/featured-content";
+import TopTenTvCarousel from "@/components/top-ten-tv-carousel";
 
 interface Category {
   title: string;
@@ -120,6 +121,7 @@ export default async function Home() {
         {!error && (
           <div className="space-y-16">
             <TopTenCarousel />
+            <TopTenTvCarousel />
             <VidfastContinueWatching />
             <VidifyContinueWatching />
             
