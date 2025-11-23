@@ -15,12 +15,8 @@ import { TopTenCarousel } from "@/components/top-ten-carousel";
 import { useEffect, useState } from "react";
 import dynamic from 'next/dynamic';
 import { Skeleton } from "@/components/ui/skeleton";
+import { Hero } from "@/components/hero";
 
-// Dynamically import the Hero component with SSR turned off
-const Hero = dynamic(() => import('@/components/hero').then(mod => mod.Hero), {
-  ssr: false,
-  loading: () => <Skeleton className="w-full h-[60vh] lg:h-[80vh]" />,
-});
 
 interface Category {
   title: string;
@@ -101,7 +97,9 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {isLoading ? (
-         <Skeleton className="w-full h-[60vh] lg:h-[80vh]" />
+         <div className="relative w-full h-[70vh] lg:h-[90vh]">
+            <Skeleton className="w-full h-full" />
+         </div>
       ) : heroItems.length > 0 ? (
         <Hero items={heroItems} />
       ) : (

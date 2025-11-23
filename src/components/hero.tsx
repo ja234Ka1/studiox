@@ -3,128 +3,202 @@
 
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { PlayCircle } from "lucide-react";
-import { useState, useEffect } from "react";
+import { PlayCircle, Info } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
 
 import type { Media } from "@/types/tmdb";
 import { getTmdbImageUrl } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import LoadingLink from "./loading-link";
+import { Skeleton } from "./ui/skeleton";
 
 interface HeroProps {
   items: Media[];
 }
 
-export function Hero({ items }: HeroProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+const contentVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: [0.4, 0, 0.2, 1],
+      staggerChildren: 0.1,
+      delayChildren: 0.3,
+    },
+  },
+};
 
-  useEffect(() => {
-    if (items.length <= 1) return;
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
 
-    const timer = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % items.length);
-    }, 7000); // Change slide every 7 seconds
-
-    return () => clearInterval(timer);
-  }, [items.length]);
-
-  const item = items[currentIndex];
-
-  if (!item) {
-    return (
-        <div className="relative w-full h-[60vh] lg:h-[80vh] bg-muted animate-pulse">
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/20 to-transparent" />
-        </div>
-    );
-  }
-  
+function HeroContent({ item }: { item: Media }) {
   const title = item.title || item.name;
   const releaseDate = item.release_date || item.first_air_date;
   const year = releaseDate ? new Date(releaseDate).getFullYear() : 'N/A';
   const detailPath = `/media/${item.media_type}/${item.id}`;
-
+  const streamPath = `/stream/${item.media_type}/${item.id}${item.media_type === 'tv' ? '?s=1&e=1' : ''}`;
 
   return (
-    <div className="relative w-full h-[60vh] lg:h-[80vh] group">
+    <motion.div
+      key={item.id}
+      variants={contentVariants}
+      initial="hidden"
+      animate="visible"
+      exit="hidden"
+      className="relative z-20 max-w-2xl text-left"
+    >
+      <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-2 mb-4">
+        <Badge variant="secondary">{item.media_type.toUpperCase()}</Badge>
+        <Badge variant="outline">{year}</Badge>
+        {item.vote_average > 0 && (
+          <Badge variant="default" className="bg-amber-500/10 text-amber-400 border-amber-500/20">
+            Rating: {item.vote_average.toFixed(1)}
+          </Badge>
+        )}
+      </motion.div>
+      <motion.h1
+        variants={itemVariants}
+        className="text-4xl md:text-6xl font-black tracking-tighter leading-tight mb-4 text-shadow-primary"
+      >
+        {title}
+      </motion.h1>
+      <motion.p variants={itemVariants} className="text-muted-foreground line-clamp-3 mb-8 text-base md:text-lg">
+        {item.overview}
+      </motion.p>
+      <motion.div variants={itemVariants} className="flex items-center gap-3">
+        <Button size="lg" asChild className="button-bg-pan">
+          <LoadingLink href={streamPath}>
+            <PlayCircle />
+            Watch Now
+          </LoadingLink>
+        </Button>
+        <Button size="lg" variant="outline" asChild className="bg-background/20 backdrop-blur-sm">
+          <LoadingLink href={detailPath}>
+            <Info />
+            More Info
+          </LoadingLink>
+        </Button>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function HeroThumbnailNav({ items, currentIndex, onSelect }: { items: Media[], currentIndex: number, onSelect: (index: number) => void }) {
+    return (
+        <div className="absolute bottom-8 right-0 z-20 w-full lg:w-auto lg:right-16">
+            <div className="lg:max-w-xl xl:max-w-2xl mx-auto lg:mx-0">
+                <AnimatePresence>
+                    <motion.div layout className="flex items-end justify-center gap-3 px-4">
+                    {items.map((item, index) => (
+                        <motion.div
+                            layout
+                            key={item.id}
+                            onClick={() => onSelect(index)}
+                            className="relative w-1/4 max-w-[120px] cursor-pointer rounded-md overflow-hidden border-2 transition-all duration-300 ease-in-out"
+                            animate={{
+                                borderColor: currentIndex === index ? 'hsl(var(--primary))' : 'hsl(var(--foreground) / 0.2)',
+                                flex: currentIndex === index ? '1 1 150px' : '1 1 80px',
+                            }}
+                            whileHover={{ scale: 1.05 }}
+                        >
+                            <Image
+                                src={getTmdbImageUrl(item.poster_path, 'w500')}
+                                alt={`Thumbnail for ${item.title || item.name}`}
+                                width={150}
+                                height={225}
+                                className="aspect-[2/3] object-cover"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                            {currentIndex === index && (
+                                <motion.div
+                                    layoutId="hero-active-border"
+                                    className="absolute -bottom-1 left-0 right-0 h-1 bg-primary"
+                                    initial={false}
+                                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                                />
+                            )}
+                        </motion.div>
+                    ))}
+                    </motion.div>
+                </AnimatePresence>
+            </div>
+        </div>
+    )
+}
+
+export function Hero({ items }: HeroProps) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const handleThumbnailSelect = useCallback((index: number) => {
+    setCurrentIndex(index);
+  }, []);
+
+  useEffect(() => {
+    if (items.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % items.length);
+    }, 8000); // 8 seconds per slide
+    return () => clearInterval(timer);
+  }, [items.length]);
+
+  const activeItem = items[currentIndex];
+
+  if (!items || items.length === 0) {
+    return (
+      <div className="relative w-full h-[60vh] lg:h-[80vh]">
+        <Skeleton className="w-full h-full" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative w-full h-[70vh] lg:h-[90vh] flex flex-col justify-center">
       <AnimatePresence initial={false}>
         <motion.div
-          key={currentIndex}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          key={activeItem.id}
+          initial={{ opacity: 0, scale: 1.05 }}
+          animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 1.5, ease: "easeInOut" }}
           className="absolute inset-0"
         >
-            <Image
-              src={getTmdbImageUrl(item.backdrop_path, "original")}
-              alt={title || "Hero backdrop"}
-              fill
-              priority
-              className="object-cover"
-            />
-            {/* The link is now an overlay, preventing nesting issues */}
-            <LoadingLink href={detailPath} className="absolute inset-0 z-10">
-                <span className="sr-only">View details for {title}</span>
-            </LoadingLink>
+          <Image
+            src={getTmdbImageUrl(activeItem.backdrop_path, "original")}
+            alt={activeItem.title || activeItem.name || "Hero backdrop"}
+            fill
+            priority
+            className="object-cover"
+          />
         </motion.div>
       </AnimatePresence>
+      
+      {/* Overlays */}
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/20 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-background via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-black/20" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(0,0,0,0)_50%,_rgba(0,0,0,0.5))]"/>
+      <div 
+        className="absolute inset-0 opacity-5 dark:opacity-[0.02]"
+        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`}}
+      />
 
-      <div className="relative z-20 container h-full flex flex-col justify-end pb-16 md:pb-24 px-4 md:px-8">
-        <AnimatePresence>
-            <motion.div
-                key={currentIndex}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.8, ease: "easeInOut" }}
-                className="max-w-xl"
-            >
-            <div className="flex items-center gap-4 mb-4">
-                <Badge variant="secondary" className="text-sm">{item.media_type.toUpperCase()}</Badge>
-                <Badge variant="outline" className="text-sm">{year}</Badge>
-                {item.vote_average > 0 && (
-                    <Badge variant="default" className="bg-accent text-accent-foreground text-sm">
-                        Rating: {item.vote_average.toFixed(1)}
-                    </Badge>
-                )}
-            </div>
-            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter leading-tight mb-4">
-                {title}
-            </h1>
-            <p className="text-muted-foreground line-clamp-3 mb-8">
-                {item.overview}
-            </p>
-            <div className="flex items-center gap-4">
-                <Button size="lg" asChild>
-                    <LoadingLink href={detailPath}>
-                        <PlayCircle className="mr-2" />
-                        Watch
-                    </LoadingLink>
-                </Button>
-            </div>
-            </motion.div>
+
+      <div className="container mx-auto px-4 md:px-8 lg:px-16 h-full flex flex-col justify-center">
+        <AnimatePresence mode="wait">
+          {activeItem && <HeroContent item={activeItem} />}
         </AnimatePresence>
       </div>
-      
-      {/* Navigation dots */}
-      {items.length > 1 && (
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-            {items.map((_, index) => (
-                <button
-                    key={index}
-                    onClick={() => setCurrentIndex(index)}
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                        currentIndex === index ? 'w-6 bg-primary' : 'w-2 bg-muted-foreground/50 hover:bg-muted-foreground'
-                    }`}
-                    aria-label={`Go to slide ${index + 1}`}
-                />
-            ))}
-        </div>
-      )}
+
+      <HeroThumbnailNav 
+        items={items}
+        currentIndex={currentIndex}
+        onSelect={handleThumbnailSelect}
+      />
     </div>
   );
 }
