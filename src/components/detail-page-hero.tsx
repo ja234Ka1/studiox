@@ -52,7 +52,8 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
     e.preventDefault();
     setIsWatchlistLoading(true);
 
-    const itemWithMediaType = { ...item, media_type: item.media_type || 'movie' };
+    // The media_type might not be present on the details object, so ensure it is.
+    const itemWithMediaType = { ...item, media_type: item.media_type || (item.title ? 'movie' : 'tv') };
 
     if (onWatchlist) {
       removeFromWatchlist(item.id);
