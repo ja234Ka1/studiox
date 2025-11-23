@@ -51,6 +51,7 @@ export default function StreamPage() {
   const { streamSource } = useTheme();
 
   const [isHovered, setIsHovered] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   
   const { mediaType, id } = params;
   const playerStateRef = useRef<PlayerState | null>(null);
@@ -58,6 +59,10 @@ export default function StreamPage() {
   const season = searchParams.get('s');
   const episode = searchParams.get('e');
   const progressKey = `progress_${mediaType}_${id}`;
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
 
   useEffect(() => {
@@ -127,19 +132,20 @@ export default function StreamPage() {
   }
 
   const getStreamUrl = () => {
-    const source = sourceConfig[streamSource] || sourceConfig['Prime'];
+    const sourceDetails = sourceConfig[streamSource] || sourceConfig['Prime'];
     let urlTemplate: string;
-
+  
     if (mediaType === 'tv') {
-        urlTemplate = source.tv;
+        urlTemplate = sourceDetails.tv;
         return urlTemplate.replace('{id}', id).replace('{season}', season || '1').replace('{episode}', episode || '1');
     }
     
-    urlTemplate = source.movie;
+    urlTemplate = sourceDetails.movie;
     let url = urlTemplate.replace('{id}', id);
     
     return url;
   }
+  
 
   const streamUrl = getStreamUrl();
 
@@ -149,6 +155,7 @@ export default function StreamPage() {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      {isClient && (
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: isHovered ? 1 : 0 }}
@@ -165,6 +172,7 @@ export default function StreamPage() {
                 <span className="sr-only">Go back</span>
             </Button>
         </motion.div>
+      )}
 
       <iframe
           src={streamUrl}
