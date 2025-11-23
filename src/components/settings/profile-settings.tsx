@@ -119,7 +119,7 @@ export function ProfileSettings() {
                     <FormControl>
                         <Input placeholder="Your email" {...field} disabled />
                     </FormControl>
-                    <FormDescription>
+                    <FormDescription className="text-xs">
                       Your email cannot be changed.
                     </FormDescription>
                     <FormMessage />

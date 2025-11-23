@@ -32,7 +32,7 @@ const DataSaverSettings = dynamic(() =>
 
 export function SettingsAppearancePage() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <ThemeSelector />
       <RadiusCustomizer />
       <InterfaceSettings />

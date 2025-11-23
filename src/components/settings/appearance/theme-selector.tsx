@@ -26,11 +26,11 @@ export function ThemeSelector() {
     <Card>
       <CardHeader>
         <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
-                <Palette className="h-6 w-6 text-muted-foreground" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                <Palette className="h-5 w-5 text-muted-foreground" />
             </div>
             <div>
-                <CardTitle>Theme</CardTitle>
+                <CardTitle className="text-xl">Theme</CardTitle>
                 <CardDescription>Select a theme for the application.</CardDescription>
             </div>
         </div>
@@ -63,7 +63,7 @@ export function ThemeSelector() {
                   {t.palette.map((color, i) => (
                     <div
                       key={i}
-                      className="w-6 h-6 rounded-full border border-border/20"
+                      className="w-5 h-5 rounded-full border border-border/20"
                       style={{ backgroundColor: color }}
                     />
                   ))}

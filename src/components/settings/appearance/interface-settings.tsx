@@ -22,17 +22,17 @@ export function InterfaceSettings() {
     <Card>
       <CardHeader>
          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
-                <SlidersHorizontal className="h-6 w-6 text-muted-foreground" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                <SlidersHorizontal className="h-5 w-5 text-muted-foreground" />
             </div>
             <div>
-                <CardTitle>Interface &amp; Animations</CardTitle>
+                <CardTitle className="text-xl">Interface &amp; Animations</CardTitle>
                 <CardDescription>Customize the user interface and motion effects.</CardDescription>
             </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-2">
-        <div className="flex items-center justify-between rounded-lg border p-4">
+        <div className="flex items-center justify-between rounded-lg border p-3">
           <div>
             <Label htmlFor="animations-switch" className="font-medium">
               UI Animations
@@ -47,7 +47,7 @@ export function InterfaceSettings() {
             onCheckedChange={setAnimationsEnabled}
           />
         </div>
-        <div className="flex items-center justify-between rounded-lg border p-4">
+        <div className="flex items-center justify-between rounded-lg border p-3">
           <div>
             <Label htmlFor="blobs-switch" className="font-medium">
               Animated Blobs
@@ -82,7 +82,7 @@ export function InterfaceSettings() {
                 </div>
           </div>
         )}
-        <div className="flex items-center justify-between rounded-lg border p-4">
+        <div className="flex items-center justify-between rounded-lg border p-3">
           <div>
             <Label htmlFor="starfield-switch" className="font-medium">
               Starfield

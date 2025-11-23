@@ -14,17 +14,17 @@ export function DataSaverSettings() {
     <Card>
       <CardHeader>
         <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
-                <Gauge className="h-6 w-6 text-muted-foreground" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                <Gauge className="h-5 w-5 text-muted-foreground" />
             </div>
             <div>
-                <CardTitle>Data Saver</CardTitle>
+                <CardTitle className="text-xl">Data Saver</CardTitle>
                 <CardDescription>Manage data usage across the app.</CardDescription>
             </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center justify-between rounded-lg border p-4">
+        <div className="flex items-center justify-between rounded-lg border p-3">
           <div>
             <Label htmlFor="data-saver-switch" className="font-medium">
               Data Saver Mode

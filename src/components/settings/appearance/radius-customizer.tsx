@@ -15,11 +15,11 @@ export function RadiusCustomizer() {
     <Card>
       <CardHeader>
          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
-                <Square className="h-6 w-6 rotate-45 text-muted-foreground" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                <Square className="h-5 w-5 rotate-45 text-muted-foreground" />
             </div>
             <div>
-                <CardTitle>Corner Rounding</CardTitle>
+                <CardTitle className="text-xl">Corner Rounding</CardTitle>
                 <CardDescription>Adjust the roundness of UI elements.</CardDescription>
             </div>
         </div>
@@ -44,7 +44,7 @@ export function RadiusCustomizer() {
               onValueChange={(value) => setRadius(value[0])}
             />
             <p className="text-xs text-muted-foreground mt-2">
-              Applies to cards, modals, menus, and more.
+              Applies to cards, modals, and more.
             </p>
           </div>
           <div className="flex gap-2">

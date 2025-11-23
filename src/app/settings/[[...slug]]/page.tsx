@@ -37,14 +37,14 @@ export default function SettingsPage({ params }: { params: { slug: string[] }}) 
     const activeTab = settingsNavItems.find(item => item.slug === activeSlug) || settingsNavItems[0];
 
     return (
-        <div className="container max-w-6xl mx-auto py-12 px-4 md:px-8">
-            <header className="mb-8">
-                <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+        <div className="container max-w-5xl mx-auto py-8 px-4 md:px-8">
+            <header className="mb-6">
+                <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
                 <p className="text-muted-foreground mt-1">
                 Manage your account and app preferences.
                 </p>
             </header>
-            <Separator className="mb-8" />
+            <Separator className="mb-6" />
             <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
                 <aside className="-mx-4 lg:w-1/5">
                     <SettingsSidebarNav items={settingsNavItems} onNavigate={handleNav} />
