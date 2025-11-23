@@ -4,7 +4,7 @@
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlayCircle, Info } from "lucide-react";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import LoadingLink from './loading-link';
 
 import type { Media } from "@/types/tmdb";
