@@ -43,24 +43,24 @@ export function Hero({ items }: HeroProps) {
   return (
     <div className="relative w-full h-[60vh] lg:h-[80vh] group">
       <AnimatePresence initial={false}>
-        <motion.div
-          key={currentIndex}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1.5, ease: "easeInOut" }}
-          className="absolute inset-0"
-        >
-            <LoadingLink href={detailPath} className="block w-full h-full">
-              <Image
-                src={getTmdbImageUrl(item.backdrop_path, "original")}
-                alt={title || "Hero backdrop"}
-                fill
-                priority
-                className="object-cover"
-                />
-            </LoadingLink>
-        </motion.div>
+        <LoadingLink href={detailPath} className="block w-full h-full">
+            <motion.div
+            key={currentIndex}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.5, ease: "easeInOut" }}
+            className="absolute inset-0"
+            >
+                <Image
+                    src={getTmdbImageUrl(item.backdrop_path, "original")}
+                    alt={title || "Hero backdrop"}
+                    fill
+                    priority
+                    className="object-cover"
+                    />
+            </motion.div>
+        </LoadingLink>
       </AnimatePresence>
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-r from-background via-background/20 to-transparent" />
