@@ -27,7 +27,7 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
 
   // Firestore state for logged-in user
   const watchlistQuery = useMemoFirebase(
-    () => (user && firestore ? collection(firestore, 'users', user.uid, 'watchlists') : null),
+    () => (user && !user.isAnonymous && firestore ? collection(firestore, 'users', user.uid, 'watchlists') : null),
     [user, firestore]
   );
   
@@ -38,7 +38,7 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setIsMounted(true);
     // Load initial guest watchlist from local storage
-    if (!user) {
+    if (user?.isAnonymous || !user) {
       setLocalWatchlistState(getLocalWatchlist());
     }
   }, [user]);
@@ -52,7 +52,7 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
 
   // Listen for local storage changes (for guest users in other tabs)
   useEffect(() => {
-    if (user) return; // Only for guests
+    if (user && !user.isAnonymous) return; // Only for guests
 
     const handleStorageChange = (e: Event) => {
         // Custom event from useLocalStorage hook
@@ -67,8 +67,8 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
     };
   }, [user]);
   
-  const watchlist = user ? firebaseWatchlist || [] : localWatchlist;
-  const isLoading = isUserLoading || (user && isFirestoreLoading);
+  const watchlist = user && !user.isAnonymous ? firebaseWatchlist || [] : localWatchlist;
+  const isLoading = isUserLoading || (user && !user.isAnonymous && isFirestoreLoading);
 
   const isInWatchlist = useCallback((mediaId: number) => {
     return watchlist.some(item => item.id === mediaId);
