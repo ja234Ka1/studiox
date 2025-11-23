@@ -11,6 +11,7 @@ import VidfastContinueWatching from "@/components/vidfast-continue-watching";
 import TopTenCarousel from "@/components/top-ten-carousel";
 import VidifyContinueWatching from "@/components/vidify-continue-watching";
 import PlatformCarousel from "@/components/platform-carousel";
+import { FeaturedContent } from "@/components/featured-content";
 
 interface Category {
   title: string;
@@ -28,22 +29,26 @@ const categoriesConfig = [
   { title: "Anime", fetcher: () => getDiscover("tv", { with_genres: '16', with_origin_country: 'JP' }) },
   { title: "K-Drama", fetcher: () => getDiscover("tv", { with_origin_country: 'KR' }) },
   { title: "Hindi Cinema", fetcher: () => getDiscover("movie", { with_original_language: 'hi' }) },
-  { title: "Action & Adventure", fetcher: () => getDiscover("movie", { with_genres: '28' }) },
-  { title: "Comedy", fetcher: () => getDiscover("movie", { with_genres: '35' }) },
-  { title: "Sci-Fi & Fantasy", fetcher: () => getDiscover("movie", { with_genres: '878,14' }) },
 ];
 
 export default async function Home() {
   let trendingWeekly: Media[] = [];
   let categories: Category[] = [];
   let error: string | null = null;
+  let featuredAction: Media | undefined;
+  let featuredScifi: Media | undefined;
   
   try {
     const trendingWeeklyPromise = getTrending("all", "week");
     const categoriesPromises = categoriesConfig.map(c => c.fetcher());
+    const featuredActionPromise = getDiscover("movie", { with_genres: '28' });
+    const featuredScifiPromise = getDiscover("movie", { with_genres: '878,14' });
 
-    const [trendingWeeklyResult, ...categoriesResults] = await Promise.allSettled([
+
+    const [trendingWeeklyResult, featuredActionRes, featuredScifiRes, ...categoriesResults] = await Promise.allSettled([
       trendingWeeklyPromise,
+      featuredActionPromise,
+      featuredScifiPromise,
       ...categoriesPromises
     ]);
 
@@ -52,6 +57,13 @@ export default async function Home() {
     } else {
       console.error('Failed to fetch trending:', trendingWeeklyResult.reason);
       throw new Error("Failed to fetch trending data.");
+    }
+    
+    if (featuredActionRes.status === 'fulfilled' && featuredActionRes.value.length > 0) {
+      featuredAction = featuredActionRes.value[0];
+    }
+    if (featuredScifiRes.status === 'fulfilled' && featuredScifiRes.value.length > 0) {
+      featuredScifi = featuredScifiRes.value[1]; // Get a different one
     }
     
     categories = categoriesConfig.map((config, index) => {
@@ -110,12 +122,27 @@ export default async function Home() {
             <TopTenCarousel />
             <VidfastContinueWatching />
             <VidifyContinueWatching />
+            
             {trendingWeekly.length > 0 && (
               <MediaCarousel title="Trending This Week" items={trendingWeekly} />
             )}
-            {categories.map((category) => (
+            
+            {categories.slice(0, 2).map((category) => (
               <MediaCarousel key={category.title} title={category.title} items={category.items} />
             ))}
+
+            {featuredAction && <FeaturedContent media={featuredAction} textPosition="left" />}
+            
+            {categories.slice(2, 4).map((category) => (
+              <MediaCarousel key={category.title} title={category.title} items={category.items} />
+            ))}
+
+            {featuredScifi && <FeaturedContent media={featuredScifi} textPosition="right" />}
+
+            {categories.slice(4).map((category) => (
+              <MediaCarousel key={category.title} title={category.title} items={category.items} />
+            ))}
+
             <PlatformCarousel />
           </div>
         )}
