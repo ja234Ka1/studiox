@@ -4,7 +4,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import type { Media } from "@/types/tmdb";
 import { getTrending } from "@/lib/tmdb";
-import { MediaCard } from "./media-card";
 import {
   Carousel,
   CarouselContent,
@@ -12,14 +11,11 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import Autoplay from "embla-carousel-autoplay";
+import { TopTenCard } from "./top-ten-card";
 
 export default function TopTenCarousel() {
   const [items, setItems] = useState<Media[]>([]);
-  const plugin = useRef(
-    Autoplay({ delay: 5000, stopOnInteraction: true })
-  );
-
+  
   useEffect(() => {
     getTrending('movie', 'day').then(movies => {
       setItems(movies.slice(0, 10));
@@ -31,8 +27,8 @@ export default function TopTenCarousel() {
   }
 
   return (
-    <section className="py-12 group/section">
-        <div className="px-4 md:px-8 mb-6">
+    <section className="py-12 group/section overflow-hidden">
+        <div className="container px-4 md:px-8 mb-6">
             <div className="flex items-end gap-2">
                 <h2 className="text-8xl font-black tracking-tighter flex items-center">
                     <span className="text-transparent text-outline-white">TOP</span>
@@ -48,29 +44,17 @@ export default function TopTenCarousel() {
         <Carousel
             opts={{
               align: "start",
-              loop: true,
+              dragFree: true,
             }}
-            plugins={[plugin.current]}
-            onMouseEnter={plugin.current.stop}
-            onMouseLeave={plugin.current.reset}
             className="w-full"
         >
             <CarouselContent className="container -ml-4 md:ml-0">
             {items.map((item, index) => (
                 <CarouselItem
                     key={item.id}
-                    className="basis-auto pl-4 md:pl-8 group"
+                    className="basis-auto pl-12 pr-8"
                 >
-                    <div className="flex items-center transition-transform duration-500 ease-out group-hover:scale-105">
-                        <span 
-                            className="text-[200px] font-black text-transparent text-outline-primary text-glow transition-colors duration-500 ease-out group-hover:text-primary"
-                        >
-                            {index + 1}
-                        </span>
-                        <div className="w-52 -ml-8 shrink-0">
-                           <MediaCard item={item} />
-                        </div>
-                    </div>
+                  <TopTenCard item={item} rank={index} />
                 </CarouselItem>
             ))}
             </CarouselContent>

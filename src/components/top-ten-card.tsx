@@ -40,39 +40,48 @@ export function TopTenCard({ item, rank }: TopTenCardProps) {
   
   const title = item.title || item.name;
   const detailPath = `/media/${item.media_type}/${item.id}`;
-  const streamPath = `/stream/${item.media_type}/${item.id}`;
+  
+  const handleWatchClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const streamPath = item.media_type === 'tv'
+      ? `/stream/tv/${item.id}?s=1&e=1`
+      : `/stream/movie/${item.id}`;
+    router.push(streamPath);
+  }
   
   return (
     <motion.div
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
-      className="relative aspect-[2/3] w-full rounded-md cursor-pointer group flex-shrink-0"
+      className="relative aspect-[2/3] w-52 rounded-lg cursor-pointer group flex-shrink-0"
       transition={{ duration: 0.3 }}
       layoutId={`top-10-card-${item.id}`}
     >
-        <div 
-          className="absolute -bottom-1/4 -left-[50%] text-accent text-[12rem] md:text-[16rem] font-black leading-none text-outline transition-all duration-500 ease-out group-hover:scale-110 group-hover:-translate-x-2 group-hover:-translate-y-2 z-0"
-          style={{ textShadow: '0 0 40px hsl(var(--accent) / 0.5)'}}
-        >
-            {rank + 1}
-        </div>
+      <div 
+        className="absolute -bottom-12 -left-[55%] text-accent text-[12rem] font-black leading-none text-outline-primary transition-all duration-300 ease-out group-hover:text-primary group-hover:scale-110 z-0"
+      >
+          {rank + 1}
+      </div>
 
-        <LoadingLink href={detailPath} className="w-full h-full block relative z-10">
-            <motion.div 
-                className="w-full h-full rounded-md overflow-hidden shadow-2xl"
-                whileHover={{ scale: 1.1, y: -10 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            >
-                <Image
-                    src={posterUrl!}
-                    alt={title || "Media"}
-                    fill
-                    sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
-                    className="object-cover"
-                    data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
-                />
-            </motion.div>
-        </LoadingLink>
+      <LoadingLink href={detailPath} className="w-full h-full block relative z-10">
+          <motion.div 
+              className="w-full h-full rounded-lg overflow-hidden shadow-2xl bg-muted"
+              whileHover={{ scale: 1.05, y: -20, x: 10 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          >
+            {posterUrl && (
+              <Image
+                  src={posterUrl}
+                  alt={title || "Media"}
+                  fill
+                  sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
+                  className="object-cover"
+                  data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
+              />
+            )}
+          </motion.div>
+      </LoadingLink>
 
       <AnimatePresence>
         {isHovered && (
@@ -81,7 +90,7 @@ export function TopTenCard({ item, rank }: TopTenCardProps) {
             initial="hidden"
             animate="visible"
             exit="hidden"
-            className="absolute z-20 inset-0 p-4 flex flex-col justify-end text-left bg-gradient-to-t from-black/90 via-black/50 to-transparent rounded-md pointer-events-none"
+            className="absolute z-20 inset-0 p-4 flex flex-col justify-end text-left bg-gradient-to-t from-black/90 via-black/50 to-transparent rounded-lg pointer-events-none"
           >
             <motion.h3 variants={itemVariants} className="text-white font-bold text-lg truncate w-full mb-1">{title}</motion.h3>
             <motion.div variants={itemVariants} className="flex items-center text-xs text-muted-foreground mb-3 gap-2">
@@ -94,10 +103,7 @@ export function TopTenCard({ item, rank }: TopTenCardProps) {
               <Button 
                 size="sm"
                 className="w-full bg-primary/80 hover:bg-primary text-primary-foreground backdrop-blur-sm"
-                onClick={(e) => {
-                    e.stopPropagation();
-                    router.push(streamPath);
-                }}
+                onClick={handleWatchClick}
               >
                   <PlayCircle className="mr-2" />
                   Watch
