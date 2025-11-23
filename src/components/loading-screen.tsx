@@ -91,7 +91,7 @@ export default function LoadingScreen() {
             <div className="relative mt-6 h-1 w-48 mx-auto overflow-hidden rounded-full bg-muted">
                 <motion.div 
                     ref={scope}
-                    className="h-full bg-accent"
+                    className="h-full bg-primary"
                     style={{ width: "0%" }}
                 />
             </div>
