@@ -6,6 +6,7 @@ import type { Media } from '@/types/tmdb';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { getLocalWatchlist, setLocalWatchlist, mergeLocalWatchlistToFirebase, addToFirebaseWatchlist, removeFromFirebaseWatchlist } from '@/lib/userData';
 import { collection } from 'firebase/firestore';
+import { useNotification } from './notification-provider';
 
 interface WatchlistContextType {
   watchlist: Media[];
@@ -20,6 +21,7 @@ const WatchlistContext = createContext<WatchlistContextType | undefined>(undefin
 export function WatchlistProvider({ children }: { children: ReactNode }) {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
+  const { showNotification } = useNotification();
   
   const [localWatchlist, setLocalWatchlistState] = useState<Media[]>([]);
 
@@ -82,6 +84,7 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
       setLocalWatchlist(newWatchlist); // This also updates localStorage via the hook
       setLocalWatchlistState(newWatchlist);
     }
+    showNotification(item);
   };
 
   const handleRemoveFromWatchlist = (mediaId: number) => {
