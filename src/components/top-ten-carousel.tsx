@@ -61,20 +61,20 @@ export default function TopTenCarousel() {
         plugins={[plugin.current]}
         className="w-full"
       >
-        <CarouselContent>
+        <CarouselContent className="-ml-2">
           {mediaItems.map((item, index) => (
             <CarouselItem
               key={item.id}
               className={cn(
-                "group px-8",
-                "basis-2/5 sm:basis-1/3 md:basis-1/4 lg:basis-1/5"
+                "group px-12",
+                "basis-1/3 sm:basis-1/4 md:basis-1/5 lg:basis-1/6"
               )}
             >
                 <div className="flex items-center transition-transform duration-300 ease-in-out group-hover:scale-105">
                     <span 
                         style={{ WebkitTextStroke: '3px hsl(var(--primary))' }}
                         className={cn(
-                            "text-[200px] font-black text-transparent transition-all duration-300 ease-in-out group-hover:text-primary group-hover:text-glow -mr-2"
+                            "text-[200px] font-black text-transparent transition-all duration-300 ease-in-out group-hover:text-primary -mr-2"
                         )}
                     >
                         {index + 1}
