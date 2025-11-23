@@ -26,7 +26,7 @@ const platforms = [
 
 export default function PlatformCarousel() {
     const plugin = React.useRef(
-        Autoplay({ delay: 2000, stopOnInteraction: true })
+        Autoplay({ delay: 2000, stopOnInteraction: false, stopOnHover: false })
     );
 
   return (
@@ -42,8 +42,6 @@ export default function PlatformCarousel() {
                     dragFree: true,
                 }}
                 plugins={[plugin.current]}
-                onMouseEnter={plugin.current.stop}
-                onMouseLeave={plugin.current.reset}
                 className="w-full"
             >
                 <CarouselContent className="-ml-4">
