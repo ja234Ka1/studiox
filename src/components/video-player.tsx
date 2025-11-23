@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -24,15 +24,15 @@ const VIDEO_SOURCE_BASE_URLS = {
   Vimeo: "https://player.vimeo.com/video/",
 };
 
-export default function VideoPlayer() {
-  const { isPlaying, mediaId, mediaType, stopVideo } = useVideo();
+function VideoPlayerContent() {
+  const { mediaId, mediaType, stopVideo } = useVideo();
   const [videos, setVideos] = useState<Video[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isPlaying && mediaId && mediaType) {
+    if (mediaId && mediaType) {
       const fetchVideos = async () => {
         setIsLoading(true);
         setError(null);
@@ -62,7 +62,7 @@ export default function VideoPlayer() {
       };
       fetchVideos();
     }
-  }, [isPlaying, mediaId, mediaType]);
+  }, [mediaId, mediaType]);
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
@@ -81,7 +81,7 @@ export default function VideoPlayer() {
   const videoSrc = getEmbedUrl(selectedVideo);
   
   return (
-    <Dialog open={isPlaying} onOpenChange={handleOpenChange}>
+    <Dialog open={!!mediaId} onOpenChange={handleOpenChange}>
       <DialogContent 
         className="max-w-4xl w-full h-auto p-0 border-0 bg-card"
         aria-label={selectedVideo?.name || "Video Player"}
@@ -133,4 +133,14 @@ export default function VideoPlayer() {
       </DialogContent>
     </Dialog>
   );
+}
+
+export default function VideoPlayer() {
+    const { isPlaying } = useVideo();
+
+    if (!isPlaying) {
+        return null;
+    }
+
+    return <VideoPlayerContent />;
 }
