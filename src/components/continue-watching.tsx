@@ -209,7 +209,7 @@ const ContinueWatchingCard = ({ item, onRemove }: { item: NormalizedProgress, on
             <AnimatePresence>
                 <motion.div
                     initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
+                    whileHover={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     className="absolute top-2 right-2 z-20 opacity-0 group-hover/card:opacity-100 transition-opacity"
                 >
@@ -295,12 +295,14 @@ export default function ContinueWatching() {
 
   if (watchingItems.length === 0) {
     return (
-        <div className="container px-4 md:px-8">
-             <h2 className="text-2xl font-bold mb-4">Continue Watching</h2>
-             <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted bg-muted/20 p-8 text-center h-48">
-                <p className="text-lg font-semibold text-foreground">No items to continue watching</p>
-                <p className="mt-1 text-sm text-muted-foreground">Start watching a movie or show to see it here.</p>
-            </div>
+        <div>
+             <h2 className="text-2xl font-bold mb-4 container px-4 md:px-8">Continue Watching</h2>
+             <div className="container px-4 md:px-8">
+                <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted bg-muted/20 p-8 text-center h-48">
+                    <p className="text-lg font-semibold text-foreground">No items to continue watching</p>
+                    <p className="mt-1 text-sm text-muted-foreground">Start watching a movie or show to see it here.</p>
+                </div>
+             </div>
         </div>
     );
   }
