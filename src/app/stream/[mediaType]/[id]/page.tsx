@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTheme, type StreamSource } from "@/context/theme-provider";
-import { getMediaDetails } from "@/lib/tmdb";
 
 const vidfastOrigins = [
     'https://vidfast.pro',
@@ -33,6 +32,11 @@ const sourceConfig: Record<StreamSource, { movie: string, tv: string, origin: st
     },
 }
 
+const dispatchProgressEvent = (key: string, data: any) => {
+    localStorage.setItem(key, JSON.stringify(data));
+    window.dispatchEvent(new CustomEvent('willow-progress-change', { detail: { key } }));
+}
+
 export default function StreamPage() {
   const params = useParams<{ mediaType: MediaType; id: string }>();
   const searchParams = useSearchParams();
@@ -46,64 +50,49 @@ export default function StreamPage() {
   const season = searchParams.get('s');
   const episode = searchParams.get('e');
 
-  const handleVidifyProgress = useCallback(async (data: any) => {
-    const { mediaId, currentTime, duration, eventType } = data;
-    const progressKey = `progress_${mediaType}_${mediaId}`;
-    
-    let existingData = {};
-    try {
-      const stored = localStorage.getItem(progressKey);
-      if (stored) existingData = JSON.parse(stored);
-    } catch (e) {
-        console.error("Failed to parse progress data from localStorage", e);
-    }
-
-    const numericId = parseInt(id, 10);
-    const details = await getMediaDetails(numericId, mediaType);
-    
+  const handleProgress = useCallback((data: any) => {
+    const progressKey = `progress_${mediaType}_${id}`;
     let progressData: any = {
-      ...existingData,
-      currentTime,
-      duration,
-      lastWatched: Date.now(),
-      eventType,
+      ...data,
       mediaType,
-      title: details.title || details.name,
-      poster: details.poster_path,
-      watched_percentage: (currentTime / duration) * 100,
+      season,
+      episode
     };
-    
-    if (mediaType === 'tv' && details.seasons) {
-        const seasonData = details.seasons.find(s => s.season_number === parseInt(season!));
-        if (seasonData) {
-             const episodeData = seasonData.episodes.find(e => e.episode_number === parseInt(episode!));
-             progressData.episodeTitle = episodeData?.name;
-        }
-        progressData = {
-            ...progressData,
-            season: season,
-            episode: episode,
-        };
-    }
-
-    localStorage.setItem(progressKey, JSON.stringify(progressData));
-    window.dispatchEvent(new CustomEvent('vidify-progress-change'));
-
-  }, [mediaType, season, episode, id]);
+    dispatchProgressEvent(progressKey, progressData);
+  }, [mediaType, id, season, episode]);
   
-
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      // Vidfast handler
-      if (vidfastOrigins.includes(event.origin) && event.data?.type === 'MEDIA_DATA') {
-        localStorage.setItem('vidFastProgress', JSON.stringify(event.data.data));
-        window.dispatchEvent(new CustomEvent('vidfast-progress-change'));
-      }
-      
-      // Vidify handler
+      // Vidify handler for 'Elite' source
       const vidifyOrigin = sourceConfig['Elite'].origin;
       if (event.origin === vidifyOrigin && event.data?.type === 'WATCH_PROGRESS') {
-        handleVidifyProgress(event.data.data);
+        handleProgress(event.data.data);
+        return;
+      }
+
+      // Vidfast handler for 'Prime' source
+      if (vidfastOrigins.includes(event.origin) && event.data?.type === 'MEDIA_DATA' && event.data.data) {
+        const d = event.data.data;
+        const progressKey = `progress_${d.type}_${d.id}`;
+        
+        const isMovie = d.type === 'movie';
+        const progress = isMovie ? d.progress : (d.show_progress?.[`${d.last_season_watched}-${d.last_episode_watched}`]?.progress);
+        
+        if (!progress) return;
+
+        const progressPayload = {
+            currentTime: progress.watched,
+            duration: progress.duration,
+            lastWatched: d.last_updated,
+            eventType: 'timeupdate',
+            mediaType: d.type,
+            title: d.title,
+            poster: d.poster_path,
+            watched_percentage: (progress.watched / progress.duration) * 100,
+            season: d.last_season_watched,
+            episode: d.last_episode_watched,
+        }
+        dispatchProgressEvent(progressKey, progressPayload);
       }
     };
 
@@ -112,7 +101,7 @@ export default function StreamPage() {
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, [handleVidifyProgress]);
+  }, [handleProgress]);
 
   if (mediaType !== "tv" && mediaType !== "movie") {
     notFound();
@@ -134,27 +123,6 @@ export default function StreamPage() {
     
     urlTemplate = source.movie;
     let url = urlTemplate.replace('{id}', id);
-
-    // Append vidify-specific params
-    if (source.origin.includes('vidify')) {
-        const urlObj = new URL(url);
-        urlObj.searchParams.set('autoplay', 'true');
-        urlObj.searchParams.set('poster', 'true');
-        urlObj.searchParams.set('chromecast', 'false');
-        urlObj.searchParams.set('servericon', 'true');
-        urlObj.searchParams.set('setting', 'true');
-        urlObj.searchParams.set('pip', 'false');
-        urlObj.searchParams.set('download', 'true');
-        urlObj.searchParams.set('logourl', 'https://i.ibb.co/67wTJd9R/pngimg-com-netflix-PNG11.png');
-        urlObj.searchParams.set('font', 'Roboto');
-        urlObj.searchParams.set('fontcolor', '6f63ff');
-        urlObj.searchParams.set('fontsize', '20');
-        urlObj.searchParams.set('opacity', '0.5');
-        urlObj.searchParams.set('primarycolor', 'fdfff5');
-        urlObj.searchParams.set('secondarycolor', '000000');
-        urlObj.searchParams.set('iconcolor', 'c2c2c2');
-        return urlObj.toString();
-    }
     
     return url;
   }

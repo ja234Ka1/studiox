@@ -15,9 +15,10 @@ import {
 import { getTmdbImageUrl } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 import LoadingLink from "./loading-link";
-import type { MediaType } from "@/types/tmdb";
+import type { MediaType, MediaDetails } from "@/types/tmdb";
 import { Card } from "./ui/card";
 import { Skeleton } from "./ui/skeleton";
+import { getMediaDetails } from "@/lib/tmdb";
 
 interface WatchProgress {
   currentTime: number;
@@ -25,13 +26,16 @@ interface WatchProgress {
   lastWatched: number;
   eventType: string;
   mediaType: MediaType;
-  title: string;
-  poster: string;
-  watched_percentage: number;
+  title?: string;
+  poster?: string;
+  watched_percentage?: number;
   season?: number;
   episode?: number;
   episodeTitle?: string;
+  // Full media details might be added later
+  details?: MediaDetails;
 }
+
 
 const carouselVariants = {
   hidden: { opacity: 0 },
@@ -55,19 +59,61 @@ const itemVariants = {
   },
 };
 
-const getWatchingItemsFromStorage = (): [string, WatchProgress][] => {
+
+const getWatchingItemsFromStorage = async (): Promise<[string, WatchProgress][]> => {
     try {
         const keys = Object.keys(localStorage).filter(k => k.startsWith('progress_'));
-        const progressItems: [string, WatchProgress][] = keys.map(key => {
+        const progressItemsPromises: Promise<[string, WatchProgress] | null>[] = keys.map(async key => {
             const item = localStorage.getItem(key);
-            const parsed = item ? JSON.parse(item) : {};
+            if (!item) return null;
+            
+            const parsed = JSON.parse(item) as WatchProgress;
+            
+            // If details are already fetched, use them.
+            if (parsed.details) {
+                const mediaId = key.split('_')[2];
+                return [mediaId, parsed];
+            }
+
+            // Fetch details if missing
+            const mediaType = parsed.mediaType;
             const mediaId = key.split('_')[2];
-            return [mediaId, parsed];
+            const numericId = parseInt(mediaId, 10);
+            if (isNaN(numericId)) return null;
+
+            const details = await getMediaDetails(numericId, mediaType);
+            
+            const updatedProgress: WatchProgress = {
+                ...parsed,
+                details,
+                title: details.title || details.name,
+                poster: details.poster_path,
+                watched_percentage: (parsed.currentTime / parsed.duration) * 100,
+            };
+
+            if (mediaType === 'tv' && details.seasons && parsed.season) {
+                const seasonData = details.seasons.find(s => s.season_number === parsed.season);
+                if (seasonData && parsed.episode) {
+                     const episodeData = seasonData.episodes?.find(e => e.episode_number === parsed.episode);
+                     updatedProgress.episodeTitle = episodeData?.name;
+                }
+            }
+            
+            // Save back to localStorage with details
+            localStorage.setItem(key, JSON.stringify(updatedProgress));
+
+            return [mediaId, updatedProgress];
         });
+
+        const resolvedItems = await Promise.all(progressItemsPromises);
+        const validItems = resolvedItems.filter((item): item is [string, WatchProgress] => 
+            item !== null && 
+            item[1] !== null && 
+            item[1].duration > 0 && 
+            (item[1].watched_percentage ?? 0) < 95
+        );
       
-        const sortedItems = progressItems
-            .filter(item => item[1] && item[1].duration > 0 && item[1].watched_percentage < 95)
-            .sort((a, b) => b[1].lastWatched - a[1].lastWatched);
+        const sortedItems = validItems.sort((a, b) => b[1].lastWatched - a[1].lastWatched);
             
         return sortedItems;
     } catch (error) {
@@ -78,6 +124,8 @@ const getWatchingItemsFromStorage = (): [string, WatchProgress][] => {
 
 
 const ContinueWatchingCard = ({ item, mediaId }: { item: WatchProgress, mediaId: string }) => {
+  if (!item.details) return null;
+
   let streamPath = `/stream/${item.mediaType}/${mediaId}`;
   let subTitle = "Resume Watching";
 
@@ -90,8 +138,8 @@ const ContinueWatchingCard = ({ item, mediaId }: { item: WatchProgress, mediaId:
     <LoadingLink href={streamPath} className="group block">
         <Card className="relative aspect-video w-full rounded-md overflow-hidden shadow-md">
             <Image
-                src={getTmdbImageUrl(item.poster, 'w500')}
-                alt={item.title}
+                src={getTmdbImageUrl(item.details.backdrop_path, 'w500')}
+                alt={item.title || ''}
                 fill
                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -117,15 +165,16 @@ export default function ContinueWatching() {
   const [watchingItems, setWatchingItems] = React.useState<[string, WatchProgress][]>([]);
   const [loading, setLoading] = React.useState(true);
 
-  const loadProgress = React.useCallback(() => {
-    setWatchingItems(getWatchingItemsFromStorage());
+  const loadProgress = React.useCallback(async () => {
+    const items = await getWatchingItemsFromStorage();
+    setWatchingItems(items);
     setLoading(false);
   }, []);
 
   React.useEffect(() => {
     loadProgress();
     
-    const handleProgressChange = () => {
+    const handleProgressChange = (e: StorageEvent | CustomEvent) => {
         loadProgress();
     }
 
