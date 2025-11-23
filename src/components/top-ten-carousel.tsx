@@ -105,13 +105,13 @@ export function TopTenCarousel() {
         onMouseLeave={() => autoplayPlugin.current?.play()}
         className="w-full"
       >
-        <CarouselContent className="px-4">
+        <CarouselContent>
           {mediaItems.map((item, index) => (
             <CarouselItem
               key={item.id}
-              className={cn("basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5", index > 0 && "-ml-8")}
+              className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5"
             >
-              <div className="group flex items-center transition-transform duration-300 ease-in-out hover:!transform-none">
+              <div className={cn("group flex items-center transition-transform duration-300 ease-in-out hover:!transform-none", index === 0 && "pl-4")}>
                 <span className="
                     text-[200px] font-black text-transparent opacity-50
                     transition-all duration-300 ease-in-out group-hover:text-primary
@@ -125,7 +125,7 @@ export function TopTenCarousel() {
                   {index + 1}
                 </span>
                 <motion.div 
-                    className="relative z-10 -ml-8 transition-transform duration-300 ease-in-out group-hover:scale-110"
+                    className="relative z-10 transition-transform duration-300 ease-in-out group-hover:scale-110 -ml-8"
                     initial={{ opacity: 0, scale: 0.8 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true, amount: 0.3 }}
