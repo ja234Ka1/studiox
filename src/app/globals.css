@@ -196,7 +196,7 @@
     -webkit-text-stroke: 2px white;
   }
   .text-outline-primary {
-      -webkit-text-stroke: 4px hsl(var(--primary));
+      -webkit-text-stroke: 2px hsl(var(--primary));
   }
   .text-glow {
       text-shadow: 0 0 25px hsl(var(--primary) / 0.7);
@@ -266,6 +266,10 @@
   
   .button-bg-pan:hover {
     background-position: -100% 0%;
+  }
+
+  .text-shadow-primary {
+    text-shadow: 0 0 15px hsl(var(--primary));
   }
 }
 
