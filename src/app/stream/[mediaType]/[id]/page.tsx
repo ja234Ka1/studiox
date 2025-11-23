@@ -127,7 +127,7 @@ export default function StreamPage() {
   }
 
   const getStreamUrl = () => {
-    const source = sourceConfig[streamSource];
+    const source = sourceConfig[streamSource] || sourceConfig['Prime'];
     let urlTemplate: string;
 
     if (mediaType === 'tv') {
