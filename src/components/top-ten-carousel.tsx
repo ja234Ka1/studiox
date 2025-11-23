@@ -66,8 +66,7 @@ export default function TopTenCarousel() {
             <CarouselItem
               key={item.id}
               className={cn(
-                "basis-2/3 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5 2xl:basis-1/6 pl-4 pr-2 group",
-                index > 0 && "-ml-[0.05rem]"
+                "basis-2/3 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5 2xl:basis-1/6 pl-4 pr-2 group"
               )}
             >
                 <div className="flex items-center transition-transform duration-300 ease-in-out group-hover:scale-105">
@@ -77,7 +76,7 @@ export default function TopTenCarousel() {
                     >
                         {index + 1}
                     </span>
-                    <div className="w-full shrink-0 transition-transform duration-300 ease-in-out -ml-8 group-hover:scale-110">
+                    <div className="w-full shrink-0 transition-transform duration-300 ease-in-out group-hover:scale-110">
                         <MediaCard item={item} />
                     </div>
                 </div>
