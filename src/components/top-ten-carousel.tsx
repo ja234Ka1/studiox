@@ -20,8 +20,12 @@ export default function TopTenCarousel() {
 
   React.useEffect(() => {
     const fetchTrending = async () => {
-      const trendingMovies = await getTrending('movie', 'day');
-      setMediaItems(trendingMovies.slice(0, 10));
+      try {
+        const trendingMovies = await getTrending('movie', 'day');
+        setMediaItems(trendingMovies.slice(0, 10));
+      } catch (error) {
+        console.error("Failed to fetch trending movies for Top 10:", error);
+      }
     };
     fetchTrending();
   }, []);
@@ -31,6 +35,7 @@ export default function TopTenCarousel() {
   );
 
   if (mediaItems.length === 0) {
+    // Optionally return a skeleton loader here
     return null;
   }
 
@@ -62,13 +67,13 @@ export default function TopTenCarousel() {
               key={item.id}
               className={cn(
                 "basis-2/3 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5 2xl:basis-1/6 pl-4 pr-2 group",
-                index > 0 && "-ml-2"
+                index > 0 && "-ml-[0.05rem]"
               )}
             >
                 <div className="flex items-center transition-transform duration-300 ease-in-out group-hover:scale-105">
                     <span 
                         style={{ WebkitTextStroke: '3px hsl(var(--primary))', textShadow: '0 0 15px hsl(var(--primary))' }}
-                        className="text-[200px] font-black text-transparent transition-transform duration-300 ease-in-out"
+                        className="text-[200px] font-black text-transparent transition-transform duration-300 ease-in-out group-hover:scale-110"
                     >
                         {index + 1}
                     </span>
