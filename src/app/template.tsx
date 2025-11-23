@@ -12,13 +12,9 @@ export default function Template({ children }: { children: React.ReactNode }) {
   const { stopLoading } = useLoading();
   const pathname = usePathname();
 
-  // Ensure loading stops on route change, with a small delay for transition.
+  // Ensure loading stops on route change.
   useEffect(() => {
-    const timer = setTimeout(() => {
-      stopLoading();
-    }, 100); // Small delay to allow page transition to start
-
-    return () => clearTimeout(timer);
+    stopLoading();
   }, [pathname, stopLoading]);
 
   if (!animationsEnabled) {
@@ -28,8 +24,8 @@ export default function Template({ children }: { children: React.ReactNode }) {
   return (
     <motion.div
       key={pathname} // Animate on path change
-      initial={{ y: 20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       transition={{ ease: "easeInOut", duration: 0.5 }}
     >
       {children}
