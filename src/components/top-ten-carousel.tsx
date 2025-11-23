@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from "react";
@@ -15,6 +14,9 @@ import {
 import { motion } from "framer-motion";
 import { Skeleton } from "./ui/skeleton";
 import Autoplay from "embla-carousel-autoplay";
+import { Button } from "./ui/button";
+import { PlayCircle } from "lucide-react";
+import LoadingLink from "./loading-link";
 
 const carouselVariants = {
   hidden: { opacity: 0 },
@@ -41,11 +43,10 @@ const itemVariants = {
 export function TopTenCarousel() {
   const [mediaItems, setMediaItems] = React.useState<Media[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
-  
+
   const autoplayPlugin = React.useRef(
     Autoplay({ delay: 5000, stopOnInteraction: true, stopOnHover: true })
   );
-
 
   React.useEffect(() => {
     const fetchTrending = async () => {
@@ -66,7 +67,7 @@ export function TopTenCarousel() {
     return (
         <div className="container mx-auto px-4 md:px-8 space-y-6">
             <Skeleton className="h-16 w-1/2 mx-auto" />
-            <div className="flex gap-4 overflow-hidden">
+            <div className="flex gap-4 overflow-hidden -ml-8">
                 {Array.from({length: 5}).map((_, i) => (
                     <div key={i} className="flex items-center">
                         <Skeleton className="h-[200px] w-[100px] bg-transparent" />
@@ -111,18 +112,18 @@ export function TopTenCarousel() {
         onMouseLeave={() => autoplayPlugin.current && autoplayPlugin.current.play()}
         className="w-full"
       >
-        <CarouselContent className="-ml-20">
+        <CarouselContent className="-ml-8">
           {mediaItems.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
-              className="basis-auto pl-20"
+              className="basis-auto pl-8"
             >
               <motion.div 
                 variants={itemVariants} 
                 className="flex items-center group/item transition-transform duration-300 ease-in-out"
               >
                 <span 
-                  className="text-[200px] font-black text-transparent transition-all duration-300 ease-in-out group-hover/item:scale-110 group-hover/item:text-primary" 
+                  className="text-[200px] font-black text-transparent group-hover/item:text-primary transition-all duration-300 ease-in-out group-hover/item:scale-110" 
                   style={{ WebkitTextStroke: '3px hsl(var(--foreground) / 0.1)', textShadow: '0 0 15px hsl(var(--foreground) / 0.1)' }}
                 >
                     {index + 1}
