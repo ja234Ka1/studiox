@@ -6,6 +6,9 @@ import { Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { useVideo } from "@/context/video-provider";
 import { getVideos } from "@/lib/tmdb";
@@ -18,6 +21,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 const VIDEO_SOURCE_BASE_URLS = {
   YouTube: "https://www.youtube.com/embed/",
@@ -84,8 +88,15 @@ function VideoPlayerContent() {
     <Dialog open={!!mediaId} onOpenChange={handleOpenChange}>
       <DialogContent 
         className="max-w-4xl w-full h-auto p-0 border-0 bg-card"
-        aria-label={selectedVideo?.name || "Video Player"}
       >
+        <DialogHeader>
+            <VisuallyHidden>
+                <DialogTitle>{selectedVideo?.name || 'Video Player'}</DialogTitle>
+                <DialogDescription>
+                    A dialog containing a video player. You can select different videos using the dropdown if available.
+                </DialogDescription>
+            </VisuallyHidden>
+        </DialogHeader>
         <div className="aspect-video relative bg-black">
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center">
