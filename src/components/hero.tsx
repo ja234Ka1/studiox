@@ -51,7 +51,6 @@ export function Hero({ items }: HeroProps) {
           transition={{ duration: 1.5, ease: "easeInOut" }}
           className="absolute inset-0"
         >
-          <LoadingLink href={detailPath} className="block w-full h-full">
             <Image
               src={getTmdbImageUrl(item.backdrop_path, "original")}
               alt={title || "Hero backdrop"}
@@ -59,13 +58,16 @@ export function Hero({ items }: HeroProps) {
               priority
               className="object-cover"
             />
-          </LoadingLink>
+            {/* The link is now an overlay, preventing nesting issues */}
+            <LoadingLink href={detailPath} className="absolute inset-0 z-10">
+                <span className="sr-only">View details for {title}</span>
+            </LoadingLink>
         </motion.div>
       </AnimatePresence>
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-r from-background via-background/20 to-transparent" />
 
-      <div className="relative z-10 container h-full flex flex-col justify-end pb-16 md:pb-24 px-4 md:px-8">
+      <div className="relative z-20 container h-full flex flex-col justify-end pb-16 md:pb-24 px-4 md:px-8">
         <AnimatePresence>
             <motion.div
                 key={currentIndex}
