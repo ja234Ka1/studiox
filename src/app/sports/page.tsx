@@ -1,14 +1,17 @@
 
-import { getLiveMatches, getSports } from "@/lib/streamed";
+'use client';
+
+import { useState, useEffect } from "react";
+import { getLiveMatchesAction, getSports } from "@/lib/streamed";
 import type { APIMatch, Sport } from "@/types/streamed";
 import Image from "next/image";
 import LoadingLink from "@/components/loading-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { PlayCircle } from "lucide-react";
+import { PlayCircle, Loader2 } from "lucide-react";
 import { getStreamedImageUrl } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function MatchCard({ match }: { match: APIMatch }) {
     const homeTeam = match.teams?.home;
@@ -52,58 +55,124 @@ function MatchCard({ match }: { match: APIMatch }) {
     )
 }
 
-export default async function SportsPage() {
-  const liveMatchesPromise = getLiveMatches();
-  const sportsPromise = getSports();
-
-  const [liveMatches, sports] = await Promise.all([liveMatchesPromise, sportsPromise]);
-  
-  const matchesByCategory = sports.map(sport => ({
-      ...sport,
-      matches: liveMatches.filter(match => match.category === sport.id)
-  })).filter(category => category.matches.length > 0);
-
-  const allTab = { id: 'all', name: 'All', matches: liveMatches };
-  const categories = [allTab, ...matchesByCategory];
-
-  return (
-    <div className="container px-4 md:px-8 lg:px-16 space-y-12 py-12 pb-24 mx-auto">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Live Sports</h1>
-        <p className="text-muted-foreground mt-1">
-          Watch live sports matches from around the world.
-        </p>
-      </header>
-
-      {liveMatches.length === 0 ? (
-         <div className="text-center py-16">
-            <p className="text-muted-foreground">There are no live matches right now. Please check back later.</p>
+function SportsSkeleton() {
+    return (
+        <div className="space-y-8">
+            <div className="flex space-x-2">
+                <Skeleton className="h-10 w-20" />
+                <Skeleton className="h-10 w-24" />
+                <Skeleton className="h-10 w-28" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
+                {Array.from({ length: 8 }).map((_, i) => (
+                    <Card key={i}>
+                        <Skeleton className="aspect-video w-full" />
+                        <CardContent className="p-4 space-y-2">
+                            <Skeleton className="h-5 w-3/4" />
+                            <div className="flex justify-between">
+                                <Skeleton className="h-4 w-12" />
+                                <Skeleton className="h-4 w-16" />
+                            </div>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
         </div>
-      ) : (
-        <Tabs defaultValue="all" className="w-full">
-            <TabsList>
-            {categories.map((category) => (
-                <TabsTrigger key={category.id} value={category.id}>{category.name}</TabsTrigger>
-            ))}
-            </TabsList>
-            
-            {categories.map((category) => (
-                <TabsContent key={category.id} value={category.id}>
-                    {category.matches.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
-                            {category.matches.map((match) => (
-                                <MatchCard key={match.id} match={match} />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-16">
-                            <p className="text-muted-foreground">No live matches for {category.name} right now.</p>
-                        </div>
-                    )}
-                </TabsContent>
-            ))}
-        </Tabs>
-      )}
-    </div>
-  );
+    );
+}
+
+export default function SportsPage() {
+    const [liveMatches, setLiveMatches] = useState<APIMatch[]>([]);
+    const [sports, setSports] = useState<Sport[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const fetchLiveMatches = async () => {
+        try {
+            const [matches, sportsData] = await Promise.all([
+                getLiveMatchesAction(),
+                getSports()
+            ]);
+            setLiveMatches(matches);
+            setSports(sportsData);
+        } catch (error) {
+            console.error("Failed to fetch live matches or sports:", error);
+            setLiveMatches([]);
+            setSports([]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    
+    useEffect(() => {
+        fetchLiveMatches(); // Initial fetch
+        
+        const interval = setInterval(() => {
+            fetchLiveMatches();
+        }, 180000); // 3 minutes
+
+        return () => clearInterval(interval);
+    }, []);
+
+    if (isLoading) {
+        return (
+            <div className="container px-4 md:px-8 lg:px-16 space-y-12 py-12 pb-24 mx-auto">
+                 <header className="mb-8">
+                    <h1 className="text-3xl font-bold tracking-tight">Live Sports</h1>
+                    <p className="text-muted-foreground mt-1">
+                        Watch live sports matches from around the world.
+                    </p>
+                </header>
+                <SportsSkeleton />
+            </div>
+        )
+    }
+
+    const matchesByCategory = sports.map(sport => ({
+        ...sport,
+        matches: liveMatches.filter(match => match.category === sport.id)
+    })).filter(category => category.matches.length > 0);
+
+    const allTab = { id: 'all', name: 'All', matches: liveMatches };
+    const categories = [allTab, ...matchesByCategory];
+
+    return (
+        <div className="container px-4 md:px-8 lg:px-16 space-y-12 py-12 pb-24 mx-auto">
+            <header className="mb-8">
+                <h1 className="text-3xl font-bold tracking-tight">Live Sports</h1>
+                <p className="text-muted-foreground mt-1">
+                    Watch live sports matches from around the world.
+                </p>
+            </header>
+
+            {liveMatches.length === 0 ? (
+                <div className="text-center py-16">
+                    <p className="text-muted-foreground">There are no live matches right now. Please check back later.</p>
+                </div>
+            ) : (
+                <Tabs defaultValue="all" className="w-full">
+                    <TabsList>
+                    {categories.map((category) => (
+                        <TabsTrigger key={category.id} value={category.id}>{category.name}</TabsTrigger>
+                    ))}
+                    </TabsList>
+                    
+                    {categories.map((category) => (
+                        <TabsContent key={category.id} value={category.id}>
+                            {category.matches.length > 0 ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
+                                    {category.matches.map((match) => (
+                                        <MatchCard key={match.id} match={match} />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-16">
+                                    <p className="text-muted-foreground">No live matches for {category.name} right now.</p>
+                                </div>
+                            )}
+                        </TabsContent>
+                    ))}
+                </Tabs>
+            )}
+        </div>
+    );
 }
