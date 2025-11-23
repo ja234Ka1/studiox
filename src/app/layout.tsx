@@ -21,12 +21,13 @@ import { Toaster } from "@/components/ui/toaster";
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 function ThemedBodyContent({ children }: { children: ReactNode }) {
-  const { radius } = useTheme();
+  const { radius, isMounted } = useTheme();
 
   React.useEffect(() => {
-    document.documentElement.style.setProperty('--radius', `${radius}rem`);
-  }, [radius]);
-
+    if (isMounted) {
+      document.documentElement.style.setProperty('--radius', `${radius}rem`);
+    }
+  }, [radius, isMounted]);
 
   return (
       <>

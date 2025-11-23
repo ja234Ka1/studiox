@@ -33,7 +33,20 @@ type ThemeProviderState = {
   setRadius: (radius: number) => void;
   streamSource: StreamSource;
   setStreamSource: (source: StreamSource) => void;
+  isMounted: boolean;
 };
+
+const defaultState: Omit<ThemeProviderState, 'setTheme' | 'setBackgroundEffects' | 'setAnimationsEnabled' | 'setBlobSpeed' | 'setDataSaver' | 'setRadius' | 'setStreamSource' > = {
+    theme: 'system',
+    backgroundEffects: { blobs: true, starfield: false },
+    animationsEnabled: true,
+    blobSpeed: 30,
+    dataSaver: false,
+    radius: 1.0,
+    streamSource: 'Prime',
+    isMounted: false,
+};
+
 
 const ThemeProviderContext = React.createContext<ThemeProviderState | undefined>(undefined);
 
@@ -81,18 +94,12 @@ export function ThemeProvider({
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = () => {
         if (theme === 'system' && enableSystem) {
-            // This will trigger the effect above to re-evaluate the theme
             setTheme('system'); 
         }
     };
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [theme, setTheme, enableSystem, isMounted]);
-
-
-  const handleSetBackgroundEffects = (effects: Partial<BackgroundEffects>) => {
-    setBackgroundEffects(prev => ({ ...prev, ...effects }));
-  };
 
   const value = {
     theme,
@@ -109,6 +116,7 @@ export function ThemeProvider({
     setRadius: (newRadius: number) => setRadius(newRadius),
     streamSource,
     setStreamSource: (source: StreamSource) => setStreamSource(source),
+    isMounted,
   };
   
   return (
