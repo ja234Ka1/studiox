@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -101,8 +102,8 @@ export function TopTenCarousel() {
       <Carousel
         opts={{ loop: true, align: 'start' }}
         plugins={[autoplayPlugin.current]}
-        onMouseEnter={() => autoplayPlugin.current.stop()}
-        onMouseLeave={() => autoplayPlugin.current.play()}
+        onMouseEnter={() => autoplayPlugin.current?.stop()}
+        onMouseLeave={() => autoplayPlugin.current?.play()}
         className="w-full"
       >
         <CarouselContent className="">
