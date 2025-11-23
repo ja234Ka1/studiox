@@ -13,6 +13,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 const carouselVariants = {
   hidden: { opacity: 0 },
@@ -68,7 +69,7 @@ export function TopTenCarousel() {
       variants={carouselVariants}
     >
       <motion.h2 
-        className="text-2xl font-bold mb-4 px-4 md:px-8"
+        className="text-3xl font-bold mb-6 text-center"
         variants={itemVariants}
       >
         Top 10 Movies Today
@@ -81,15 +82,22 @@ export function TopTenCarousel() {
         }}
         className="w-full"
       >
-        <CarouselContent className="-ml-2">
+        <CarouselContent className="-ml-12">
           {mediaItems.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
-              className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4 pr-2"
+              className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 pl-12"
             >
-              <motion.div variants={itemVariants} className="flex items-center">
-                <span className="text-6xl font-black text-muted-foreground/20 -mr-4">{index + 1}</span>
-                <MediaCard item={item} />
+              <motion.div 
+                variants={itemVariants} 
+                className="flex items-center group/item transition-transform duration-300 ease-in-out hover:!scale-105"
+              >
+                <span className="text-[150px] font-black text-transparent transition-all duration-300 ease-in-out group-hover/item:text-primary" style={{ WebkitTextStroke: '2px hsl(var(--foreground) / 0.2)' }}>
+                    {index + 1}
+                </span>
+                <div className="-ml-8 w-[200px] z-10 transition-transform duration-300 ease-in-out group-hover/item:scale-110">
+                    <MediaCard item={item} />
+                </div>
               </motion.div>
             </CarouselItem>
           ))}
