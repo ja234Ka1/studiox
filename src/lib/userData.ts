@@ -45,7 +45,8 @@ export const addToFirebaseWatchlist = (firestore: Firestore, userId: string, ite
     if (!firestore) return;
     const watchlistItemRef = doc(firestore, 'users', userId, 'watchlists', String(item.id));
     
-    const itemWithUser = { ...item, userId: userId };
+    // Ensure userId is part of the document data for rule validation
+    const itemWithUser = { ...item, userId };
 
     setDoc(watchlistItemRef, itemWithUser, { merge: true }).catch(error => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({

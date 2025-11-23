@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
@@ -25,6 +26,12 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
   const [localWatchlist, setLocalWatchlistState] = useState<Media[]>([]);
   const [isMounted, setIsMounted] = useState(false);
 
+  useEffect(() => {
+    setIsMounted(true);
+    // Load initial guest watchlist on mount
+    setLocalWatchlistState(getLocalWatchlist());
+  }, []);
+
   // Firestore state for logged-in user
   const watchlistQuery = useMemoFirebase(
     () => (user && !user.isAnonymous && firestore ? collection(firestore, 'users', user.uid, 'watchlists') : null),
@@ -33,24 +40,28 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
   
   const { data: firebaseWatchlist, isLoading: isFirestoreLoading } = useCollection<Media>(watchlistQuery);
 
+  // This effect handles changes in user state (login/logout)
   useEffect(() => {
-    setIsMounted(true);
-    // Load initial guest watchlist from local storage
-    if (!user || user.isAnonymous) {
+    if (isUserLoading) return; // Wait until we know the user's status
+
+    if (user && !user.isAnonymous) {
+      // User is logged in, clear local state. The source of truth is now firebaseWatchlist.
+      if (localWatchlist.length > 0) {
+        setLocalWatchlistState([]);
+      }
+    } else {
+      // User is a guest or logged out, ensure local state is loaded.
       setLocalWatchlistState(getLocalWatchlist());
     }
-  }, [user]);
+  }, [user, isUserLoading, localWatchlist.length]);
 
-
-  // Listen for local storage changes (for guest users in other tabs)
+  // This effect handles listening for guest watchlist changes from other tabs
   useEffect(() => {
     if (user && !user.isAnonymous) return; // Only for guests
 
     const handleStorageChange = (e: Event) => {
         const customEvent = e as CustomEvent;
-        if (customEvent.detail?.key === 'willow-watchlist') {
-             setLocalWatchlistState(getLocalWatchlist());
-        } else if ((e as StorageEvent).key === 'willow-watchlist') {
+        if (customEvent.detail?.key === 'willow-watchlist' || (e as StorageEvent).key === 'willow-watchlist') {
              setLocalWatchlistState(getLocalWatchlist());
         }
     };
@@ -63,14 +74,15 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
     };
   }, [user]);
   
-  const watchlist = isMounted && user && !user.isAnonymous ? (firebaseWatchlist || []) : localWatchlist;
-  const isLoading = !isMounted || isUserLoading || (user && !user.isAnonymous && isFirestoreLoading);
+  const isGuest = !user || user.isAnonymous;
+  const watchlist = isGuest ? localWatchlist : (firebaseWatchlist || []);
+  const isLoading = !isMounted || isUserLoading || (!isGuest && isFirestoreLoading);
 
   const isInWatchlist = useCallback((mediaId: number) => {
     return watchlist.some(item => item.id === mediaId);
   }, [watchlist]);
 
-  const handleAddToWatchlist = (item: Media) => {
+  const addToWatchlist = useCallback((item: Media) => {
     if (isInWatchlist(item.id)) {
       showNotification(item, 'exists');
       return;
@@ -84,9 +96,9 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
       setLocalWatchlistState(newWatchlist); // Update state
     }
     showNotification(item, 'added');
-  };
+  }, [isInWatchlist, user, firestore, localWatchlist, showNotification]);
 
-  const handleRemoveFromWatchlist = (mediaId: number) => {
+  const removeFromWatchlist = useCallback((mediaId: number) => {
     const itemToRemove = watchlist.find(item => item.id === mediaId);
     if (!itemToRemove) return;
 
@@ -97,14 +109,14 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
       setLocalWatchlist(newWatchlist);
       setLocalWatchlistState(newWatchlist);
     }
-  };
+  }, [watchlist, user, firestore, localWatchlist]);
   
   const value = {
     watchlist,
     isLoading,
     isInWatchlist,
-    addToWatchlist: handleAddToWatchlist,
-    removeFromWatchlist: handleRemoveFromWatchlist,
+    addToWatchlist,
+    removeFromWatchlist,
   };
 
   return (
