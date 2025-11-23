@@ -49,8 +49,8 @@ export default function TopTenCarousel() {
                 TOP
             </span>
             <span className={cn(
-                "text-7xl font-black",
-                "group-hover/section:text-glow text-primary"
+                "text-7xl font-black text-primary",
+                "group-hover/section:text-glow"
                 )}
             >
                 10
@@ -67,13 +67,13 @@ export default function TopTenCarousel() {
         plugins={[plugin.current]}
         className="w-full"
       >
-        <CarouselContent className="-ml-2">
+        <CarouselContent className="-ml-4">
           {mediaItems.map((item, index) => (
             <CarouselItem
               key={item.id}
               className={cn(
-                "group pl-24",
-                "basis-1/3 sm:basis-1/4 md:basis-1/5 lg:basis-1/6"
+                "group pl-4",
+                "basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6"
               )}
             >
                 <div className="flex items-center transition-transform duration-300 ease-in-out group-hover:scale-105">
