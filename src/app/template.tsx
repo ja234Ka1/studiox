@@ -12,7 +12,8 @@ export default function Template({ children }: { children: React.ReactNode }) {
   const { stopLoading } = useLoading();
   const pathname = usePathname();
 
-  // Ensure loading stops on route change.
+  // On any path change, stop the loading animation.
+  // This effect runs when the new page's template is mounted.
   useEffect(() => {
     stopLoading();
   }, [pathname, stopLoading]);
