@@ -3,9 +3,9 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SendHorizonal, User, Sparkles, Film, Search } from 'lucide-react';
+import { SendHorizonal, User, Sparkles } from 'lucide-react';
 import { chat, type ChatInput } from '@/ai/flows/chat';
-
+import ReactMarkdown from 'react-markdown';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useUser } from '@/firebase';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
+import LoadingLink from '../loading-link';
 
 interface Message {
   id: number;
@@ -187,14 +188,19 @@ export function ChatInterface() {
                         </Avatar>
                         )}
                         <div
-                        className={cn('max-w-md rounded-2xl px-4 py-3 text-sm md:text-base prose prose-sm prose-invert',
-                            'prose-p:mt-0 prose-p:mb-0',
-                            message.sender === 'user'
-                            ? 'bg-primary text-primary-foreground rounded-br-none'
-                            : 'bg-background text-card-foreground rounded-bl-none'
-                        )}
-                        dangerouslySetInnerHTML={{ __html: message.text.replace(/\n/g, '<br />') }}
-                        />
+                            className={cn('max-w-md rounded-2xl px-4 py-3 text-sm md:text-base',
+                                'prose prose-sm prose-invert prose-p:my-0 prose-a:text-accent prose-strong:text-foreground',
+                                message.sender === 'user'
+                                ? 'bg-primary text-primary-foreground rounded-br-none'
+                                : 'bg-background text-card-foreground rounded-bl-none'
+                            )}
+                        >
+                            <ReactMarkdown
+                                components={{
+                                    a: ({node, ...props}) => <LoadingLink {...props} className="underline" />
+                                }}
+                            >{message.text}</ReactMarkdown>
+                        </div>
                         {message.sender === 'user' && (
                             <Avatar className="w-8 h-8">
                                 {user?.photoURL ? (
@@ -210,19 +216,21 @@ export function ChatInterface() {
                 </AnimatePresence>
                 {isLoading && (
                     <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="flex items-start gap-3 justify-start"
+                        key="typing"
+                        layout
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="flex items-start gap-3 justify-start"
                     >
-                    <Avatar className="w-8 h-8 border-2 border-primary/50">
-                        <AvatarFallback className="bg-primary/20 text-primary">
-                            <Sparkles className="w-5 h-5" />
-                        </AvatarFallback>
-                    </Avatar>
-                    <div className="max-w-md rounded-2xl px-4 py-3 text-sm md:text-base bg-background text-card-foreground rounded-bl-none">
-                        <TypingIndicator />
-                    </div>
+                        <Avatar className="w-8 h-8 border-2 border-primary/50">
+                            <AvatarFallback className="bg-primary/20 text-primary">
+                                <Sparkles className="w-5 h-5" />
+                            </AvatarFallback>
+                        </Avatar>
+                        <div className="max-w-md rounded-2xl px-4 py-3 text-sm md:text-base bg-background text-card-foreground rounded-bl-none">
+                            <TypingIndicator />
+                        </div>
                     </motion.div>
                 )}
             </div>
@@ -233,11 +241,11 @@ export function ChatInterface() {
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask me to find a movie..."
+            placeholder="Ask for a movie or TV show..."
             className="flex-1 h-12 rounded-full bg-background/70 pl-4 pr-14"
             disabled={isLoading}
           />
-          <Button type="submit" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full w-9 h-9" disabled={isLoading}>
+          <Button type="submit" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full w-9 h-9" disabled={isLoading || !input.trim()}>
             <SendHorizonal className="w-5 h-5" />
             <span className="sr-only">Send message</span>
           </Button>
