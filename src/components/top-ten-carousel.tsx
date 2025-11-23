@@ -73,7 +73,9 @@ export default function TopTenCarousel() {
                 <div className="flex items-center transition-transform duration-300 ease-in-out group-hover:scale-105">
                     <span 
                         style={{ WebkitTextStroke: '3px hsl(var(--primary))' }}
-                        className="-mr-2 text-[200px] font-black text-transparent transition-all duration-300 ease-in-out group-hover:text-primary"
+                        className={cn(
+                            "text-[200px] font-black text-transparent transition-all duration-300 ease-in-out group-hover:text-primary mr-8"
+                        )}
                     >
                         {index + 1}
                     </span>
