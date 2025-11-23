@@ -32,8 +32,6 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
 
   const [showSourceDialog, setShowSourceDialog] = useState(false);
   
-  const onWatchlist = isInWatchlist(item.id);
-
   const title = item.title || item.name;
   const releaseDate = item.release_date || item.first_air_date;
   const year = releaseDate ? new Date(releaseDate).getFullYear() : 'N/A';
@@ -64,12 +62,14 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
   
   const handleWatchlistToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onWatchlist) {
+    if (isInWatchlist(item.id)) {
       removeFromWatchlist(item.id);
     } else {
       addToWatchlist(item);
     }
   };
+  
+  const onWatchlist = isInWatchlist(item.id);
 
   return (
     <>
