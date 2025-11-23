@@ -14,6 +14,10 @@ const settingsNavItems = [
       title: "Appearance",
       href: "/settings/appearance",
     },
+    {
+      title: "Developer",
+      href: "/stresstest",
+    }
 ]
 
 interface SettingsLayoutProps {
