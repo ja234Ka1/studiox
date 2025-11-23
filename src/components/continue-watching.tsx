@@ -84,22 +84,7 @@ const normalizeProgressData = (key: string, rawData: any): NormalizedProgress | 
         normalized.season = rawData.season;
         normalized.episode = rawData.episode;
     }
-    // Detect 'Prime' source structure (vidfast) from MEDIA_DATA event
-    else if ('type' in rawData && 'progress' in rawData && 'last_updated' in rawData) {
-        const isMovie = rawData.type === 'movie';
-        const progress = isMovie 
-            ? rawData.progress 
-            : (rawData.show_progress?.[`s${rawData.last_season_watched}e${rawData.last_episode_watched}`]?.progress);
-        
-        if (!progress) return null;
-
-        normalized.currentTime = progress.watched;
-        normalized.duration = progress.duration;
-        normalized.lastWatched = rawData.last_updated;
-        normalized.season = rawData.last_season_watched;
-        normalized.episode = rawData.last_episode_watched;
-    } 
-    // Detect synthetic 'Prime' source structure (vidfast) from PLAYER_EVENT
+    // Detect 'Prime' source structure (vidfast) from PLAYER_EVENT
     else if ('event' in rawData && 'currentTime' in rawData && 'duration' in rawData) {
         normalized.currentTime = rawData.currentTime;
         normalized.duration = rawData.duration;
@@ -268,7 +253,7 @@ export default function ContinueWatching() {
     const handleProgressChange = (e: Event) => {
         // This event can be a standard StorageEvent or our custom event
         const customEvent = e as CustomEvent;
-        if ((e as StorageEvent).key?.startsWith('progress_') || customEvent.detail?.key?.startsWith('progress_')) {
+        if ((e as StorageEvent).key?.startsWith('progress_') || customEvent.detail?.key?.startsWith('progress_') || customEvent.type === 'willow-progress-change') {
             loadProgress();
         }
     }

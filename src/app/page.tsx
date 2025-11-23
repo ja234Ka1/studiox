@@ -119,9 +119,9 @@ export default async function Home() {
 
         {!error && (
           <div className="space-y-16">
+            <ContinueWatching />
             <TopTenCarousel />
             <TopTenTvCarousel />
-            <ContinueWatching />
             
             {trendingWeekly.length > 0 && (
               <MediaCarousel title="Trending This Week" items={trendingWeekly} />
