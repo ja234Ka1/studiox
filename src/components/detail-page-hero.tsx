@@ -3,8 +3,8 @@
 
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { PlayCircle, Plus, Check, VolumeX, Volume2 } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
+import { PlayCircle, VolumeX, Volume2 } from "lucide-react";
+import { useState, useRef } from "react";
 import type { YouTubePlayer } from "react-youtube";
 import { useRouter } from "next/navigation";
 
@@ -12,8 +12,6 @@ import type { MediaDetails } from "@/types/tmdb";
 import { getTmdbImageUrl } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useVideo } from "@/context/video-provider";
-import { useWatchlist } from "@/context/watchlist-provider";
 import YouTubeEmbed from "./youtube-embed";
 import { useTheme, type StreamSource } from "@/context/theme-provider";
 import { StreamSourceDialog } from "./stream-source-dialog";
@@ -25,7 +23,6 @@ interface DetailPageHeroProps {
 
 export function DetailPageHero({ item }: DetailPageHeroProps) {
   const router = useRouter();
-  const { isInWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
   
   const [showTrailer, setShowTrailer] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
@@ -41,7 +38,6 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
   const trailer = item.videos?.results?.find(v => v.type === 'Trailer' && v.official) 
                   || item.videos?.results?.find(v => v.type === 'Trailer');
 
-  const isItemInWatchlist = isInWatchlist(item.id);
 
   const handleMouseEnter = () => {
     if (trailer && !dataSaver) {
@@ -52,15 +48,6 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
   const handleMouseLeave = () => {
     setShowTrailer(false);
     setIsMuted(true); // Always reset to muted when preview ends
-  };
-
-  const handleWatchlistToggle = () => {
-    const itemToAdd = { ...item, media_type: item.media_type || (item.title ? 'movie' : 'tv') };
-    if (isItemInWatchlist) {
-      removeFromWatchlist(item.id);
-    } else {
-      addToWatchlist(itemToAdd);
-    }
   };
 
   const handleSelectSource = (source: StreamSource) => {
@@ -147,10 +134,6 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
             <Button size="lg" onClick={() => setShowSourceDialog(true)}>
                 <PlayCircle className="mr-2" />
                 Watch
-            </Button>
-            <Button size="lg" variant="secondary" onClick={handleWatchlistToggle}>
-                {isItemInWatchlist ? <Check className="w-5 h-5 mr-2" /> : <Plus className="w-5 h-5 mr-2" />}
-              {isItemInWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
             </Button>
           </div>
         </motion.div>

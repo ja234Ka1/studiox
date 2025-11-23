@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Info, PlayCircle, Plus, Check } from "lucide-react";
+import { PlayCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 
 import type { Media } from "@/types/tmdb";
@@ -11,7 +11,6 @@ import { getTmdbImageUrl } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import LoadingLink from "./loading-link";
-import { useWatchlist } from "@/context/watchlist-provider";
 
 interface HeroProps {
   items: Media[];
@@ -19,7 +18,6 @@ interface HeroProps {
 
 export function Hero({ items }: HeroProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const { isInWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
 
   const item = items[currentIndex];
 
@@ -35,22 +33,12 @@ export function Hero({ items }: HeroProps) {
   
   if (!item) return null;
   
-  const isItemInWatchlist = isInWatchlist(item.id);
 
   const title = item.title || item.name;
   const releaseDate = item.release_date || item.first_air_date;
   const year = releaseDate ? new Date(releaseDate).getFullYear() : 'N/A';
   const detailPath = `/media/${item.media_type}/${item.id}`;
 
-  const handleWatchlistToggle = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent navigation if clicking on button over the link
-    const itemToAdd = { ...item, media_type: item.media_type || (item.title ? 'movie' : 'tv') };
-    if (isItemInWatchlist) {
-      removeFromWatchlist(item.id);
-    } else {
-      addToWatchlist(itemToAdd);
-    }
-  };
 
   return (
     <div className="relative w-full h-[60vh] lg:h-[80vh] group">
@@ -108,10 +96,6 @@ export function Hero({ items }: HeroProps) {
                         <PlayCircle className="mr-2" />
                         Watch
                     </LoadingLink>
-                </Button>
-                <Button size="lg" variant="secondary" onClick={handleWatchlistToggle}>
-                    {isItemInWatchlist ? <Check className="w-5 h-5 mr-2" /> : <Plus className="w-5 h-5 mr-2" />}
-                    {isItemInWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
                 </Button>
             </div>
             </motion.div>

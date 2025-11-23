@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { LogOut, User as UserIcon, List } from 'lucide-react';
+import { useState } from 'react';
+import { LogOut, User as UserIcon } from 'lucide-react';
 import { useUser } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { useAuth } from '@/firebase/provider';
@@ -18,20 +18,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LoginDialog } from './login-dialog';
-import LoadingLink from './loading-link';
-import { mergeLocalWatchlistToFirebase } from '@/lib/userData';
 
 export function AuthButton() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
-
-  useEffect(() => {
-    // When user logs in and is not anonymous, merge local watchlist to firebase
-    if (user && !user.isAnonymous) {
-      mergeLocalWatchlistToFirebase(user.uid);
-    }
-  }, [user]);
 
   if (isUserLoading) {
     return <Button variant="ghost" size="sm">Loading...</Button>;
@@ -91,13 +82,6 @@ export function AuthButton() {
                 </p>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <LoadingLink href="/watchlist">
-                <List className="mr-2 h-4 w-4" />
-                <span>Watchlist</span>
-              </LoadingLink>
-            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut}>
               <LogOut className="mr-2 h-4 w-4" />

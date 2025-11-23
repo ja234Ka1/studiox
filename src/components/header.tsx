@@ -2,8 +2,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Film, List, Menu, Search, Settings, Tv } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { Film, Menu, Search, Settings, Tv } from "lucide-react";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 
 import { cn } from "@/lib/utils";
@@ -16,7 +16,6 @@ import { StreamSourceDialog } from "./stream-source-dialog";
 const navItems = [
   { href: "/tv-shows", label: "Shows", icon: Tv },
   { href: "/movies", label: "Movies", icon: Film },
-  { href: "/watchlist", label: "Watchlist", icon: List },
 ];
 
 export function Header() {
