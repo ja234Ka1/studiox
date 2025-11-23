@@ -7,6 +7,7 @@ import { VideoProvider } from "@/context/video-provider";
 import { LoadingProvider } from "@/context/loading-provider";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
 import { WatchlistProvider } from "@/context/watchlist-provider";
+import { ToastProvider } from "@/components/ui/toast";
 
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
@@ -14,9 +15,11 @@ export function AppProviders({ children }: { children: ReactNode }) {
         <VideoProvider>
           <LoadingProvider>
             <FirebaseClientProvider>
-              <WatchlistProvider>
-                {children}
-              </WatchlistProvider>
+              <ToastProvider>
+                <WatchlistProvider>
+                  {children}
+                </WatchlistProvider>
+              </ToastProvider>
             </FirebaseClientProvider>
           </LoadingProvider>
         </VideoProvider>
