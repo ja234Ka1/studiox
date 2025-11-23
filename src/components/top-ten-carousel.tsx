@@ -67,13 +67,13 @@ export default function TopTenCarousel() {
         plugins={[plugin.current]}
         className="w-full"
       >
-        <CarouselContent className="-ml-4">
+        <CarouselContent className="-ml-20">
           {mediaItems.map((item, index) => (
             <CarouselItem
               key={item.id}
               className={cn(
-                "group pl-4",
-                "basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6"
+                "group",
+                "basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-20"
               )}
             >
                 <div className="flex items-center transition-transform duration-300 ease-in-out group-hover:scale-105">
