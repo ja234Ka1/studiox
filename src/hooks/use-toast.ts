@@ -1,4 +1,3 @@
-
 "use client"
 
 // Inspired by react-hot-toast library
@@ -199,7 +198,7 @@ interface ToastProviderProps {
 
 function ToastProvider({ children }: ToastProviderProps) {
   return (
-    <>{children}</>
+    <React.Fragment>{children}</React.Fragment>
   )
 }
 
