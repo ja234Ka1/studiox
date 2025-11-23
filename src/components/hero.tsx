@@ -18,21 +18,34 @@ interface HeroProps {
 
 export function Hero({ items }: HeroProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  const item = items[currentIndex];
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    if (items.length <= 1) return;
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted || items.length <= 1) return;
 
     const timer = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % items.length);
     }, 7000); // Change slide every 7 seconds
 
     return () => clearInterval(timer);
-  }, [items.length]);
+  }, [items.length, isMounted]);
+
+  if (!isMounted || items.length === 0) {
+    // Render a static placeholder or nothing on the server and during initial client render
+    return (
+        <div className="relative w-full h-[60vh] lg:h-[80vh] bg-muted animate-pulse">
+             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+             <div className="absolute inset-0 bg-gradient-to-r from-background via-background/20 to-transparent" />
+        </div>
+    );
+  }
   
+  const item = items[currentIndex];
   if (!item) return null;
-  
 
   const title = item.title || item.name;
   const releaseDate = item.release_date || item.first_air_date;
