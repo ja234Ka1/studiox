@@ -8,17 +8,31 @@ import { motion } from "framer-motion";
 
 const NUM_BLOBS = 4;
 
+interface Blob {
+  id: number;
+  size: number;
+  initialX: string;
+  initialY: string;
+  animationDuration: string;
+  animationDelay: string;
+}
+
+interface Star {
+    id: number;
+    size: string;
+    duration: string;
+    delay: string;
+    top: string;
+    left: string;
+}
+
 function AnimatedBlobs() {
   const { blobSpeed } = useTheme();
-  const [isMounted, setIsMounted] = useState(false);
+  const [blobs, setBlobs] = useState<Blob[]>([]);
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  const blobs = useMemo(() => {
-    if (!isMounted) return [];
-    return Array.from({ length: NUM_BLOBS }).map((_, i) => ({
+    // Generate blobs only on the client-side after mount
+    const generatedBlobs = Array.from({ length: NUM_BLOBS }).map((_, i) => ({
       id: i,
       size: Math.random() * 200 + 150,
       initialX: `${Math.random() * 80 + 10}%`,
@@ -26,10 +40,11 @@ function AnimatedBlobs() {
       animationDuration: `${Math.random() * 20 + blobSpeed}s`,
       animationDelay: `-${Math.random() * 10}s`,
     }));
-  }, [blobSpeed, isMounted]);
+    setBlobs(generatedBlobs);
+  }, [blobSpeed]);
 
-  if (!isMounted) {
-    return null;
+  if (blobs.length === 0) {
+    return null; // Don't render anything on the server or initial client render
   }
 
   return (
@@ -57,36 +72,44 @@ function AnimatedBlobs() {
 }
 
 const Starfield = () => {
-    const [isMounted, setIsMounted] = useState(false);
-    useEffect(() => setIsMounted(true), []);
+    const [stars, setStars] = useState<Star[]>([]);
 
-    if (!isMounted) return null;
+    useEffect(() => {
+        // Generate stars only on the client-side
+        const starCount = 100;
+        const generatedStars = Array.from({ length: starCount }).map((_, i) => ({
+            id: i,
+            size: `${Math.random() * 2 + 1}px`,
+            duration: `${Math.random() * 2 + 2}s`,
+            delay: `${Math.random() * 2}s`,
+            top: `${Math.random() * 100}%`,
+            left: `${Math.random() * 100}%`,
+        }));
+        setStars(generatedStars);
+    }, []);
 
-    const starCount = 100;
-    const stars = Array.from({ length: starCount }).map((_, i) => {
-        const size = `${Math.random() * 2 + 1}px`;
-        const duration = `${Math.random() * 2 + 2}s`;
-        const delay = `${Math.random() * 2}s`;
-        const top = `${Math.random() * 100}%`;
-        const left = `${Math.random() * 100}%`;
-        
-        return (
-            <div
-              key={`star-${i}`}
-              className="absolute rounded-full bg-white/80 animate-[twinkle_4s_infinite]"
-              style={{
-                width: size,
-                height: size,
-                top: top,
-                left: left,
-                animationDuration: duration,
-                animationDelay: delay,
-              }}
-            />
-        );
-    });
+    if (stars.length === 0) {
+        return null;
+    }
 
-    return <div className="absolute inset-0 z-0">{stars}</div>
+    return (
+        <div className="absolute inset-0 z-0">
+            {stars.map(star => (
+                 <div
+                    key={`star-${star.id}`}
+                    className="absolute rounded-full bg-white/80 animate-[twinkle_4s_infinite]"
+                    style={{
+                        width: star.size,
+                        height: star.size,
+                        top: star.top,
+                        left: star.left,
+                        animationDuration: star.duration,
+                        animationDelay: star.delay,
+                    }}
+                />
+            ))}
+        </div>
+    );
 }
 
 
