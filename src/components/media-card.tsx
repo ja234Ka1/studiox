@@ -12,8 +12,7 @@ import { getTmdbImageUrl, cn } from "@/lib/utils";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Button } from "./ui/button";
 import LoadingLink from "./loading-link";
-import { isInWatchlist, addToWatchlist, removeFromWatchlist } from "@/lib/userData";
-import { useToast } from "@/hooks/use-toast";
+import { useWatchlist } from "@/context/watchlist-provider";
 
 interface MediaCardProps {
   item: Media;
@@ -37,35 +36,11 @@ const itemVariants = {
 export function MediaCard({ item }: MediaCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const router = useRouter();
-  const { toast } = useToast();
   
-  const [isWatchlisted, setIsWatchlisted] = useState(false);
-  const [isWatchlistLoading, setIsWatchlistLoading] = useState(true);
-
-  const checkWatchlistStatus = useCallback(async () => {
-    setIsWatchlistLoading(true);
-    const status = await isInWatchlist(item.id);
-    setIsWatchlisted(status);
-    setIsWatchlistLoading(false);
-  }, [item.id]);
-
-  useEffect(() => {
-    checkWatchlistStatus();
-
-    const handleWatchlistChange = (event: Event) => {
-        const customEvent = event as CustomEvent;
-        // Check if the change is for this specific item or a general refresh
-        if (!customEvent.detail || !customEvent.detail.mediaId || customEvent.detail.mediaId === item.id) {
-            checkWatchlistStatus();
-        }
-    };
-
-    window.addEventListener('willow-watchlist-change', handleWatchlistChange);
-
-    return () => {
-        window.removeEventListener('willow-watchlist-change', handleWatchlistChange);
-    };
-  }, [checkWatchlistStatus, item.id]);
+  const { isInWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
+  const [isWatchlistLoading, setIsWatchlistLoading] = useState(false);
+  
+  const onWatchlist = isInWatchlist(item.id);
 
   const fallbackImage = PlaceHolderImages.find(p => p.id === 'media-fallback');
   const posterUrl = item.poster_path ? getTmdbImageUrl(item.poster_path, 'w500') : fallbackImage?.imageUrl;
@@ -78,22 +53,18 @@ export function MediaCard({ item }: MediaCardProps) {
     e.stopPropagation();
     e.preventDefault();
     setIsWatchlistLoading(true);
-    try {
-        if (isWatchlisted) {
-            await removeFromWatchlist(item.id);
-            toast({ title: "Removed from Watchlist", description: `${title} has been removed.` });
-        } else {
-            await addToWatchlist(item);
-            toast({ title: "Added to Watchlist", description: `${title} has been added.` });
-        }
-        // This will now trigger the listener in useEffect
-        window.dispatchEvent(new CustomEvent('willow-watchlist-change', { detail: { mediaId: item.id } }));
-    } catch (error) {
-        console.error("Failed to update watchlist:", error);
-        toast({ variant: 'destructive', title: "Error", description: "Could not update your watchlist." });
-        setIsWatchlistLoading(false); // Reset loading state on error
+    if (onWatchlist) {
+      await removeFromWatchlist(item.id);
+    } else {
+      await addToWatchlist(item);
     }
+    // No need to set loading to false here, as the re-render from context will handle it.
   };
+
+  useEffect(() => {
+    // When the onWatchlist status changes (via context), we know the operation is complete.
+    setIsWatchlistLoading(false);
+  }, [onWatchlist]);
 
   return (
     <motion.div
@@ -142,7 +113,7 @@ export function MediaCard({ item }: MediaCardProps) {
               <Button size="icon" className="h-8 w-8 rounded-full" variant="outline" onClick={handleToggleWatchlist}>
                 {isWatchlistLoading ? (
                   <Loader2 className="animate-spin" />
-                ) : isWatchlisted ? (
+                ) : onWatchlist ? (
                   <BookmarkCheck className="text-primary" />
                 ) : (
                   <Bookmark />
