@@ -12,16 +12,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search as SearchIcon, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 const genres = [
-  { id: 28, name: 'Action', type: 'movie' },
+  { id: 28, name: 'Action', type: 'movie', popular: true },
   { id: 10759, name: 'Action & Adventure', type: 'tv' },
   { id: 12, name: 'Adventure', type: 'movie' },
   { id: 16, name: 'Animation', type: 'all' },
-  { id: 35, name: 'Comedy', type: 'all' },
+  { id: 35, name: 'Comedy', type: 'all', popular: true },
   { id: 80, name: 'Crime', type: 'all' },
   { id: 99, name: 'Documentary', type: 'all' },
-  { id: 18, name: 'Drama', type: 'all' },
+  { id: 18, name: 'Drama', type: 'all', popular: true },
   { id: 10751, name: 'Family', type: 'all' },
   { id: 14, name: 'Fantasy', type: 'movie' },
   { id: 36, name: 'History', type: 'all' },
@@ -32,8 +33,8 @@ const genres = [
   { id: 10763, name: 'News', type: 'tv' },
   { id: 10764, name: 'Reality', type: 'tv' },
   { id: 10749, name: 'Romance', type: 'movie' },
-  { id: 10765, name: 'Sci-Fi & Fantasy', type: 'tv' },
-  { id: 878, name: 'Science Fiction', type: 'movie' },
+  { id: 10765, name: 'Sci-Fi & Fantasy', type: 'tv', popular: true },
+  { id: 878, name: 'Science Fiction', type: 'movie', popular: true },
   { id: 10766, name: 'Soap', type: 'tv' },
   { id: 10767, name: 'Talk', type: 'tv' },
   { id: 53, name: 'Thriller', type: 'movie' },
@@ -264,8 +265,13 @@ const SearchPage = () => {
                         }}
                     >
                         <Button 
-                            variant="outline"
-                            className="rounded-full border-muted-foreground/30 hover:bg-accent/10 hover:border-accent hover:text-accent transition-all duration-300"
+                            variant={genre.popular ? "secondary" : "outline"}
+                            className={cn(
+                                "rounded-full transition-all duration-300",
+                                genre.popular 
+                                    ? "font-semibold"
+                                    : "border-muted-foreground/30 hover:bg-accent/10 hover:border-accent hover:text-accent"
+                            )}
                             onClick={() => handleGenreClick(genre)}
                         >
                             {genre.name}
@@ -288,3 +294,5 @@ const SearchPage = () => {
 };
 
 export default SearchPage;
+
+    
