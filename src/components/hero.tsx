@@ -28,18 +28,18 @@ export function Hero({ items }: HeroProps) {
 
     return () => clearInterval(timer);
   }, [items.length]);
-  
+
   const item = items[currentIndex];
+
   if (!item) {
-    // Render a consistent placeholder if there are no items
     return (
-        <div className="relative w-full h-[60vh] lg:h-[80vh] bg-muted">
-             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-             <div className="absolute inset-0 bg-gradient-to-r from-background via-background/20 to-transparent" />
+        <div className="relative w-full h-[60vh] lg:h-[80vh] bg-muted animate-pulse">
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/20 to-transparent" />
         </div>
     );
   }
-
+  
   const title = item.title || item.name;
   const releaseDate = item.release_date || item.first_air_date;
   const year = releaseDate ? new Date(releaseDate).getFullYear() : 'N/A';

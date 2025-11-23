@@ -1,6 +1,7 @@
 
+'use client';
+
 import { getTrending, getPopular, getTopRated, getDiscover, getUpcoming } from "@/lib/tmdb";
-import { Hero } from "@/components/hero";
 import MediaCarousel from "@/components/media-carousel";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Image from "next/image";
@@ -11,6 +12,15 @@ import ContinueWatching from "@/components/continue-watching";
 import PlatformCarousel from "@/components/platform-carousel";
 import { FeaturedContent } from "@/components/featured-content";
 import { TopTenCarousel } from "@/components/top-ten-carousel";
+import { useEffect, useState } from "react";
+import dynamic from 'next/dynamic';
+import { Skeleton } from "@/components/ui/skeleton";
+
+// Dynamically import the Hero component with SSR turned off
+const Hero = dynamic(() => import('@/components/hero').then(mod => mod.Hero), {
+  ssr: false,
+  loading: () => <Skeleton className="w-full h-[60vh] lg:h-[80vh]" />,
+});
 
 interface Category {
   title: string;
@@ -30,74 +40,81 @@ const categoriesConfig = [
   { title: "Hindi Cinema", fetcher: () => getDiscover("movie", { with_original_language: 'hi' }) },
 ];
 
-export default async function Home() {
-  let trendingWeekly: Media[] = [];
-  let categories: Category[] = [];
-  let error: string | null = null;
-  let featuredAction: Media | undefined;
-  let featuredScifi: Media | undefined;
-  
-  try {
-    const trendingWeeklyPromise = getTrending("all", "week");
-    const categoriesPromises = categoriesConfig.map(c => c.fetcher());
-    const featuredActionPromise = getDiscover("movie", { with_genres: '28' });
-    const featuredScifiPromise = getDiscover("movie", { with_genres: '878,14' });
+export default function Home() {
+  const [heroItems, setHeroItems] = useState<Media[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [featuredAction, setFeaturedAction] = useState<Media | undefined>();
+  const [featuredScifi, setFeaturedScifi] = useState<Media | undefined>();
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const trendingWeeklyPromise = getTrending("all", "week");
+        const categoriesPromises = categoriesConfig.map(c => c.fetcher());
+        const featuredActionPromise = getDiscover("movie", { with_genres: '28' });
+        const featuredScifiPromise = getDiscover("movie", { with_genres: '878,14' });
 
-    const [trendingWeeklyResult, featuredActionRes, featuredScifiRes, ...categoriesResults] = await Promise.allSettled([
-      trendingWeeklyPromise,
-      featuredActionPromise,
-      featuredScifiPromise,
-      ...categoriesPromises
-    ]);
+        const [trendingWeeklyResult, featuredActionRes, featuredScifiRes, ...categoriesResults] = await Promise.allSettled([
+          trendingWeeklyPromise,
+          featuredActionPromise,
+          featuredScifiPromise,
+          ...categoriesPromises
+        ]);
 
-    if (trendingWeeklyResult.status === 'fulfilled') {
-      trendingWeekly = trendingWeeklyResult.value;
-    } else {
-      console.error('Failed to fetch trending:', trendingWeeklyResult.reason);
-      throw new Error("Failed to fetch trending data.");
-    }
-    
-    if (featuredActionRes.status === 'fulfilled' && featuredActionRes.value.length > 0) {
-      featuredAction = featuredActionRes.value[0];
-    }
-    if (featuredScifiRes.status === 'fulfilled' && featuredScifiRes.value.length > 0) {
-      featuredScifi = featuredScifiRes.value[1]; // Get a different one
-    }
-    
-    categories = categoriesConfig.map((config, index) => {
-        const result = categoriesResults[index];
-        if (result.status === 'fulfilled') {
-            return { title: config.title, items: result.value };
+        if (trendingWeeklyResult.status === 'fulfilled') {
+          setHeroItems(trendingWeeklyResult.value.slice(0, 5));
+        } else {
+          console.error('Failed to fetch trending:', trendingWeeklyResult.reason);
+          throw new Error("Failed to fetch trending data.");
         }
-        console.error(`Failed to load category "${config.title}":`, result.reason);
-        return { title: config.title, items: [] };
-    }).filter(c => c.items.length > 0);
+        
+        if (featuredActionRes.status === 'fulfilled' && featuredActionRes.value.length > 0) {
+          setFeaturedAction(featuredActionRes.value[0]);
+        }
+        if (featuredScifiRes.status === 'fulfilled' && featuredScifiRes.value.length > 0) {
+          setFeaturedScifi(featuredScifiRes.value[1]); // Get a different one
+        }
+        
+        const resolvedCategories = categoriesConfig.map((config, index) => {
+            const result = categoriesResults[index];
+            if (result.status === 'fulfilled') {
+                return { title: config.title, items: result.value };
+            }
+            console.error(`Failed to load category "${config.title}":`, result.reason);
+            return { title: config.title, items: [] };
+        }).filter(c => c.items.length > 0);
+        setCategories(resolvedCategories);
 
-  } catch (e: any) {
-    error = e.message || "Failed to fetch data.";
-  }
+      } catch (e: any) {
+        setError(e.message || "Failed to fetch data.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
   
-  const heroItems = trendingWeekly.slice(0, 5);
   const heroFallbackImage = PlaceHolderImages.find(p => p.id === 'hero-fallback');
 
   return (
     <div className="flex flex-col">
-      {heroItems.length > 0 ? (
+      {isLoading ? (
+         <Skeleton className="w-full h-[60vh] lg:h-[80vh]" />
+      ) : heroItems.length > 0 ? (
         <Hero items={heroItems} />
       ) : (
-        !error && (
+        !error && heroFallbackImage && (
           <div className="relative w-full h-[60vh] lg:h-[80vh]">
-            {heroFallbackImage && (
-              <Image
-                  src={heroFallbackImage.imageUrl}
-                  alt="Fallback hero image"
-                  fill
-                  className="object-cover"
-                  data-ai-hint={heroFallbackImage.imageHint}
-                  priority
-                />
-            )}
+            <Image
+                src={heroFallbackImage.imageUrl}
+                alt="Fallback hero image"
+                fill
+                className="object-cover"
+                data-ai-hint={heroFallbackImage.imageHint}
+                priority
+              />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
           </div>
         )
@@ -116,14 +133,14 @@ export default async function Home() {
           </div>
         )}
 
-        {!error && (
+        {!error && !isLoading && (
           <div className="space-y-16">
             <ContinueWatching />
             
             <TopTenCarousel />
 
-            {trendingWeekly.length > 0 && (
-              <MediaCarousel title="Trending This Week" items={trendingWeekly} />
+            {heroItems.length > 0 && (
+              <MediaCarousel title="Trending This Week" items={heroItems} />
             )}
             
             {categories.slice(0, 2).map((category) => (
