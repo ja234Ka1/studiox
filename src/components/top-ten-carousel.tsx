@@ -13,7 +13,8 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { Skeleton } from "./ui/skeleton";
+import Autoplay from "embla-carousel-autoplay";
 
 const carouselVariants = {
   hidden: { opacity: 0 },
@@ -40,6 +41,11 @@ const itemVariants = {
 export function TopTenCarousel() {
   const [mediaItems, setMediaItems] = React.useState<Media[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
+  
+  const autoplayPlugin = React.useRef(
+    Autoplay({ delay: 5000, stopOnInteraction: true, stopOnHover: true })
+  );
+
 
   React.useEffect(() => {
     const fetchTrending = async () => {
@@ -56,43 +62,69 @@ export function TopTenCarousel() {
     fetchTrending();
   }, []);
 
-  if (isLoading || mediaItems.length === 0) {
-    return null; // Or a loading skeleton
+  if (isLoading) {
+    return (
+        <div className="container mx-auto px-4 md:px-8 space-y-6">
+            <Skeleton className="h-16 w-1/2 mx-auto" />
+            <div className="flex gap-4 overflow-hidden">
+                {Array.from({length: 5}).map((_, i) => (
+                    <div key={i} className="flex items-center">
+                        <Skeleton className="h-[200px] w-[100px] bg-transparent" />
+                        <Skeleton className="w-[200px] aspect-[2/3]" />
+                    </div>
+                ))}
+            </div>
+        </div>
+    )
+  }
+
+  if (mediaItems.length === 0) {
+    return null;
   }
 
   return (
     <motion.section 
-      className="text-left w-full group"
+      className="w-full group"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.1 }}
       variants={carouselVariants}
     >
-      <motion.h2 
-        className="text-3xl font-bold mb-6 text-center"
-        variants={itemVariants}
-      >
-        Top 10 Movies Today
-      </motion.h2>
+        <motion.div 
+            className="text-center mb-6"
+            variants={itemVariants}
+        >
+            <h2 className="text-4xl font-black tracking-tighter flex items-center justify-center gap-x-1 sm:gap-x-2">
+                <span className="text-transparent text-outline-primary text-glow">TOP</span>
+                <span className="text-primary text-glow">10</span>
+                <span>MOVIES TODAY</span>
+            </h2>
+        </motion.div>
       
       <Carousel
         opts={{
           align: "start",
-          dragFree: true,
+          loop: true,
         }}
+        plugins={[autoplayPlugin.current]}
+        onMouseEnter={() => autoplayPlugin.current && autoplayPlugin.current.stop()}
+        onMouseLeave={() => autoplayPlugin.current && autoplayPlugin.current.play()}
         className="w-full"
       >
-        <CarouselContent className="-ml-12">
+        <CarouselContent className="-ml-20">
           {mediaItems.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
-              className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 pl-12"
+              className="basis-auto pl-20"
             >
               <motion.div 
                 variants={itemVariants} 
-                className="flex items-center group/item transition-transform duration-300 ease-in-out hover:!scale-105"
+                className="flex items-center group/item transition-transform duration-300 ease-in-out"
               >
-                <span className="text-[150px] font-black text-transparent transition-all duration-300 ease-in-out group-hover/item:text-primary" style={{ WebkitTextStroke: '2px hsl(var(--foreground) / 0.2)' }}>
+                <span 
+                  className="text-[200px] font-black text-transparent transition-all duration-300 ease-in-out group-hover/item:scale-110 group-hover/item:text-primary" 
+                  style={{ WebkitTextStroke: '3px hsl(var(--foreground) / 0.1)', textShadow: '0 0 15px hsl(var(--foreground) / 0.1)' }}
+                >
                     {index + 1}
                 </span>
                 <div className="-ml-8 w-[200px] z-10 transition-transform duration-300 ease-in-out group-hover/item:scale-110">
@@ -102,8 +134,8 @@ export function TopTenCarousel() {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <CarouselNext className="opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <CarouselPrevious className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 left-4" />
+        <CarouselNext className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 right-4" />
       </Carousel>
     </motion.section>
   );
