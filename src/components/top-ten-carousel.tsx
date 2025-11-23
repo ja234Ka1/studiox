@@ -32,8 +32,8 @@ export default function TopTenCarousel() {
 
   return (
     <section className="py-12 group/section">
-        <div className="container mx-auto px-4 md:px-8">
-            <div className="flex items-end gap-2 mb-6">
+        <div className="px-4 md:px-8 mb-6">
+            <div className="flex items-end gap-2">
                 <h2 className="text-8xl font-black tracking-tighter flex items-center">
                     <span className="text-transparent text-outline-white">TOP</span>
                     <span className="text-primary text-glow">10</span>
@@ -55,7 +55,7 @@ export default function TopTenCarousel() {
             onMouseLeave={plugin.current.reset}
             className="w-full"
         >
-            <CarouselContent className="-ml-4 md:ml-0 container">
+            <CarouselContent className="container -ml-4 md:ml-0">
             {items.map((item, index) => (
                 <CarouselItem
                     key={item.id}
