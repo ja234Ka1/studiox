@@ -59,7 +59,7 @@ export function TopTenCarousel() {
         onMouseEnter={plugin.current.stop}
         onMouseLeave={plugin.current.reset}
       >
-        <CarouselContent>
+        <CarouselContent className="-ml-8">
           {mediaItems.map((item, index) => (
             <CarouselItem
               key={item.id}
