@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { PlayCircle, VolumeX, Volume2, ListPlus, Check } from "lucide-react";
+import { PlayCircle, VolumeX, Volume2 } from "lucide-react";
 import { useState, useRef } from "react";
 import type { YouTubePlayer } from "react-youtube";
 import { useRouter } from "next/navigation";
@@ -15,7 +15,6 @@ import { Button } from "@/components/ui/button";
 import YouTubeEmbed from "./youtube-embed";
 import { useTheme, type StreamSource } from "@/context/theme-provider";
 import { StreamSourceDialog } from "./stream-source-dialog";
-import { useWatchlist } from "@/context/watchlist-provider";
 
 interface DetailPageHeroProps {
   item: MediaDetails;
@@ -28,7 +27,6 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
   const [isMuted, setIsMuted] = useState(true);
   const playerRef = useRef<YouTubePlayer | null>(null);
   const { dataSaver, setStreamSource } = useTheme();
-  const { addToWatchlist, isInWatchlist, removeFromWatchlist } = useWatchlist();
 
   const [showSourceDialog, setShowSourceDialog] = useState(false);
   
@@ -58,17 +56,6 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
       ? `/stream/tv/${item.id}?s=1&e=1`
       : `/stream/movie/${item.id}`;
     router.push(streamPath);
-  };
-  
-  const onWatchlist = isInWatchlist(item.id);
-
-  const handleWatchlistToggle = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onWatchlist) {
-      removeFromWatchlist(item.id);
-    } else {
-      addToWatchlist(item);
-    }
   };
 
   return (
@@ -146,10 +133,6 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
             <Button size="lg" onClick={() => setShowSourceDialog(true)}>
                 <PlayCircle className="mr-2" />
                 Watch
-            </Button>
-            <Button size="lg" variant="outline" onClick={handleWatchlistToggle}>
-              {onWatchlist ? <Check className="mr-2" /> : <ListPlus className="mr-2" />}
-              {onWatchlist ? 'On Watchlist' : 'Add to Watchlist'}
             </Button>
           </div>
         </motion.div>
