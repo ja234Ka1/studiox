@@ -57,25 +57,7 @@ const getAuthAndDb = () => {
 };
 
 
-export const isInWatchlist = async (mediaId: number): Promise<boolean> => {
-    const { user, firestore } = getAuthAndDb();
-
-    if (user && !user.isAnonymous && firestore) {
-        const docRef = doc(firestore, 'users', user.uid, 'watchlists', String(mediaId));
-        try {
-            const docSnap = await getDoc(docRef);
-            return docSnap.exists();
-        } catch (error) {
-            console.error("Error checking Firestore watchlist:", error);
-            return false;
-        }
-    } else {
-        const localWatchlist = getLocalWatchlist();
-        return localWatchlist.some(item => item.id === mediaId);
-    }
-};
-
-export const addToWatchlist = async (item: Media): Promise<void> => {
+export const addToWatchlist = (item: Media): void => {
     const { user, firestore } = getAuthAndDb();
     
     if (user && !user.isAnonymous && firestore) {
@@ -102,7 +84,7 @@ export const addToWatchlist = async (item: Media): Promise<void> => {
 };
 
 
-export const removeFromWatchlist = async (mediaId: number): Promise<void> => {
+export const removeFromWatchlist = (mediaId: number): void => {
     const { user, firestore } = getAuthAndDb();
 
     if (user && !user.isAnonymous && firestore) {
