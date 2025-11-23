@@ -2,7 +2,7 @@
 'use client'
 
 import { notFound, useParams, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import type { MediaType } from "@/types/tmdb";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -41,6 +41,14 @@ const dispatchProgressEvent = (key: string, data: any) => {
     window.dispatchEvent(new CustomEvent('willow-progress-change', { detail: { key, data } }));
 }
 
+
+// A simplified type for the data we track for saving progress
+interface PlayerState {
+  playing: boolean;
+  rawProgressData: any;
+}
+
+
 export default function StreamPage() {
   const params = useParams<{ mediaType: MediaType; id: string }>();
   const searchParams = useSearchParams();
@@ -50,16 +58,25 @@ export default function StreamPage() {
   const [isHovered, setIsHovered] = useState(false);
   
   const { mediaType, id } = params;
+  const playerStateRef = useRef<PlayerState | null>(null);
   
   const season = searchParams.get('s');
   const episode = searchParams.get('e');
+  const progressKey = `progress_${mediaType}_${id}`;
+
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
         const { origin, data } = event;
         if (!data) return;
 
-        const progressKey = `progress_${mediaType}_${id}`;
+        // Common handler for both sources to update the player state ref
+        const updatePlayerState = (isPlaying: boolean, progressData: any) => {
+             playerStateRef.current = {
+                playing: isPlaying,
+                rawProgressData: progressData
+             };
+        }
 
         // Handle 'Elite' source (vidify)
         const eliteOrigin = sourceConfig['Elite'].origin as string;
@@ -71,36 +88,55 @@ export default function StreamPage() {
                 season: season ? Number(season) : undefined,
                 episode: episode ? Number(episode) : undefined,
             };
+            // Vidify doesn't give a 'playing' state, so we assume playing on update
+            updatePlayerState(true, payload);
             dispatchProgressEvent(progressKey, payload);
             return;
         }
 
         // Handle 'Prime' source (vidfast)
         if (vidfastOrigins.includes(origin)) {
-            // Vidfast sends two types of events. We just grab the raw data and forward it.
-            // The continue-watching component will parse it intelligently.
+            let payload;
             if (data.type === 'PLAYER_EVENT' && data.data) {
-                // For prime, the data doesn't contain everything, so we make a synthetic object
-                const payload = {
-                    ...data.data,
-                    lastWatched: Date.now(),
-                    mediaType,
-                }
+                payload = { ...data.data, lastWatched: Date.now(), mediaType };
+                updatePlayerState(data.data.playing, payload);
                 dispatchProgressEvent(progressKey, payload);
             } else if (data.type === 'MEDIA_DATA' && data.data) {
-                // This event contains the full structure, but we just save it under our key
-                // and let the continue-watching component handle the complex object.
-                dispatchProgressEvent(progressKey, data.data);
+                payload = { ...data.data, mediaType };
+                 // Assume not playing on initial data load
+                updatePlayerState(false, payload);
+                dispatchProgressEvent(progressKey, payload);
             }
         }
     };
 
     window.addEventListener('message', handleMessage);
 
+    // Set up an interval to save progress every 5 seconds if playing
+    const intervalId = setInterval(() => {
+        if (playerStateRef.current?.playing && playerStateRef.current?.rawProgressData) {
+            const currentData = {
+                ...playerStateRef.current.rawProgressData,
+                lastWatched: Date.now(), // Always update timestamp
+            };
+            dispatchProgressEvent(progressKey, currentData);
+        }
+    }, 5000); // 5 seconds
+
     return () => {
       window.removeEventListener('message', handleMessage);
+      clearInterval(intervalId);
+      
+      // Save one last time when the user navigates away
+      if (playerStateRef.current?.rawProgressData) {
+        const finalData = {
+            ...playerStateRef.current.rawProgressData,
+            lastWatched: Date.now(),
+        };
+        dispatchProgressEvent(progressKey, finalData);
+      }
     };
-  }, [id, mediaType, season, episode]);
+  }, [id, mediaType, season, episode, progressKey]);
 
   if (mediaType !== "tv" && mediaType !== "movie") {
     notFound();
