@@ -64,9 +64,17 @@ export default function StreamPage() {
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       // Vidify handler for 'Elite' source
-      const vidifyOrigin = sourceConfig['Elite'].origin;
+      const vidifyOrigin = sourceConfig['Elite'].origin as string;
       if (event.origin === vidifyOrigin && event.data?.type === 'WATCH_PROGRESS') {
-        handleProgress(event.data.data);
+        const progressKey = `progress_${mediaType}_${id}`;
+        const progressPayload = {
+            ...event.data.data,
+            lastWatched: Date.now(),
+            mediaType,
+            season: season ? Number(season) : undefined,
+            episode: episode ? Number(episode) : undefined,
+        }
+        dispatchProgressEvent(progressKey, progressPayload);
         return;
       }
 
@@ -120,7 +128,7 @@ export default function StreamPage() {
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, [id, handleProgress]);
+  }, [id, mediaType, season, episode, handleProgress]);
 
   if (mediaType !== "tv" && mediaType !== "movie") {
     notFound();
