@@ -20,22 +20,18 @@ import { Card } from "./ui/card";
 import { Skeleton } from "./ui/skeleton";
 import { getMediaDetails } from "@/lib/tmdb";
 
-interface WatchProgress {
+// This is the UNIFIED/NORMALIZED data structure we will use internally
+interface NormalizedProgress {
+  id: string; // mediaId
+  mediaType: MediaType;
   currentTime: number;
   duration: number;
   lastWatched: number;
-  eventType: string;
-  mediaType: MediaType;
-  title?: string;
-  poster?: string;
-  watched_percentage?: number;
   season?: number;
   episode?: number;
-  episodeTitle?: string;
-  // Full media details might be added later
+  // Details fetched and added later
   details?: MediaDetails;
 }
-
 
 const carouselVariants = {
   hidden: { opacity: 0 },
@@ -59,61 +55,108 @@ const itemVariants = {
   },
 };
 
+/**
+ * Normalizes progress data from various sources (Prime, Elite) into a single format.
+ * @param key The localStorage key (e.g., 'progress_movie_12345')
+ * @param rawData The raw parsed JSON data from localStorage.
+ * @returns A NormalizedProgress object or null if invalid.
+ */
+const normalizeProgressData = (key: string, rawData: any): NormalizedProgress | null => {
+    if (!rawData || typeof rawData !== 'object') return null;
 
-const getWatchingItemsFromStorage = async (): Promise<[string, WatchProgress][]> => {
+    const keyParts = key.split('_');
+    const mediaType = keyParts[1] as MediaType;
+    const mediaId = keyParts[2];
+    
+    if ((mediaType !== 'movie' && mediaType !== 'tv') || !mediaId) return null;
+
+    let normalized: Partial<NormalizedProgress> = {
+        id: mediaId,
+        mediaType: mediaType,
+    };
+
+    // Detect 'Elite' source structure
+    if ('currentTime' in rawData && 'duration' in rawData && 'lastWatched' in rawData) {
+        normalized.currentTime = rawData.currentTime;
+        normalized.duration = rawData.duration;
+        normalized.lastWatched = rawData.lastWatched;
+        normalized.season = rawData.season;
+        normalized.episode = rawData.episode;
+    }
+    // Detect 'Prime' source structure
+    else if ('type' in rawData && 'progress' in rawData && 'last_updated' in rawData) {
+        const isMovie = rawData.type === 'movie';
+        const progress = isMovie 
+            ? rawData.progress 
+            : (rawData.show_progress?.[`s${rawData.last_season_watched}e${rawData.last_episode_watched}`]?.progress);
+        
+        if (!progress) return null;
+
+        normalized.currentTime = progress.watched;
+        normalized.duration = progress.duration;
+        normalized.lastWatched = rawData.last_updated;
+        normalized.season = rawData.last_season_watched;
+        normalized.episode = rawData.last_episode_watched;
+    } 
+    // This is a payload directly from the stream page message
+    else if (rawData.eventType) {
+        normalized.currentTime = rawData.currentTime;
+        normalized.duration = rawData.duration;
+        normalized.lastWatched = rawData.lastWatched;
+        normalized.season = rawData.season;
+        normalized.episode = rawData.episode;
+    }
+    else {
+        return null;
+    }
+
+    // Basic validation
+    if (normalized.currentTime === undefined || normalized.duration === undefined || normalized.duration <= 0) {
+        return null;
+    }
+
+    return normalized as NormalizedProgress;
+}
+
+
+const getWatchingItemsFromStorage = async (): Promise<NormalizedProgress[]> => {
     try {
         const keys = Object.keys(localStorage).filter(k => k.startsWith('progress_'));
-        const progressItemsPromises: Promise<[string, WatchProgress] | null>[] = keys.map(async key => {
+        const progressItemsPromises: Promise<NormalizedProgress | null>[] = keys.map(async key => {
             const item = localStorage.getItem(key);
             if (!item) return null;
             
-            const parsed = JSON.parse(item) as WatchProgress;
-            
-            // If details are already fetched, use them.
+            const parsed = JSON.parse(item);
+            const normalized = normalizeProgressData(key, parsed);
+
+            if (!normalized || (normalized.currentTime / normalized.duration) * 100 > 95) {
+                return null;
+            }
+
+            // If details are already fetched and cached in the object, use them.
             if (parsed.details) {
-                const mediaId = key.split('_')[2];
-                return [mediaId, parsed];
+                normalized.details = parsed.details;
+                return normalized;
             }
 
             // Fetch details if missing
-            const mediaType = parsed.mediaType;
-            const mediaId = key.split('_')[2];
-            const numericId = parseInt(mediaId, 10);
+            const numericId = parseInt(normalized.id, 10);
             if (isNaN(numericId)) return null;
 
-            const details = await getMediaDetails(numericId, mediaType);
+            const details = await getMediaDetails(numericId, normalized.mediaType);
+            normalized.details = details;
             
-            const updatedProgress: WatchProgress = {
-                ...parsed,
-                details,
-                title: details.title || details.name,
-                poster: details.poster_path,
-                watched_percentage: (parsed.currentTime / parsed.duration) * 100,
-            };
+            // Save back to localStorage with details for caching
+            const updatedDataToStore = { ...parsed, details };
+            localStorage.setItem(key, JSON.stringify(updatedDataToStore));
 
-            if (mediaType === 'tv' && details.seasons && parsed.season) {
-                const seasonData = details.seasons.find(s => s.season_number === parsed.season);
-                if (seasonData && parsed.episode) {
-                     const episodeData = seasonData.episodes?.find(e => e.episode_number === parsed.episode);
-                     updatedProgress.episodeTitle = episodeData?.name;
-                }
-            }
-            
-            // Save back to localStorage with details
-            localStorage.setItem(key, JSON.stringify(updatedProgress));
-
-            return [mediaId, updatedProgress];
+            return normalized;
         });
 
         const resolvedItems = await Promise.all(progressItemsPromises);
-        const validItems = resolvedItems.filter((item): item is [string, WatchProgress] => 
-            item !== null && 
-            item[1] !== null && 
-            item[1].duration > 0 && 
-            (item[1].watched_percentage ?? 0) < 95
-        );
+        const validItems = resolvedItems.filter((item): item is NormalizedProgress => item !== null);
       
-        const sortedItems = validItems.sort((a, b) => b[1].lastWatched - a[1].lastWatched);
+        const sortedItems = validItems.sort((a, b) => b.lastWatched - a.lastWatched);
             
         return sortedItems;
     } catch (error) {
@@ -123,15 +166,20 @@ const getWatchingItemsFromStorage = async (): Promise<[string, WatchProgress][]>
 }
 
 
-const ContinueWatchingCard = ({ item, mediaId }: { item: WatchProgress, mediaId: string }) => {
+const ContinueWatchingCard = ({ item }: { item: NormalizedProgress }) => {
   if (!item.details) return null;
 
-  let streamPath = `/stream/${item.mediaType}/${mediaId}`;
-  let subTitle = "Resume Watching";
+  const watchedPercentage = (item.currentTime / item.duration) * 100;
+  let streamPath = `/stream/${item.mediaType}/${item.id}`;
+  let subTitle = `Resume Watching`;
 
   if (item.mediaType === 'tv' && item.season && item.episode) {
     streamPath += `?s=${item.season}&e=${item.episode}`;
-    subTitle = `S${item.season} E${item.episode}: ${item.episodeTitle || ''}`;
+    const episodeTitle = item.details.seasons
+                            ?.find(s => s.season_number === item.season)
+                            // @ts-ignore private api
+                            ?.episodes?.find(e => e.episode_number === item.episode)?.name;
+    subTitle = `S${item.season} E${item.episode}${episodeTitle ? `: ${episodeTitle}` : ''}`;
   }
 
   return (
@@ -139,7 +187,7 @@ const ContinueWatchingCard = ({ item, mediaId }: { item: WatchProgress, mediaId:
         <Card className="relative aspect-video w-full rounded-md overflow-hidden shadow-md">
             <Image
                 src={getTmdbImageUrl(item.details.backdrop_path, 'w500')}
-                alt={item.title || ''}
+                alt={item.details.title || item.details.name || ''}
                 fill
                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -149,11 +197,11 @@ const ContinueWatchingCard = ({ item, mediaId }: { item: WatchProgress, mediaId:
                 <PlayCircle className="w-12 h-12 text-white/80" />
             </div>
             <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
-                <h3 className="font-bold truncate text-sm">{item.title}</h3>
+                <h3 className="font-bold truncate text-sm">{item.details.title || item.details.name}</h3>
                 <p className="text-xs text-white/70 truncate">{subTitle}</p>
             </div>
             <div className="absolute bottom-0 left-0 right-0">
-                <Progress value={item.watched_percentage} className="h-1 bg-white/20 border-0" />
+                <Progress value={watchedPercentage} className="h-1 bg-white/20 border-0" />
             </div>
         </Card>
     </LoadingLink>
@@ -162,10 +210,11 @@ const ContinueWatchingCard = ({ item, mediaId }: { item: WatchProgress, mediaId:
 
 
 export default function ContinueWatching() {
-  const [watchingItems, setWatchingItems] = React.useState<[string, WatchProgress][]>([]);
+  const [watchingItems, setWatchingItems] = React.useState<NormalizedProgress[]>([]);
   const [loading, setLoading] = React.useState(true);
 
   const loadProgress = React.useCallback(async () => {
+    setLoading(true);
     const items = await getWatchingItemsFromStorage();
     setWatchingItems(items);
     setLoading(false);
@@ -174,8 +223,12 @@ export default function ContinueWatching() {
   React.useEffect(() => {
     loadProgress();
     
-    const handleProgressChange = (e: StorageEvent | CustomEvent) => {
-        loadProgress();
+    const handleProgressChange = (e: Event) => {
+        // This event can be a standard StorageEvent or our custom event
+        const customEvent = e as CustomEvent;
+        if ((e as StorageEvent).key?.startsWith('progress_') || customEvent.detail?.key?.startsWith('progress_')) {
+            loadProgress();
+        }
     }
 
     window.addEventListener('storage', handleProgressChange);
@@ -233,13 +286,13 @@ export default function ContinueWatching() {
         className="w-full"
       >
         <CarouselContent className="-ml-2">
-          {watchingItems.map(([mediaId, item]) => (
+          {watchingItems.map((item) => (
             <CarouselItem
-              key={mediaId}
+              key={item.id}
               className="basis-2/3 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5 pl-4 pr-2"
             >
               <motion.div layout variants={itemVariants}>
-                <ContinueWatchingCard mediaId={mediaId} item={item} />
+                <ContinueWatchingCard item={item} />
               </motion.div>
             </CarouselItem>
           ))}

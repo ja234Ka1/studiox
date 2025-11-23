@@ -32,9 +32,13 @@ const sourceConfig: Record<StreamSource, { movie: string, tv: string, origin: st
     },
 }
 
+/**
+ * Dispatches a custom event with progress data so other components can listen.
+ * It also saves the raw data to localStorage for persistence.
+ */
 const dispatchProgressEvent = (key: string, data: any) => {
     localStorage.setItem(key, JSON.stringify(data));
-    window.dispatchEvent(new CustomEvent('willow-progress-change', { detail: { key } }));
+    window.dispatchEvent(new CustomEvent('willow-progress-change', { detail: { key, data } }));
 }
 
 export default function StreamPage() {
@@ -50,77 +54,39 @@ export default function StreamPage() {
   const season = searchParams.get('s');
   const episode = searchParams.get('e');
 
-  const handleProgress = useCallback((data: any) => {
-    const progressKey = `progress_${mediaType}_${id}`;
-    let progressData: any = {
-      ...data,
-      mediaType,
-      season,
-      episode
-    };
-    dispatchProgressEvent(progressKey, progressData);
-  }, [mediaType, id, season, episode]);
-  
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      // Vidify handler for 'Elite' source
-      const vidifyOrigin = sourceConfig['Elite'].origin as string;
-      if (event.origin === vidifyOrigin && event.data?.type === 'WATCH_PROGRESS') {
+        const { origin, data } = event;
+        if (!data) return;
+
         const progressKey = `progress_${mediaType}_${id}`;
-        const progressPayload = {
-            ...event.data.data,
-            lastWatched: Date.now(),
-            mediaType,
-            season: season ? Number(season) : undefined,
-            episode: episode ? Number(episode) : undefined,
-        }
-        dispatchProgressEvent(progressKey, progressPayload);
-        return;
-      }
 
-      // Vidfast handler for 'Prime' source
-      if (vidfastOrigins.includes(event.origin) && event.data) {
-        let progressPayload;
-
-        if (event.data.type === 'PLAYER_EVENT' && event.data.data) {
-            const d = event.data.data;
-            progressPayload = {
-                currentTime: d.currentTime,
-                duration: d.duration,
+        // Handle 'Elite' source (vidify)
+        const eliteOrigin = sourceConfig['Elite'].origin as string;
+        if (origin === eliteOrigin && data.type === 'WATCH_PROGRESS') {
+            const payload = {
+                ...data.data,
                 lastWatched: Date.now(),
-                eventType: d.event,
-                mediaType: d.mediaType,
-                season: d.season,
-                episode: d.episode,
+                mediaType,
+                season: season ? Number(season) : undefined,
+                episode: episode ? Number(episode) : undefined,
             };
-        } else if (event.data.type === 'MEDIA_DATA' && event.data.data) {
-            const d = event.data.data;
-            const isMovie = d.type === 'movie';
-            const progress = isMovie 
-                ? d.progress 
-                : (d.show_progress?.[`s${d.last_season_watched}e${d.last_episode_watched}`]?.progress);
-
-            if (!progress) return;
-
-            progressPayload = {
-                currentTime: progress.watched,
-                duration: progress.duration,
-                lastWatched: d.last_updated,
-                eventType: 'timeupdate',
-                mediaType: d.type,
-                title: d.title,
-                poster: d.poster_path,
-                backdrop: d.backdrop_path,
-                season: d.last_season_watched,
-                episode: d.last_episode_watched,
-            };
+            dispatchProgressEvent(progressKey, payload);
+            return;
         }
 
-        if (progressPayload) {
-            const progressKey = `progress_${progressPayload.mediaType}_${id}`;
-            dispatchProgressEvent(progressKey, progressPayload);
+        // Handle 'Prime' source (vidfast)
+        if (vidfastOrigins.includes(origin)) {
+            // Vidfast sends two types of events. We just grab the raw data and forward it.
+            // The continue-watching component will parse it intelligently.
+            if (data.type === 'PLAYER_EVENT' && data.data) {
+                dispatchProgressEvent(progressKey, data.data);
+            } else if (data.type === 'MEDIA_DATA' && data.data) {
+                // This event contains the full structure, but we just save it under our key
+                // and let the continue-watching component handle the complex object.
+                dispatchProgressEvent(progressKey, data.data);
+            }
         }
-      }
     };
 
     window.addEventListener('message', handleMessage);
@@ -128,7 +94,7 @@ export default function StreamPage() {
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, [id, mediaType, season, episode, handleProgress]);
+  }, [id, mediaType, season, episode]);
 
   if (mediaType !== "tv" && mediaType !== "movie") {
     notFound();
