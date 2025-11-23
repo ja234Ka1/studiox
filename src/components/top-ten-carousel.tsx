@@ -73,11 +73,11 @@ export default function TopTenCarousel() {
                 <div className="flex items-center transition-transform duration-300 ease-in-out group-hover:scale-105">
                     <span 
                         style={{ WebkitTextStroke: '3px hsl(var(--primary))' }}
-                        className="text-[200px] font-black text-transparent transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:text-glow"
+                        className="mr-4 text-[200px] font-black text-transparent transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:text-primary"
                     >
                         {index + 1}
                     </span>
-                    <div className="w-full shrink-0 transition-transform duration-300 ease-in-out group-hover:scale-110 -ml-8">
+                    <div className="w-full shrink-0 transition-transform duration-300 ease-in-out group-hover:scale-110">
                         <MediaCard item={item} />
                     </div>
                 </div>
