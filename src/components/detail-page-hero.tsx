@@ -3,19 +3,18 @@
 
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { PlayCircle, VolumeX, Volume2, Bookmark, BookmarkCheck, Loader2 } from "lucide-react";
-import { useState, useRef, useCallback } from "react";
+import { PlayCircle, VolumeX, Volume2 } from "lucide-react";
+import { useState, useRef } from "react";
 import type { YouTubePlayer } from "react-youtube";
 import { useRouter } from "next/navigation";
 
 import type { MediaDetails } from "@/types/tmdb";
-import { getTmdbImageUrl, cn } from "@/lib/utils";
+import { getTmdbImageUrl } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import YouTubeEmbed from "./youtube-embed";
 import { useTheme, type StreamSource } from "@/context/theme-provider";
 import { StreamSourceDialog } from "./stream-source-dialog";
-import { useWatchlist } from "@/context/watchlist-provider";
 
 interface DetailPageHeroProps {
   item: MediaDetails;
@@ -29,11 +28,6 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
   const playerRef = useRef<YouTubePlayer | null>(null);
   const { dataSaver, setStreamSource } = useTheme();
   const [showSourceDialog, setShowSourceDialog] = useState(false);
-  
-  const { isInWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
-  const [isWatchlistLoading, setIsWatchlistLoading] = useState(false);
-
-  const onWatchlist = isInWatchlist(item.id);
   
   const title = item.title || item.name;
   const releaseDate = item.release_date || item.first_air_date;
@@ -61,21 +55,6 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
       : `/stream/movie/${item.id}`;
     router.push(streamPath);
   };
-
-  const handleToggleWatchlist = useCallback(async () => {
-    setIsWatchlistLoading(true);
-    if (onWatchlist) {
-      removeFromWatchlist(item.id);
-    } else {
-      // Manually add media_type if it's missing on the detail item
-      const itemWithMediaType = { ...item, media_type: item.media_type || (item.title ? 'movie' : 'tv') };
-      addToWatchlist(itemWithMediaType);
-    }
-    // The loading state will be reset implicitly when the watchlist context updates,
-    // but we can set a timeout as a fallback.
-    setTimeout(() => setIsWatchlistLoading(false), 1500);
-  }, [onWatchlist, addToWatchlist, removeFromWatchlist, item]);
-
 
   return (
     <>
@@ -152,21 +131,6 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
             <Button size="lg" onClick={() => setShowSourceDialog(true)}>
                 <PlayCircle className="mr-2" />
                 Watch
-            </Button>
-            <Button
-              size="lg"
-              variant="secondary"
-              onClick={handleToggleWatchlist}
-              disabled={isWatchlistLoading}
-            >
-              {isWatchlistLoading ? (
-                <Loader2 className="mr-2 animate-spin" />
-              ) : onWatchlist ? (
-                <BookmarkCheck className="mr-2" />
-              ) : (
-                <Bookmark className="mr-2" />
-              )}
-              {onWatchlist ? 'On Watchlist' : 'Add to Watchlist'}
             </Button>
           </div>
         </motion.div>
