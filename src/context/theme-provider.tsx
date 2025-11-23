@@ -110,14 +110,10 @@ export function ThemeProvider({
     streamSource,
     setStreamSource: (source: StreamSource) => setStreamSource(source),
   };
-
-  if (!isMounted) {
-    return null;
-  }
   
   return (
     <ThemeProviderContext.Provider value={value}>
-      <div key={theme}>{children}</div>
+      {children}
     </ThemeProviderContext.Provider>
   )
 }
