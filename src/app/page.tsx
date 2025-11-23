@@ -133,7 +133,7 @@ export default function Home() {
           </div>
         )}
 
-        {!error && !isLoading && (
+        {!isLoading && !error && (
           <div className="space-y-16">
             <ContinueWatching />
             
