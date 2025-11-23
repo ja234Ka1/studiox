@@ -80,7 +80,13 @@ export default function StreamPage() {
             // Vidfast sends two types of events. We just grab the raw data and forward it.
             // The continue-watching component will parse it intelligently.
             if (data.type === 'PLAYER_EVENT' && data.data) {
-                dispatchProgressEvent(progressKey, data.data);
+                // For prime, the data doesn't contain everything, so we make a synthetic object
+                const payload = {
+                    ...data.data,
+                    lastWatched: Date.now(),
+                    mediaType,
+                }
+                dispatchProgressEvent(progressKey, payload);
             } else if (data.type === 'MEDIA_DATA' && data.data) {
                 // This event contains the full structure, but we just save it under our key
                 // and let the continue-watching component handle the complex object.

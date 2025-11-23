@@ -75,15 +75,15 @@ const normalizeProgressData = (key: string, rawData: any): NormalizedProgress | 
         mediaType: mediaType,
     };
 
-    // Detect 'Elite' source structure
-    if ('currentTime' in rawData && 'duration' in rawData && 'lastWatched' in rawData) {
+    // Detect 'Elite' source structure (vidify)
+    if ('currentTime' in rawData && 'duration' in rawData && 'lastWatched' in rawData && 'watched_percentage' in rawData) {
         normalized.currentTime = rawData.currentTime;
         normalized.duration = rawData.duration;
         normalized.lastWatched = rawData.lastWatched;
         normalized.season = rawData.season;
         normalized.episode = rawData.episode;
     }
-    // Detect 'Prime' source structure
+    // Detect 'Prime' source structure (vidfast) from MEDIA_DATA event
     else if ('type' in rawData && 'progress' in rawData && 'last_updated' in rawData) {
         const isMovie = rawData.type === 'movie';
         const progress = isMovie 
@@ -98,16 +98,21 @@ const normalizeProgressData = (key: string, rawData: any): NormalizedProgress | 
         normalized.season = rawData.last_season_watched;
         normalized.episode = rawData.last_episode_watched;
     } 
-    // This is a payload directly from the stream page message
-    else if (rawData.eventType) {
+    // Detect synthetic 'Prime' source structure (vidfast) from PLAYER_EVENT
+    else if ('event' in rawData && 'currentTime' in rawData && 'duration' in rawData) {
         normalized.currentTime = rawData.currentTime;
         normalized.duration = rawData.duration;
-        normalized.lastWatched = rawData.lastWatched;
+        normalized.lastWatched = rawData.lastWatched || Date.now();
         normalized.season = rawData.season;
         normalized.episode = rawData.episode;
     }
     else {
-        return null;
+        return null; // Unrecognized format
+    }
+
+    // Add details if they are already in the cached object
+    if (rawData.details) {
+        normalized.details = rawData.details;
     }
 
     // Basic validation
@@ -121,34 +126,36 @@ const normalizeProgressData = (key: string, rawData: any): NormalizedProgress | 
 
 const getWatchingItemsFromStorage = async (): Promise<NormalizedProgress[]> => {
     try {
+        if (typeof window === 'undefined') return [];
         const keys = Object.keys(localStorage).filter(k => k.startsWith('progress_'));
+        
         const progressItemsPromises: Promise<NormalizedProgress | null>[] = keys.map(async key => {
             const item = localStorage.getItem(key);
             if (!item) return null;
             
             const parsed = JSON.parse(item);
-            const normalized = normalizeProgressData(key, parsed);
+            let normalized = normalizeProgressData(key, parsed);
 
             if (!normalized || (normalized.currentTime / normalized.duration) * 100 > 95) {
                 return null;
             }
 
-            // If details are already fetched and cached in the object, use them.
-            if (parsed.details) {
-                normalized.details = parsed.details;
-                return normalized;
+            // If details are missing, fetch them
+            if (!normalized.details) {
+                const numericId = parseInt(normalized.id, 10);
+                if (isNaN(numericId)) return null;
+
+                try {
+                    const details = await getMediaDetails(numericId, normalized.mediaType);
+                    normalized.details = details;
+                    // Save back to localStorage with details for caching
+                    const updatedDataToStore = { ...parsed, details };
+                    localStorage.setItem(key, JSON.stringify(updatedDataToStore));
+                } catch (fetchError) {
+                    console.error(`Failed to fetch details for ${normalized.mediaType} ${normalized.id}:`, fetchError);
+                    return null; // Don't include items we can't get details for
+                }
             }
-
-            // Fetch details if missing
-            const numericId = parseInt(normalized.id, 10);
-            if (isNaN(numericId)) return null;
-
-            const details = await getMediaDetails(numericId, normalized.mediaType);
-            normalized.details = details;
-            
-            // Save back to localStorage with details for caching
-            const updatedDataToStore = { ...parsed, details };
-            localStorage.setItem(key, JSON.stringify(updatedDataToStore));
 
             return normalized;
         });
@@ -175,12 +182,12 @@ const ContinueWatchingCard = ({ item }: { item: NormalizedProgress }) => {
 
   if (item.mediaType === 'tv' && item.season && item.episode) {
     streamPath += `?s=${item.season}&e=${item.episode}`;
-    const episodeTitle = item.details.seasons
-                            ?.find(s => s.season_number === item.season)
-                            // @ts-ignore private api
-                            ?.episodes?.find(e => e.episode_number === item.episode)?.name;
+    // @ts-ignore private api
+    const episodeTitle = item.details.seasons?.find(s => s.season_number === item.season)?.episodes?.find(e => e.episode_number === item.episode)?.name;
+    
     subTitle = `S${item.season} E${item.episode}${episodeTitle ? `: ${episodeTitle}` : ''}`;
   }
+
 
   return (
     <LoadingLink href={streamPath} className="group block">

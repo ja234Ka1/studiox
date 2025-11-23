@@ -1,5 +1,6 @@
 
 
+
 import { type ToastProps } from "@/components/ui/toast"
 
 
@@ -101,6 +102,7 @@ export interface Season {
     poster_path: string;
     season_number: number;
     vote_average: number;
+    episodes?: Episode[];
 }
 
 export interface Episode {
@@ -137,4 +139,3 @@ export interface PersonDetails {
 }
 
 export type Toast = Omit<import("@/hooks/use-toast").Toast, "id">;
-
