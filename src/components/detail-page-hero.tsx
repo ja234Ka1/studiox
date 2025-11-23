@@ -1,10 +1,10 @@
 
-"use client";
+'use client';
 
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlayCircle, VolumeX, Volume2, Bookmark, BookmarkCheck, Loader2 } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, lazy, Suspense } from "react";
 import type { YouTubePlayer } from "react-youtube";
 import { useRouter } from "next/navigation";
 
@@ -12,10 +12,11 @@ import type { MediaDetails } from "@/types/tmdb";
 import { getTmdbImageUrl } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import YouTubeEmbed from "./youtube-embed";
 import { useTheme, type StreamSource } from "@/context/theme-provider";
 import { StreamSourceDialog } from "./stream-source-dialog";
 import { useWatchlist } from "@/context/watchlist-provider";
+import YouTubeEmbedDynamic from "./youtube-embed-dynamic";
+
 
 interface DetailPageHeroProps {
   item: MediaDetails;
@@ -134,7 +135,7 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
                 transition={{ duration: 0.5 }}
                 className="absolute inset-0"
               >
-                  <YouTubeEmbed 
+                  <YouTubeEmbedDynamic
                     playerRef={playerRef}
                     videoId={trailer.key} 
                     isMuted={isMuted}
