@@ -60,16 +60,16 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
     router.push(streamPath);
   };
   
+  const onWatchlist = isInWatchlist(item.id);
+
   const handleWatchlistToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isInWatchlist(item.id)) {
+    if (onWatchlist) {
       removeFromWatchlist(item.id);
     } else {
       addToWatchlist(item);
     }
   };
-  
-  const onWatchlist = isInWatchlist(item.id);
 
   return (
     <>
