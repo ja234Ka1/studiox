@@ -8,7 +8,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Clapperboard } from "lucide-react";
 import type { Media } from "@/types/tmdb";
 import ContinueWatching from "@/components/continue-watching";
-import TopTenCarousel from "@/components/top-ten-carousel";
 import PlatformCarousel from "@/components/platform-carousel";
 import { FeaturedContent } from "@/components/featured-content";
 
@@ -80,7 +79,6 @@ export default async function Home() {
   
   const heroItems = trendingWeekly.slice(0, 5);
   const heroFallbackImage = PlaceHolderImages.find(p => p.id === 'hero-fallback');
-  const topTenMovies = categories.find(c => c.title === 'Trending Movies Today')?.items.slice(0, 10) || [];
 
   return (
     <div className="flex flex-col">
@@ -121,8 +119,6 @@ export default async function Home() {
           <div className="space-y-16">
             <ContinueWatching />
             
-            {topTenMovies.length > 0 && <TopTenCarousel title="Top 10 Movies Today" items={topTenMovies} />}
-
             {trendingWeekly.length > 0 && (
               <MediaCarousel title="Trending This Week" items={trendingWeekly} />
             )}
