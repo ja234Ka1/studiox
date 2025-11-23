@@ -66,7 +66,7 @@ export default function TopTenCarousel() {
             <CarouselItem
               key={item.id}
               className={cn(
-                "group pl-8 sm:pl-12 md:pl-16 lg:pl-20",
+                "group px-8",
                 "basis-2/5 sm:basis-1/3 md:basis-1/4 lg:basis-1/5"
               )}
             >
@@ -74,7 +74,7 @@ export default function TopTenCarousel() {
                     <span 
                         style={{ WebkitTextStroke: '3px hsl(var(--primary))' }}
                         className={cn(
-                            "text-[120px] font-black text-transparent transition-all duration-300 ease-in-out group-hover:text-primary mr-2"
+                            "text-[200px] font-black text-transparent transition-all duration-300 ease-in-out group-hover:text-primary group-hover:text-glow -mr-2"
                         )}
                     >
                         {index + 1}
