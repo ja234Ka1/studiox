@@ -2,11 +2,12 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode, useMemo } from 'react';
-import type { Media } from '@/types/tmdb';
+import type { Media, MediaDetails } from '@/types/tmdb';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { getLocalWatchlist, addToWatchlist as writeToWatchlist, removeFromWatchlist as deleteFromWatchlist, mergeLocalWatchlistToFirebase } from '@/lib/userData';
 import { collection } from 'firebase/firestore';
 import { useNotification } from './notification-provider';
+import { getMediaDetails } from '@/lib/tmdb';
 
 interface WatchlistContextType {
   watchlist: Media[];
@@ -17,6 +18,8 @@ interface WatchlistContextType {
 }
 
 const WatchlistContext = createContext<WatchlistContextType | undefined>(undefined);
+
+const WATCH_DATA_KEY = 'willow-tv-watch-data';
 
 export function WatchlistProvider({ children }: { children: ReactNode }) {
   const { user, isUserLoading } = useUser();
@@ -77,18 +80,44 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
     return optimisticWatchlist.some(item => item.id === mediaId);
   }, [optimisticWatchlist]);
 
-  const addToWatchlist = useCallback((item: Media) => {
+  const addToWatchlist = useCallback(async (item: Media) => {
     if (isInWatchlist(item.id)) {
       showNotification(item, 'exists');
       return;
     }
 
+    let fullItem = item;
+    // If it's a TV show, fetch full details to get episode count
+    if (item.media_type === 'tv') {
+        try {
+            const details = await getMediaDetails(item.id, 'tv');
+            const watchData = { id: item.id, lastKnownEpisodeCount: details.number_of_episodes || 0 };
+            
+            // Save to TV watch data storage
+            const currentData = JSON.parse(localStorage.getItem(WATCH_DATA_KEY) || '[]');
+            const existingIndex = currentData.findIndex((d: {id: number}) => d.id === item.id);
+            if (existingIndex > -1) {
+                currentData[existingIndex] = watchData;
+            } else {
+                currentData.push(watchData);
+            }
+            localStorage.setItem(WATCH_DATA_KEY, JSON.stringify(currentData));
+            window.dispatchEvent(new CustomEvent('willow-storage-change', { detail: { key: WATCH_DATA_KEY } }));
+
+            fullItem = { ...item, ...details };
+
+        } catch (error) {
+            console.error("Could not fetch TV details on add to watchlist", error);
+        }
+    }
+
+
     // Optimistically update UI
-    setOptimisticWatchlist(prev => [item, ...prev]);
+    setOptimisticWatchlist(prev => [fullItem, ...prev]);
     showNotification(item, 'added');
     
     // Persist change in the background
-    writeToWatchlist(item);
+    writeToWatchlist(fullItem);
 
   }, [isInWatchlist, showNotification]);
 

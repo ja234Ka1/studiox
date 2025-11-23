@@ -15,6 +15,7 @@ import { useTheme } from "@/context/theme-provider";
 import { LoginPromptDialog } from "@/components/login-prompt-dialog";
 import { WatchlistNotification } from "@/components/watchlist-notification";
 import { BackToTopButton } from "@/components/back-to-top-button";
+import { NewEpisodeNotifier } from "@/components/new-episode-notifier";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -37,6 +38,7 @@ function ThemedBodyContent({ children }: { children: ReactNode }) {
         <VideoPlayer />
         <LoginPromptDialog />
         <WatchlistNotification />
+        <NewEpisodeNotifier />
         <BackToTopButton />
       </>
   );
