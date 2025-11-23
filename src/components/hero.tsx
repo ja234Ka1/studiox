@@ -23,17 +23,17 @@ const contentVariants = {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.6,
+      duration: 0.8,
       ease: [0.4, 0, 0.2, 1],
-      staggerChildren: 0.1,
-      delayChildren: 0.3,
+      staggerChildren: 0.08,
+      delayChildren: 0.4,
     },
   },
 };
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+  visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100, damping: 20 } },
 };
 
 function HeroContent({ item }: { item: Media }) {
@@ -105,6 +105,7 @@ function HeroThumbnailNav({ items, currentIndex, onSelect }: { items: Media[], c
                                 flex: currentIndex === index ? '1 1 150px' : '1 1 80px',
                             }}
                             whileHover={{ scale: 1.05 }}
+                            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                         >
                             <Image
                                 src={getTmdbImageUrl(item.poster_path, 'w500')}
@@ -157,23 +158,28 @@ export function Hero({ items }: HeroProps) {
   }
 
   return (
-    <div className="relative w-full h-[70vh] lg:h-[90vh] flex flex-col justify-center">
+    <div className="relative w-full h-[70vh] lg:h-[90vh] flex flex-col justify-center overflow-hidden">
       <AnimatePresence initial={false}>
         <motion.div
           key={activeItem.id}
-          initial={{ opacity: 0, scale: 1.05 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1.5, ease: "easeInOut" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, scale: 1.05, transition: { duration: 1.5, ease: "easeInOut" } }}
+          exit={{ opacity: 0, transition: { duration: 1, ease: 'easeOut' } }}
           className="absolute inset-0"
         >
-          <Image
-            src={getTmdbImageUrl(activeItem.backdrop_path, "original")}
-            alt={activeItem.title || activeItem.name || "Hero backdrop"}
-            fill
-            priority
-            className="object-cover"
-          />
+          <motion.div
+            className="w-full h-full"
+            initial={{ scale: 1, x: 0 }}
+            animate={{ scale: 1.1, x: '-2%', transition: { duration: 12, ease: "easeInOut", delay: 1 } }}
+          >
+            <Image
+              src={getTmdbImageUrl(activeItem.backdrop_path, "original")}
+              alt={activeItem.title || activeItem.name || "Hero backdrop"}
+              fill
+              priority
+              className="object-cover"
+            />
+          </motion.div>
         </motion.div>
       </AnimatePresence>
       
