@@ -48,7 +48,13 @@ export default function TopTenCarousel() {
             >
                 TOP
             </span>
-            <span className="text-7xl font-black text-primary group-hover/section:text-glow">10</span>
+            <span className={cn(
+                "text-7xl font-black text-primary",
+                "group-hover/section:text-glow"
+                )}
+            >
+                10
+            </span>
             <span className="text-xl font-semibold text-muted-foreground">MOVIES TODAY</span>
         </h2>
       </div>
@@ -66,7 +72,7 @@ export default function TopTenCarousel() {
             <CarouselItem
               key={item.id}
               className={cn(
-                "group pl-6",
+                "group pl-12",
                 "basis-1/3 sm:basis-1/4 md:basis-1/5 lg:basis-1/6"
               )}
             >
