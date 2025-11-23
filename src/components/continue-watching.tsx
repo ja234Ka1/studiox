@@ -206,7 +206,7 @@ const ContinueWatchingCard = ({ item, onRemove }: { item: NormalizedProgress, on
                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                 className="object-cover transition-transform duration-300 group-hover/card:scale-105"
             />
-             <AnimatePresence>
+            <AnimatePresence>
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
