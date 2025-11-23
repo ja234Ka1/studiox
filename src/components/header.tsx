@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Film, ListVideo, Menu, Search, Settings, Tv, MessageCircle, Medal } from "lucide-react";
+import { Film, ListVideo, Menu, Search, Settings, Tv, MessageCircle } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 
@@ -16,7 +16,6 @@ import { StreamSourceDialog } from "./stream-source-dialog";
 const navItems = [
   { href: "/tv-shows", label: "Shows", icon: Tv },
   { href: "/movies", label: "Movies", icon: Film },
-  { href: "/sports", label: "Sports", icon: Medal },
   { href: "/watchlist", label: "Watchlist", icon: ListVideo },
   { href: "/chat", label: "Chat", icon: MessageCircle },
 ];
@@ -27,7 +26,7 @@ export function Header() {
   const [isSourceDialogOpen, setIsSourceDialogOpen] = useState(false);
   const pathname = usePathname();
 
-  const isStreamPage = pathname.startsWith('/stream') || pathname.startsWith('/sports/stream');
+  const isStreamPage = pathname.startsWith('/stream');
 
   useEffect(() => {
     const handleScroll = () => {
