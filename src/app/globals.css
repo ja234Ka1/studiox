@@ -256,6 +256,10 @@
       transform: translate(20%, calc(100vh - 80%)) scale(1.2);
     }
   }
+
+  .button-bg-pan {
+    @apply bg-gradient-to-r from-primary via-accent to-primary bg-[200%_auto] transition-all duration-500 hover:bg-right;
+  }
 }
 
 @layer components {
