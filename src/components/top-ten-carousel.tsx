@@ -49,8 +49,8 @@ export default function TopTenCarousel() {
                 TOP
             </span>
             <span className={cn(
-                "text-7xl font-black text-primary",
-                "group-hover/section:text-glow"
+                "text-7xl font-black",
+                "group-hover/section:text-glow text-primary"
                 )}
             >
                 10
@@ -72,7 +72,7 @@ export default function TopTenCarousel() {
             <CarouselItem
               key={item.id}
               className={cn(
-                "group pl-12",
+                "group pl-24",
                 "basis-1/3 sm:basis-1/4 md:basis-1/5 lg:basis-1/6"
               )}
             >
@@ -80,7 +80,8 @@ export default function TopTenCarousel() {
                     <span 
                         style={{ WebkitTextStroke: '3px hsl(var(--primary))' }}
                         className={cn(
-                            "text-[200px] font-black text-transparent transition-all duration-300 ease-in-out group-hover:text-primary -mr-2"
+                            "text-[200px] font-black transition-all duration-300 ease-in-out -mr-2",
+                            "text-transparent group-hover:text-primary"
                         )}
                     >
                         {index + 1}
