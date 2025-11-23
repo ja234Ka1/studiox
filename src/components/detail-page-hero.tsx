@@ -3,8 +3,8 @@
 
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { PlayCircle, VolumeX, Volume2 } from "lucide-react";
-import { useState, useRef } from "react";
+import { PlayCircle, VolumeX, Volume2, Bookmark, BookmarkCheck, Loader2 } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import type { YouTubePlayer } from "react-youtube";
 import { useRouter } from "next/navigation";
 
@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import YouTubeEmbed from "./youtube-embed";
 import { useTheme, type StreamSource } from "@/context/theme-provider";
 import { StreamSourceDialog } from "./stream-source-dialog";
+import { useWatchlist } from "@/context/watchlist-provider";
 
 interface DetailPageHeroProps {
   item: MediaDetails;
@@ -28,6 +29,15 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
   const playerRef = useRef<YouTubePlayer | null>(null);
   const { dataSaver, setStreamSource } = useTheme();
   const [showSourceDialog, setShowSourceDialog] = useState(false);
+
+  const { isInWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
+  const [isWatchlistLoading, setIsWatchlistLoading] = useState(false);
+  const onWatchlist = isInWatchlist(item.id);
+
+  useEffect(() => {
+    // When the onWatchlist status changes (via context), operation is complete.
+    setIsWatchlistLoading(false);
+  }, [onWatchlist]);
   
   const title = item.title || item.name;
   const releaseDate = item.release_date || item.first_air_date;
@@ -45,6 +55,9 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
   const handleMouseLeave = () => {
     setShowTrailer(false);
     setIsMuted(true); // Always reset to muted when preview ends
+    if (playerRef.current) {
+        playerRef.current.mute();
+    }
   };
 
   const handleSelectSource = (source: StreamSource) => {
@@ -55,6 +68,34 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
       : `/stream/movie/${item.id}`;
     router.push(streamPath);
   };
+  
+  const handleToggleMute = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!playerRef.current) return;
+    
+    const currentlyMuted = !isMuted;
+    setIsMuted(currentlyMuted);
+    
+    if (currentlyMuted) {
+      playerRef.current.mute();
+    } else {
+      playerRef.current.unMute();
+    }
+  };
+
+  const handleToggleWatchlist = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setIsWatchlistLoading(true);
+    if (onWatchlist) {
+      removeFromWatchlist(item.id);
+    } else {
+      // The detail page has the full item, so pass it directly
+      const mediaItem: MediaDetails = item;
+      addToWatchlist(mediaItem);
+    }
+  };
+
 
   return (
     <>
@@ -94,6 +135,7 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
                 className="absolute inset-0"
               >
                   <YouTubeEmbed 
+                    playerRef={playerRef}
                     videoId={trailer.key} 
                     isMuted={isMuted}
                     onReady={(event) => {
@@ -132,6 +174,18 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
                 <PlayCircle className="mr-2" />
                 Watch
             </Button>
+            <Button size="lg" variant="outline" onClick={handleToggleWatchlist}>
+                {isWatchlistLoading ? (
+                  <Loader2 className="animate-spin" />
+                ) : onWatchlist ? (
+                  <BookmarkCheck />
+                ) : (
+                  <Bookmark />
+                )}
+                <span className="ml-2">
+                    {onWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
+                </span>
+            </Button>
           </div>
         </motion.div>
       </div>
@@ -146,10 +200,7 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
           <Button
             size="icon"
             variant="secondary"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsMuted((prev) => !prev);
-            }}
+            onClick={handleToggleMute}
             className="rounded-full h-12 w-12"
           >
             {isMuted ? <VolumeX /> : <Volume2 />}

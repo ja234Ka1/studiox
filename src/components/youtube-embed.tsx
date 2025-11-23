@@ -1,22 +1,22 @@
 
 "use client"
 
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import YouTube, { type YouTubePlayer, type YouTubeProps } from 'react-youtube';
 
 interface YouTubeEmbedProps {
   videoId: string;
   isMuted: boolean;
   onReady: YouTubeProps['onReady'];
+  playerRef: React.MutableRefObject<YouTubePlayer | null>;
 }
 
-const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({ videoId, isMuted, onReady }) => {
-  const [player, setPlayer] = useState<YouTubePlayer | null>(null);
+const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({ videoId, isMuted, onReady, playerRef }) => {
 
   const opts: YouTubeProps['opts'] = {
     playerVars: {
       autoplay: 1,
-      mute: 1,
+      mute: isMuted ? 1 : 0,
       loop: 1,
       playlist: videoId, // Required for loop to work
       controls: 0,
@@ -29,19 +29,9 @@ const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({ videoId, isMuted, onReady }
   };
 
   const handleReady: YouTubeProps['onReady'] = (event) => {
-    setPlayer(event.target);
+    playerRef.current = event.target;
     onReady(event);
   };
-  
-  useEffect(() => {
-    if (player) {
-      if (isMuted) {
-        player.mute();
-      } else {
-        player.unMute();
-      }
-    }
-  }, [isMuted, player]);
 
   return (
     <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden">
