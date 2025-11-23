@@ -32,7 +32,7 @@ export default function PlatformCarousel() {
   return (
     <section className="py-16">
         <div className="container mx-auto px-4 md:px-8">
-            <h2 className="text-2xl font-bold text-center text-white mb-8">
+            <h2 className="text-3xl font-bold text-center text-white mb-10" style={{ textShadow: '0 2px 10px hsla(var(--foreground), 0.1)'}}>
                 All Your Favorite Platforms In One Place
             </h2>
             <Carousel
@@ -53,13 +53,14 @@ export default function PlatformCarousel() {
                         className="basis-1/3 sm:basis-1/4 md:basis-1/6 lg:basis-1/8"
                     >
                         <div className="p-1">
-                            <div className="group relative flex h-24 items-center justify-center rounded-lg border-2 border-transparent bg-card/50 p-6 transition-all duration-300 hover:border-primary/50">
+                            <div className="group relative flex h-24 items-center justify-center rounded-lg border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-all duration-300 hover:border-primary/50 hover:bg-white/10">
                                 <Image
                                     src={platform.logo}
                                     alt={platform.name}
                                     fill
-                                    className="object-contain p-2 transition-all duration-300 dark:invert group-hover:dark:invert-0"
+                                    className="object-contain p-4 brightness-50 dark:invert transition-all duration-300 group-hover:brightness-100 group-hover:dark:invert-0 group-hover:scale-105"
                                 />
+                                <div className="absolute -inset-px rounded-lg border border-transparent transition-all duration-300 group-hover:border-primary/50 group-hover:shadow-[0_0_20px_theme(colors.primary)]" />
                             </div>
                         </div>
                     </CarouselItem>
