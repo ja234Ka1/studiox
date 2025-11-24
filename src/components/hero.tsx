@@ -200,11 +200,13 @@ export function Hero({ items }: HeroProps) {
         </AnimatePresence>
       </div>
 
-      <HeroThumbnailNav 
-        items={items}
-        currentIndex={currentIndex}
-        onSelect={handleThumbnailSelect}
-      />
+      <div className="hidden lg:block">
+        <HeroThumbnailNav 
+            items={items}
+            currentIndex={currentIndex}
+            onSelect={handleThumbnailSelect}
+        />
+      </div>
     </div>
   );
 }
