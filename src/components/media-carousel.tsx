@@ -73,7 +73,7 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
               key={`${item.id}-${index}`}
               className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4 pr-2"
             >
-              <motion.div variants={itemVariants}>
+              <motion.div variants={itemVariants} className="py-4">
                 <MediaCard item={item} />
               </motion.div>
             </CarouselItem>

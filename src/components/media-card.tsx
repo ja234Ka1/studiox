@@ -69,63 +69,72 @@ export function MediaCard({ item }: MediaCardProps) {
   }, [onWatchlist]);
 
   return (
-    <div
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="relative aspect-[2/3] w-full rounded-md overflow-hidden bg-card shadow-md cursor-pointer group"
+    <motion.div
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className="relative aspect-[2/3] w-full rounded-md"
+        whileHover="hover"
+        variants={{
+            initial: { scale: 1, y: 0, zIndex: 1 },
+            hover: { scale: 1.1, y: -5, zIndex: 10, transition: { type: 'spring', stiffness: 300, damping: 20 } }
+        }}
+        initial="initial"
     >
-      <Link href={detailPath}>
-        <Image
-          src={posterUrl!}
-          alt={title || "Media"}
-          fill
-          sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-          data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
-        />
-      </Link>
-
-      <AnimatePresence>
-        {isHovered && (
-          <motion.div
-            variants={overlayVariants}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            className="absolute inset-0 p-3 flex flex-col justify-end items-center text-center bg-gradient-to-t from-black/80 via-black/40 to-transparent"
-          >
-            <motion.h3 variants={itemVariants} className="text-white font-bold text-base truncate w-full mb-1">{title}</motion.h3>
-            <motion.div variants={itemVariants} className="flex items-center text-xs text-muted-foreground mb-3 gap-2">
-              {item.vote_average > 0 && (
-                <>
-                  <div className="flex items-center gap-1 text-amber-400">
-                    <Star className="w-3 h-3 fill-current"/>
-                    <span>{item.vote_average.toFixed(1)}</span>
-                  </div>
-                  <span>•</span>
-                </>
-              )}
-              <span>{year}</span>
-            </motion.div>
-            <motion.div variants={itemVariants} className="flex items-center gap-2">
-              <Button size="icon" className="h-8 w-8 rounded-full" asChild >
-                <Link href={detailPath} onClick={(e) => e.stopPropagation()}>
-                    <PlayCircle className="w-4 h-4" />
-                </Link>
-              </Button>
-              <Button size="icon" className="h-8 w-8 rounded-full" variant="outline" onClick={handleToggleWatchlist}>
-                {isWatchlistLoading ? (
-                  <Loader2 className="animate-spin" />
-                ) : onWatchlist ? (
-                  <BookmarkCheck className="text-primary" />
-                ) : (
-                  <Bookmark />
-                )}
-              </Button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+        <Link href={detailPath} className="block w-full h-full">
+            <div
+            className="relative w-full h-full rounded-md overflow-hidden bg-card shadow-md cursor-pointer"
+            >
+                <Image
+                    src={posterUrl!}
+                    alt={title || "Media"}
+                    fill
+                    sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
+                    className="object-cover"
+                    data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
+                />
+                <AnimatePresence>
+                    {isHovered && (
+                    <motion.div
+                        variants={overlayVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="hidden"
+                        className="absolute inset-0 p-3 flex flex-col justify-end items-center text-center bg-gradient-to-t from-black/80 via-black/40 to-transparent"
+                    >
+                        <motion.h3 variants={itemVariants} className="text-white font-bold text-base truncate w-full mb-1">{title}</motion.h3>
+                        <motion.div variants={itemVariants} className="flex items-center text-xs text-muted-foreground mb-3 gap-2">
+                        {item.vote_average > 0 && (
+                            <>
+                            <div className="flex items-center gap-1 text-amber-400">
+                                <Star className="w-3 h-3 fill-current"/>
+                                <span>{item.vote_average.toFixed(1)}</span>
+                            </div>
+                            <span>•</span>
+                            </>
+                        )}
+                        <span>{year}</span>
+                        </motion.div>
+                        <motion.div variants={itemVariants} className="flex items-center gap-2">
+                        <Button size="icon" className="h-8 w-8 rounded-full" asChild >
+                            <Link href={detailPath} onClick={(e) => e.stopPropagation()}>
+                                <PlayCircle className="w-4 h-4" />
+                            </Link>
+                        </Button>
+                        <Button size="icon" className="h-8 w-8 rounded-full" variant="outline" onClick={handleToggleWatchlist}>
+                            {isWatchlistLoading ? (
+                            <Loader2 className="animate-spin" />
+                            ) : onWatchlist ? (
+                            <BookmarkCheck className="text-primary" />
+                            ) : (
+                            <Bookmark />
+                            )}
+                        </Button>
+                        </motion.div>
+                    </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+        </Link>
+    </motion.div>
   );
 }
