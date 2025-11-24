@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from "react";
@@ -54,17 +53,18 @@ function RecommendationCard({ item }: { item: Recommendation }) {
     const router = useRouter();
 
     const handleNavigation = (e: React.MouseEvent, path: string) => {
-        e.stopPropagation(); // Stop event from bubbling up
+        e.preventDefault();
+        e.stopPropagation();
         router.push(path);
     };
 
     return (
         <Card
-            className="relative group/card aspect-video w-full overflow-hidden rounded-xl border-border/20 cursor-pointer"
+            className="group/card relative aspect-video w-full cursor-pointer overflow-hidden rounded-xl border-border/20 shadow-lg"
             onClick={(e) => handleNavigation(e, `/media/${item.media_type}/${item.id}`)}
         >
             <motion.div
-                className="h-full w-full"
+                className="absolute inset-0 z-0"
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             >
@@ -77,29 +77,24 @@ function RecommendationCard({ item }: { item: Recommendation }) {
                 />
             </motion.div>
 
-            {/* Animated Gradient Border on Hover */}
-            <div className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition-opacity duration-300 group-hover/card:opacity-100">
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary via-accent to-primary" style={{ backgroundSize: '200% 200%', animation: 'button-bg-pan 3s linear infinite' }}></div>
-            </div>
+            <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
 
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
-
-            <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                <h3 className="font-bold truncate text-base">{item.title || item.name}</h3>
-                <p className="text-sm text-primary flex items-center gap-1.5 mt-1 filter-glow font-medium">
-                    <Sparkles className="w-4 h-4" />
+            <div className="absolute inset-0 z-20 flex flex-col justify-end p-4 text-white">
+                <h3 className="text-base font-bold leading-tight drop-shadow-md">{item.title || item.name}</h3>
+                <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-primary drop-shadow-md filter-glow">
+                    <Sparkles className="h-4 w-4" />
                     <span>{item.reason}</span>
                 </p>
             </div>
 
-            <div className="absolute top-3 right-3 z-10 flex gap-2 opacity-0 transition-opacity duration-300 group-hover/card:opacity-100">
+            <div className="absolute right-3 top-3 z-30 flex gap-2 opacity-0 transition-opacity duration-300 group-hover/card:opacity-100">
                 <Button
                     size="icon"
                     variant="secondary"
                     className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20"
                     onClick={(e) => handleNavigation(e, `/media/${item.media_type}/${item.id}`)}
                 >
-                    <Info className="w-5 h-5" />
+                    <Info className="h-5 w-5" />
                     <span className="sr-only">More Info</span>
                 </Button>
                 <Button
@@ -107,9 +102,13 @@ function RecommendationCard({ item }: { item: Recommendation }) {
                     className="h-9 w-9 rounded-full bg-primary/80 backdrop-blur-sm hover:bg-primary"
                     onClick={(e) => handleNavigation(e, `/stream/${item.media_type}/${item.id}${item.media_type === 'tv' ? '?s=1&e=1' : ''}`)}
                 >
-                    <PlayCircle className="w-5 h-5" />
+                    <PlayCircle className="h-5 w-5" />
                     <span className="sr-only">Play</span>
                 </Button>
+            </div>
+            
+            <div className="pointer-events-none absolute -inset-px z-40 rounded-xl opacity-0 transition-opacity duration-300 group-hover/card:opacity-100">
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary via-accent to-primary" style={{ backgroundSize: '200% 200%', animation: 'button-bg-pan 3s linear infinite' }}></div>
             </div>
         </Card>
     );
@@ -126,7 +125,7 @@ export default function ForYouCarousel() {
   const [error, setError] = React.useState<string | null>(null);
 
   const fetchRecommendations = React.useCallback(async () => {
-    if (isWatchlistLoading || watchlist.length < 2) {
+    if (watchlist.length < 2) {
       setRecommendations([]);
       return;
     }
@@ -135,7 +134,6 @@ export default function ForYouCarousel() {
     setError(null);
 
     try {
-      // Ensure all IDs are numbers before sending to the AI flow
       const watchlistPayload = watchlist.map(item => ({
         id: Number(item.id),
         title: item.title,
@@ -182,13 +180,13 @@ export default function ForYouCarousel() {
     } finally {
       setIsLoading(false);
     }
-  }, [watchlist, isWatchlistLoading]);
+  }, [watchlist]);
 
   React.useEffect(() => {
-    if (user && !user.isAnonymous) {
+    if (user && !user.isAnonymous && !isWatchlistLoading) {
         fetchRecommendations();
     }
-  }, [user, watchlist, fetchRecommendations]);
+  }, [user, isWatchlistLoading, fetchRecommendations]);
 
   // Conditions to not render the component at all
   if (isWatchlistLoading) {
@@ -224,7 +222,8 @@ export default function ForYouCarousel() {
   if (recommendations.length === 0) {
       return (
         <section className="text-left w-full group px-4 md:px-8">
-             <div className="flex items-center gap-3 mb-4">
+             <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="w-6 h-6 text-primary filter-glow" />
                 <h2 className="text-2xl font-bold">For You</h2>
             </div>
             <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted bg-muted/20 p-8 text-center h-48">
