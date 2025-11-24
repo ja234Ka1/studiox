@@ -5,9 +5,10 @@ import { notFound, useParams, useRouter, useSearchParams } from "next/navigation
 import { useEffect, useState, useRef } from "react";
 import type { MediaType } from "@/types/tmdb";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTheme, type StreamSource } from "@/context/theme-provider";
+import { getEpisodeSources } from "@/lib/aniwatch";
 
 const vidfastOrigins = [
     'https://vidfast.pro',
@@ -19,12 +20,15 @@ const vidfastOrigins = [
     'https://vidfast.xyz'
 ];
 
-const sourceConfig: Record<StreamSource, { movie: string, tv: string, origin: string | string[] }> = {
+const sourceConfig: Record<string, { movie?: string, tv?: string, origin: string | string[] }> = {
     Prime: {
         movie: 'https://vidfast.pro/movie/{id}',
         tv: 'https://vidfast.pro/tv/{id}/{season}/{episode}',
         origin: vidfastOrigins,
     },
+    AniWatch: {
+        origin: 'https://aniwatch-api-8ax1.onrender.com' // Not used for messaging, just for config structure
+    }
 }
 
 /**
@@ -52,12 +56,15 @@ export default function StreamPage() {
 
   const [isHovered, setIsHovered] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [streamUrl, setStreamUrl] = useState<string | null>(null);
+  const [isLoadingUrl, setIsLoadingUrl] = useState(false);
   
   const { mediaType, id } = params;
   const playerStateRef = useRef<PlayerState | null>(null);
   
   const season = searchParams.get('s');
   const episode = searchParams.get('e');
+  const aniwatchId = searchParams.get('aniwatchId');
   const progressKey = `progress_${mediaType}_${id}`;
 
   useEffect(() => {
@@ -79,7 +86,8 @@ export default function StreamPage() {
         }
 
         // Handle 'Prime' source (vidfast)
-        if (vidfastOrigins.includes(origin)) {
+        const primeOrigin = sourceConfig.Prime.origin;
+        if (typeof primeOrigin === 'string' ? origin === primeOrigin : primeOrigin.includes(origin)) {
             let payload;
             if (data.type === 'PLAYER_EVENT' && data.data) {
                 payload = { ...data.data, lastWatched: Date.now(), mediaType };
@@ -121,6 +129,43 @@ export default function StreamPage() {
       }
     };
   }, [id, mediaType, season, episode, progressKey]);
+  
+  useEffect(() => {
+      const getStreamUrl = async () => {
+        setIsLoadingUrl(true);
+        const sourceDetails = sourceConfig[streamSource] || sourceConfig['Prime'];
+        let urlTemplate: string | undefined;
+
+        if (streamSource === 'AniWatch') {
+            if (mediaType === 'tv' && aniwatchId && episode) {
+                try {
+                    const episodeId = `${aniwatchId}-episode-${episode}`;
+                    const sources = await getEpisodeSources(episodeId);
+                    // Find the default, highest quality source
+                    const source = sources.find((s: any) => s.quality === 'default');
+                    if (source) {
+                        setStreamUrl(source.url);
+                    } else {
+                        setStreamUrl(null);
+                    }
+                } catch (e) {
+                    console.error("Failed to fetch AniWatch sources", e);
+                    setStreamUrl(null);
+                }
+            }
+        } else { // Handle TMDB sources like Prime
+            if (mediaType === 'tv') {
+                urlTemplate = sourceDetails.tv;
+                if(urlTemplate) setStreamUrl(urlTemplate.replace('{id}', id).replace('{season}', season || '1').replace('{episode}', episode || '1'));
+            } else {
+                urlTemplate = sourceDetails.movie;
+                if(urlTemplate) setStreamUrl(urlTemplate.replace('{id}', id));
+            }
+        }
+        setIsLoadingUrl(false);
+    }
+    getStreamUrl();
+  }, [streamSource, mediaType, id, season, episode, aniwatchId]);
 
   if (mediaType !== "tv" && mediaType !== "movie") {
     notFound();
@@ -130,24 +175,45 @@ export default function StreamPage() {
   if (isNaN(numericId)) {
     notFound();
   }
-
-  const getStreamUrl = () => {
-    const sourceDetails = sourceConfig[streamSource] || sourceConfig['Prime'];
-    let urlTemplate: string;
   
-    if (mediaType === 'tv') {
-        urlTemplate = sourceDetails.tv;
-        return urlTemplate.replace('{id}', id).replace('{season}', season || '1').replace('{episode}', episode || '1');
-    }
-    
-    urlTemplate = sourceDetails.movie;
-    let url = urlTemplate.replace('{id}', id);
-    
-    return url;
+  const renderPlayer = () => {
+      if (isLoadingUrl) {
+          return (
+            <div className="flex items-center justify-center h-full">
+                <Loader2 className="w-12 h-12 animate-spin text-primary" />
+            </div>
+          )
+      }
+
+      if (!streamUrl) {
+          return (
+            <div className="flex items-center justify-center h-full text-muted-foreground">
+                Could not load video source.
+            </div>
+          )
+      }
+
+      if (streamSource === 'AniWatch') {
+          return (
+              <video
+                src={streamUrl}
+                controls
+                autoPlay
+                className="w-full h-full"
+              />
+          )
+      }
+
+      return (
+        <iframe
+            src={streamUrl}
+            allow="autoplay; fullscreen; encrypted-media"
+            allowFullScreen
+            className="w-full h-full border-0"
+        />
+      )
   }
-  
 
-  const streamUrl = getStreamUrl();
 
   return (
     <div 
@@ -173,13 +239,9 @@ export default function StreamPage() {
             </Button>
         </motion.div>
       )}
+      
+      {renderPlayer()}
 
-      <iframe
-          src={streamUrl}
-          allow="autoplay; fullscreen; encrypted-media"
-          allowFullScreen
-          className="w-full h-full border-0"
-      />
     </div>
   );
 }

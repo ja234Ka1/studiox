@@ -1,11 +1,10 @@
+
 import MediaCarousel from "@/components/media-carousel";
-import { getDiscover, getTopRated } from "@/lib/tmdb";
+import { getTrendingAnime, getPopularAnime } from "@/lib/aniwatch";
 
 export default async function AnimePage() {
-    const popularAnime = await getDiscover("tv", { with_genres: '16', with_origin_country: 'JP' });
-    const topRatedAnime = await getTopRated("tv", { with_genres: '16', with_origin_country: 'JP' });
-    const actionAnime = await getDiscover("tv", { with_genres: '16,10759', with_origin_country: 'JP' });
-    const fantasyAnime = await getDiscover("tv", { with_genres: '16,10765', with_origin_country: 'JP' });
+    const trendingAnime = await getTrendingAnime();
+    const popularAnime = await getPopularAnime();
     
 
   return (
@@ -17,10 +16,8 @@ export default async function AnimePage() {
             </p>
         </header>
         <div className="space-y-12">
+            {trendingAnime.length > 0 && <MediaCarousel title="Trending Anime" items={trendingAnime} />}
             {popularAnime.length > 0 && <MediaCarousel title="Popular Anime" items={popularAnime} />}
-            {topRatedAnime.length > 0 && <MediaCarousel title="Top Rated Anime" items={topRatedAnime} />}
-            {actionAnime.length > 0 && <MediaCarousel title="Action & Adventure" items={actionAnime} />}
-            {fantasyAnime.length > 0 && <MediaCarousel title="Sci-Fi & Fantasy" items={fantasyAnime} />}
         </div>
     </div>
   );
