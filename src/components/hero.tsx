@@ -194,7 +194,7 @@ export function Hero({ items }: HeroProps) {
       />
 
 
-      <div className="container mx-auto px-4 md:px-8 lg:px-16 h-full flex flex-col justify-center">
+      <div className="container mx-auto px-4 md:px-8 lg:px-16 h-full flex flex-col justify-end pb-32 md:pb-40 lg:justify-center lg:pb-0">
         <AnimatePresence mode="wait">
           {activeItem && <HeroContent item={activeItem} />}
         </AnimatePresence>
