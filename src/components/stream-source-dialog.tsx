@@ -40,8 +40,8 @@ export function StreamSourceDialog({ isOpen, onOpenChange, onSelectSource }: Str
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md bg-card/80 backdrop-blur-xl border-border/50 text-foreground">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl font-bold text-primary">
-            <Gem className="w-5 h-5" /> Select Stream Source
+          <DialogTitle className="flex items-center gap-2 text-xl font-bold">
+            <Gem className="w-5 h-5 text-primary" /> Select Stream Source
           </DialogTitle>
           <DialogDescription>
             If one source doesn't work, try another. Performance may vary.
