@@ -91,9 +91,15 @@ export async function getVideos(mediaId: number, mediaType: MediaType): Promise<
 
 export async function getMediaDetails(id: number, mediaType: MediaType): Promise<MediaDetails> {
     const params = {
-        append_to_response: 'credits,recommendations,videos'
+        append_to_response: 'credits,similar,videos'
     }
     const data = await fetcher<MediaDetails>(`/${mediaType}/${id}`, params);
+    // The 'similar' items are nested under a 'similar' key, but we want to treat them like 'recommendations'
+    // for consistency in the component. We rename it here.
+    if ((data as any).similar) {
+        data.recommendations = (data as any).similar;
+        delete (data as any).similar;
+    }
     return data;
 }
 

@@ -1,4 +1,5 @@
 
+
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { getMediaDetails } from "@/lib/tmdb";
@@ -110,7 +111,7 @@ export default async function MediaDetailsPage({ params }: MediaDetailsPageProps
         {item.recommendations?.results.length > 0 && (
           <MediaCarousel
             title="More Like This"
-            items={item.recommendations.results}
+            items={item.recommendations.results.slice(0, 10)}
           />
         )}
       </div>
