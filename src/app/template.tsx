@@ -13,7 +13,9 @@ export default function Template({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    stopLoading();
+    // Force stop any previous loading animations on new page template mount.
+    // This prevents stuck loaders on rapid navigation.
+    stopLoading(true);
   }, [pathname, stopLoading]);
 
   if (!animationsEnabled) {
@@ -26,7 +28,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ ease: "easeInOut", duration: 0.5 }}
-      onAnimationComplete={stopLoading}
+      // The loading screen's onExitComplete will handle the final stop call
     >
       {children}
     </motion.div>

@@ -6,7 +6,7 @@ import { createContext, useContext, useState, ReactNode, useCallback } from "rea
 interface LoadingContextType {
   isLoading: boolean;
   startLoading: () => void;
-  stopLoading: () => void;
+  stopLoading: (force?: boolean) => void;
 }
 
 const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
@@ -18,8 +18,15 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
   }, []);
 
-  const stopLoading = useCallback(() => {
-    setIsLoading(false);
+  const stopLoading = useCallback((force: boolean = false) => {
+    if (force) {
+        setIsLoading(false);
+    } else {
+        // Allow time for exit animation before setting state to false
+        setTimeout(() => {
+            setIsLoading(false);
+        }, 1000); 
+    }
   }, []);
 
   const value = {
