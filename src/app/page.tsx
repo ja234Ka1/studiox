@@ -1,22 +1,40 @@
 
-'use client';
-
 import { getTrending, getPopular, getTopRated, getDiscover, getUpcoming } from "@/lib/tmdb";
 import MediaCarousel from "@/components/media-carousel";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
-import Image from "next/image";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Clapperboard } from "lucide-react";
 import type { Media } from "@/types/tmdb";
-import ContinueWatching from "@/components/continue-watching";
 import PlatformCarousel from "@/components/platform-carousel";
 import { FeaturedContent } from "@/components/featured-content";
 import { TopTenCarousel } from "@/components/top-ten-carousel";
-import { useEffect, useState } from "react";
-import dynamic from 'next/dynamic';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Hero } from "@/components/hero";
-import ForYouCarousel from "@/components/for-you-carousel";
+import dynamic from 'next/dynamic';
+import Image from "next/image";
+
+const ContinueWatching = dynamic(() => import('@/components/continue-watching'), {
+  loading: () => (
+    <div className="px-4 md:px-8">
+        <Skeleton className="h-8 w-64 mb-4" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="aspect-video" />)}
+        </div>
+    </div>
+  ),
+});
+
+const ForYouCarousel = dynamic(() => import('@/components/for-you-carousel'), {
+  loading: () => (
+     <div className="px-4 md:px-8">
+        <Skeleton className="h-8 w-48 mb-4" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Skeleton className="aspect-video" />
+            <Skeleton className="aspect-video" />
+            <Skeleton className="aspect-video" />
+        </div>
+    </div>
+  ),
+});
 
 
 interface Category {
@@ -36,86 +54,69 @@ const categoriesConfig = [
   { title: "Hindi Cinema", fetcher: () => getDiscover("movie", { with_original_language: 'hi' }) },
 ];
 
-export default function Home() {
-  const [heroItems, setHeroItems] = useState<Media[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [featuredAction, setFeaturedAction] = useState<Media | undefined>();
-  const [featuredScifi, setFeaturedScifi] = useState<Media | undefined>();
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+export default async function Home() {
+  let heroItems: Media[] = [];
+  let categories: Category[] = [];
+  let featuredAction: Media | undefined;
+  let featuredScifi: Media | undefined;
+  let error: string | null = null;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const trendingWeeklyPromise = getTrending("all", "week");
-        const categoriesPromises = categoriesConfig.map(c => c.fetcher());
-        const featuredActionPromise = getDiscover("movie", { with_genres: '28' });
-        const featuredScifiPromise = getDiscover("movie", { with_genres: '878,14' });
+  try {
+    const trendingWeeklyPromise = getTrending("all", "week");
+    const categoriesPromises = categoriesConfig.map(c => c.fetcher());
+    const featuredActionPromise = getDiscover("movie", { with_genres: '28' });
+    const featuredScifiPromise = getDiscover("movie", { with_genres: '878,14' });
 
-        const [trendingWeeklyResult, featuredActionRes, featuredScifiRes, ...categoriesResults] = await Promise.allSettled([
-          trendingWeeklyPromise,
-          featuredActionPromise,
-          featuredScifiPromise,
-          ...categoriesPromises
-        ]);
+    const [
+        trendingWeeklyResult,
+        featuredActionRes,
+        featuredScifiRes,
+        ...categoriesResults
+    ] = await Promise.allSettled([
+        trendingWeeklyPromise,
+        featuredActionPromise,
+        featuredScifiPromise,
+        ...categoriesPromises
+    ]);
+    
+    if (trendingWeeklyResult.status === 'fulfilled') {
+        heroItems = trendingWeeklyResult.value.slice(0, 5);
+    } else {
+        console.error('Failed to fetch trending:', trendingWeeklyResult.reason);
+        throw new Error("Failed to fetch trending data for the hero section.");
+    }
 
-        if (trendingWeeklyResult.status === 'fulfilled') {
-          setHeroItems(trendingWeeklyResult.value.slice(0, 5));
-        } else {
-          console.error('Failed to fetch trending:', trendingWeeklyResult.reason);
-          throw new Error("Failed to fetch trending data.");
+    if (featuredActionRes.status === 'fulfilled' && featuredActionRes.value.length > 0) {
+        featuredAction = featuredActionRes.value[0];
+    }
+    if (featuredScifiRes.status === 'fulfilled' && featuredScifiRes.value.length > 0) {
+        featuredScifi = featuredScifiRes.value[1];
+    }
+
+    const resolvedCategories = categoriesConfig.map((config, index) => {
+        const result = categoriesResults[index];
+        if (result.status === 'fulfilled' && result.value) {
+            return { title: config.title, items: result.value };
         }
-        
-        if (featuredActionRes.status === 'fulfilled' && featuredActionRes.value.length > 0) {
-          setFeaturedAction(featuredActionRes.value[0]);
-        }
-        if (featuredScifiRes.status === 'fulfilled' && featuredScifiRes.value.length > 0) {
-          setFeaturedScifi(featuredScifiRes.value[1]); // Get a different one
-        }
-        
-        const resolvedCategories = categoriesConfig.map((config, index) => {
-            const result = categoriesResults[index];
-            if (result.status === 'fulfilled') {
-                return { title: config.title, items: result.value };
-            }
-            console.error(`Failed to load category "${config.title}":`, result.reason);
-            return { title: config.title, items: [] };
-        }).filter(c => c.items.length > 0);
-        setCategories(resolvedCategories);
+        console.error(`Failed to load category "${config.title}":`, result.status === 'rejected' ? result.reason : 'No data');
+        return { title: config.title, items: [] };
+    }).filter(c => c.items.length > 0);
+    
+    categories = resolvedCategories;
 
-      } catch (e: any) {
-        setError(e.message || "Failed to fetch data.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-  
-  const heroFallbackImage = PlaceHolderImages.find(p => p.id === 'hero-fallback');
+  } catch (e: any) {
+    console.error("Error fetching homepage data:", e);
+    error = e.message || "An unexpected error occurred while loading content.";
+  }
 
   return (
     <div className="flex flex-col">
-      {isLoading ? (
+      {heroItems.length > 0 ? (
+        <Hero items={heroItems} />
+      ) : (
          <div className="relative w-full h-[70vh] lg:h-[90vh]">
             <Skeleton className="w-full h-full" />
          </div>
-      ) : heroItems.length > 0 ? (
-        <Hero items={heroItems} />
-      ) : (
-        !error && heroFallbackImage && (
-          <div className="relative w-full h-[60vh] lg:h-[80vh]">
-            <Image
-                src={heroFallbackImage.imageUrl}
-                alt="Fallback hero image"
-                fill
-                className="object-cover object-top"
-                data-ai-hint={heroFallbackImage.imageHint}
-                priority
-              />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
-          </div>
-        )
       )}
 
       <div className="w-full space-y-12 py-12 pb-24">
@@ -131,7 +132,7 @@ export default function Home() {
           </div>
         )}
 
-        {!isLoading && !error && (
+        {!error && (
           <div className="space-y-16">
             <ContinueWatching />
 
