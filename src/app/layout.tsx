@@ -2,8 +2,9 @@
 'use client'
 
 import type { ReactNode } from "react";
-import React from "react";
+import React, { useEffect } from "react";
 import { Inter } from 'next/font/google';
+import { usePathname } from "next/navigation";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { AppProviders } from "@/components/providers";
@@ -11,6 +12,7 @@ import { Header } from "@/components/header";
 import { Background } from "@/components/background";
 import VideoPlayer from "@/components/video-player";
 import { useTheme } from "@/context/theme-provider";
+import { useLoading } from "@/context/loading-provider";
 import { LoginPromptDialog } from "@/components/login-prompt-dialog";
 import { WatchlistNotification } from "@/components/watchlist-notification";
 import { BackToTopButton } from "@/components/back-to-top-button";
@@ -22,6 +24,15 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 function ThemedBodyContent({ children }: { children: ReactNode }) {
   const { radius, isMounted } = useTheme();
+  const { stopLoading } = useLoading();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    // Force stop any previous loading animations on new page template mount.
+    // This prevents stuck loaders on rapid navigation.
+    stopLoading(true);
+  }, [pathname, stopLoading]);
+
 
   React.useEffect(() => {
     if (isMounted) {
