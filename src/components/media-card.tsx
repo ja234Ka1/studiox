@@ -22,9 +22,7 @@ export function MediaCard({ item }: MediaCardProps) {
   const fallbackImage = PlaceHolderImages.find(p => p.id === 'media-fallback');
   const posterUrl = item.poster_path ? getTmdbImageUrl(item.poster_path, 'w500') : fallbackImage?.imageUrl;
   const title = item.title || item.name;
-  const detailPath = `/media/${item.media_type}/${item.id}`;
-  const streamPath = `/stream/${item.media_type}/${item.id}${item.media_type === 'tv' ? '?s=1&e=1' : ''}`;
-
+  
   const { isInWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
   const [isWatchlistLoading, setIsWatchlistLoading] = React.useState(false);
   const onWatchlist = isInWatchlist(item.id);
@@ -33,7 +31,7 @@ export function MediaCard({ item }: MediaCardProps) {
     setIsWatchlistLoading(false);
   }, [onWatchlist]);
 
-  const handleToggleWatchlist = async (e: React.MouseEvent) => {
+  const handleToggleWatchlist = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     setIsWatchlistLoading(true);
@@ -49,57 +47,69 @@ export function MediaCard({ item }: MediaCardProps) {
     e.preventDefault();
     router.push(path);
   };
+  
+  const detailPath = `/media/${item.media_type}/${item.id}`;
+  const streamPath = `/stream/${item.media_type}/${item.id}${item.media_type === 'tv' ? '?s=1&e=1' : ''}`;
 
   return (
-    <motion.div
-      whileHover={{ scale: 1.1, zIndex: 10 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className="relative aspect-[2/3] w-full group overflow-hidden rounded-md shadow-lg bg-muted cursor-pointer"
-      onClick={(e) => handleNavigation(e, detailPath)}
-    >
-      <Image
-        src={posterUrl!}
-        alt={title || "Media"}
-        fill
-        sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
-        className="object-cover"
-        data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      
-      <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <h3 className="text-white font-bold text-sm truncate mb-2">{title}</h3>
-          <div className="flex justify-between items-center gap-2">
-              <Button 
-                size="icon" 
-                className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm hover:bg-primary" 
-                onClick={(e) => handleNavigation(e, streamPath)}
-              >
-                  <PlayCircle className="w-5 h-5" />
-                  <span className="sr-only">Watch</span>
-              </Button>
-              <div className="flex gap-2">
-                <Button 
-                  size="icon" 
-                  className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20" 
-                  onClick={(e) => handleNavigation(e, detailPath)}
-                >
-                    <Info className="w-5 h-5" />
-                    <span className="sr-only">More Info</span>
-                </Button>
-                <Button size="icon" className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20" onClick={handleToggleWatchlist}>
-                    {isWatchlistLoading ? (
-                        <Loader2 className="animate-spin w-5 h-5" />
-                    ) : onWatchlist ? (
-                        <BookmarkCheck className="w-5 h-5 text-primary" />
-                    ) : (
-                        <Bookmark className="w-5 h-5" />
-                    )}
-                    <span className="sr-only">Add to watchlist</span>
-                </Button>
-              </div>
-          </div>
-      </div>
-    </motion.div>
+     <div className="relative aspect-[2/3] w-full">
+        <motion.div
+            whileHover={{ scale: 1.1, zIndex: 10 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            className="absolute inset-0"
+        >
+            <div
+                className="relative h-full w-full group overflow-hidden rounded-md shadow-lg bg-muted cursor-pointer"
+            >
+                <Image
+                    src={posterUrl!}
+                    alt={title || "Media"}
+                    fill
+                    sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
+                    className="object-cover"
+                    data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
+                    onClick={(e) => handleNavigation(e, detailPath)}
+                />
+                <div 
+                    className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    onClick={(e) => handleNavigation(e, detailPath)} 
+                />
+                
+                <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <h3 className="text-white font-bold text-sm truncate mb-2">{title}</h3>
+                    <div className="flex justify-between items-center gap-2">
+                        <Button 
+                          size="icon" 
+                          className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm hover:bg-primary" 
+                          onClick={(e) => handleNavigation(e, streamPath)}
+                        >
+                            <PlayCircle className="w-5 h-5" />
+                            <span className="sr-only">Watch</span>
+                        </Button>
+                        <div className="flex gap-2">
+                          <Button 
+                            size="icon" 
+                            className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20" 
+                            onClick={(e) => handleNavigation(e, detailPath)}
+                          >
+                              <Info className="w-5 h-5" />
+                              <span className="sr-only">More Info</span>
+                          </Button>
+                          <Button size="icon" className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20" onClick={handleToggleWatchlist}>
+                              {isWatchlistLoading ? (
+                                  <Loader2 className="animate-spin w-5 h-5" />
+                              ) : onWatchlist ? (
+                                  <BookmarkCheck className="w-5 h-5 text-primary" />
+                              ) : (
+                                  <Bookmark className="w-5 h-5" />
+                              )}
+                              <span className="sr-only">Add to watchlist</span>
+                          </Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </motion.div>
+    </div>
   );
 }
