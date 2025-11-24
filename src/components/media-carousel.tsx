@@ -67,7 +67,7 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
         }}
         className="w-full"
       >
-        <CarouselContent className="-ml-2 px-8 py-8">
+        <CarouselContent className="-ml-2 px-8">
           {items.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
