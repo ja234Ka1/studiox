@@ -1,6 +1,7 @@
 
 "use client";
 
+import * as React from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlayCircle, Star, Bookmark, BookmarkCheck, Loader2, Plus, Info } from "lucide-react";
