@@ -116,24 +116,24 @@ export function TopTenCarousel() {
         onMouseLeave={() => autoplayPlugin.current && autoplayPlugin.current.play()}
         className="w-full"
       >
-        <CarouselContent className="-ml-8">
+        <CarouselContent className="-ml-4 sm:-ml-8">
           {mediaItems.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
-              className="basis-auto"
+              className="pl-4 sm:pl-8 basis-auto"
             >
               <motion.div 
                 variants={itemVariants} 
                 className="flex items-center group/item transition-transform duration-300 ease-in-out"
               >
                 <span 
-                  className="text-[200px] font-black text-transparent group-hover/item:text-primary transition-all duration-300 ease-in-out group-hover/item:scale-110" 
+                  className="text-[120px] sm:text-[160px] md:text-[200px] font-black text-transparent group-hover/item:text-primary transition-all duration-300 ease-in-out group-hover/item:scale-110" 
                   style={{ WebkitTextStroke: '3px hsl(var(--foreground) / 0.1)', textShadow: '0 0 15px hsl(var(--foreground) / 0.1)' }}
                 >
                     {index + 1}
                 </span>
                 <div className={cn(
-                  "w-[200px] z-10 transition-transform duration-300 ease-in-out group-hover/item:scale-110 -ml-8"
+                  "w-[130px] sm:w-[160px] md:w-[200px] z-10 transition-transform duration-300 ease-in-out group-hover/item:scale-110 -ml-6 sm:-ml-8 md:-ml-12"
                 )}>
                     <MediaCard item={item} />
                 </div>
