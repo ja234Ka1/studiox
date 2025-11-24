@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from "react";
@@ -134,11 +135,18 @@ export default function ForYouCarousel() {
     setError(null);
 
     try {
-      const watchlistPayload = watchlist.map(item => ({
+      const fullWatchlistDetails = await Promise.all(
+        watchlist.map(item => getMediaDetails(item.id, item.media_type as 'movie' | 'tv'))
+      );
+
+      const watchlistPayload = fullWatchlistDetails.map(item => ({
         id: Number(item.id),
         title: item.title,
         name: item.name,
-        media_type: item.media_type
+        media_type: item.media_type,
+        genres: item.genres.map(g => g.name),
+        // @ts-ignore original_language is not on MediaDetails but is often present
+        original_language: item.original_language || 'en',
       }));
 
       const aiResult = await getRecommendations({ watchlist: watchlistPayload });
@@ -183,10 +191,10 @@ export default function ForYouCarousel() {
   }, [watchlist]);
 
   React.useEffect(() => {
-    if (user && !user.isAnonymous && !isWatchlistLoading) {
+    if (user && !user.isAnonymous && !isWatchlistLoading && watchlist.length > 0) {
         fetchRecommendations();
     }
-  }, [user, isWatchlistLoading, fetchRecommendations]);
+  }, [user, isWatchlistLoading, watchlist, fetchRecommendations]);
 
   // Conditions to not render the component at all
   if (isWatchlistLoading) {

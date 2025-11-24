@@ -10,7 +10,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { searchMedia } from '@/lib/tmdb';
+import { searchMedia as searchTmdb } from '@/lib/tmdb';
 import { type Media } from '@/types/tmdb';
 
 const MediaItemSchema = z.object({
@@ -18,10 +18,12 @@ const MediaItemSchema = z.object({
   title: z.string().optional(),
   name: z.string().optional(),
   media_type: z.string(),
+  genres: z.array(z.string()).describe("A list of genres for this media item."),
+  original_language: z.string().describe("The original language of the media item (e.g., 'en', 'ja')."),
 });
 
 const RecommendationsInputSchema = z.object({
-  watchlist: z.array(MediaItemSchema).describe("A list of movies and TV shows in the user's watchlist."),
+  watchlist: z.array(MediaItemSchema).describe("A list of movies and TV shows in the user's watchlist, including their genres and language."),
 });
 export type RecommendationsInput = z.infer<typeof RecommendationsInputSchema>;
 
@@ -59,15 +61,18 @@ const recommendationsPrompt = ai.definePrompt({
   prompt: `You are a movie and TV show recommendation expert for an app called Willow.
 Your goal is to provide 10 personalized recommendations based on the user's watchlist.
 
-Analyze the genres, actors, and themes present in the user's watchlist below.
-Based on this analysis, suggest 10 new movies or TV shows that they are likely to enjoy. 
-For each one, provide a short, exciting reason (no more than 15 words) explaining why it's a good fit. For example, "Because you liked The Matrix, you'll love the mind-bending sci-fi in this." or "Fans of Stranger Things will enjoy this supernatural mystery."
+Analyze the genres, language, actors, and themes present in the user's watchlist below.
+Based on this analysis, suggest 10 new movies or TV shows that they are likely to enjoy.
+
+**CRITICAL INSTRUCTION:** Your recommendations MUST perfectly match the predominant genres and original languages of the items in the user's watchlist. For example, if the user watches Japanese-language horror movies, you MUST recommend other Japanese-language horror movies.
+
+For each recommendation, provide a short, exciting reason (no more than 15 words) explaining why it's a good fit. For example, "Because you liked The Matrix, you'll love the mind-bending sci-fi in this."
 
 Do not recommend items that are already in the user's watchlist.
 
 User's Watchlist:
 {{#each watchlist}}
-- {{#if title}}{{title}}{{else}}{{name}}{{/if}} ({{media_type}})
+- {{#if title}}{{title}}{{else}}{{name}}{{/if}} ({{media_type}}, Language: {{original_language}}, Genres: {{#each genres}}{{.}}{{#unless @last}}, {{/unless}}{{/each}})
 {{/each}}
 `,
 });
@@ -96,7 +101,7 @@ const recommendationsFlow = ai.defineFlow(
     for (const rec of output.recommendations) {
         if (validatedRecommendations.length >= 10) break;
 
-        const searchResults = await searchMedia(rec.title, 1, 1);
+        const searchResults = await searchTmdb(rec.title, 1, 1);
         const topResult = searchResults.results[0];
 
         if (topResult) {
