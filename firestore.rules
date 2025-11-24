@@ -17,6 +17,8 @@
  * - Admin-Only Writes: All write operations on global content collections
  *   (`/movies`, `/tv_shows`, `/genres`) are restricted to users who have an
  *   admin role document in the `/roles_admin` collection.
+ * - Strict Schema Validation: All user-generated data is validated against a
+ *   pre-defined schema upon write, ensuring data integrity and structure.
  * - Default Deny: All operations are denied by default and must be explicitly
  *   granted by a rule.
  *
@@ -24,7 +26,7 @@
  * ownership for user-specific data (e.g., `/users/{userId}/...`). To ensure data
  * integrity, the `userId` field within a user's subcollection documents (like a
  * watchlist item) must match the `{userId}` from the path upon creation and must be
- * immutable. This prevents a document from being moved or associated with another user.
+ * immutable.
  *
  * Structural Segregation: The clear separation between the private `/users/{userId}`
  * data tree and the public `/movies`, `/tv_shows`, and `/genres` collections is
@@ -60,7 +62,7 @@ service cloud.firestore {
      * CRITICAL for all update and delete operations to prevent acting on non-existent data.
      */
     function isExistingDoc() {
-      return resource != null;
+      return exists(path);
     }
 
     /**
@@ -80,6 +82,42 @@ service cloud.firestore {
     function isAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
+    
+    // -------------------------------------------------------------------------
+    // Schema Validation Functions
+    // -------------------------------------------------------------------------
+
+    /**
+     * Validates the schema for a User document.
+     * Ensures all required fields are present and have the correct type.
+     * @param data The incoming request resource data.
+     */
+    function isValidUser(data) {
+        return data.id is string
+            && data.email is string
+            && data.username is string;
+    }
+
+    /**
+     * Validates the schema for a UserWatchlist item.
+     * @param data The incoming request resource data.
+     */
+    function isValidWatchlistItem(data) {
+        return data.id is number
+            && data.userId is string
+            && data.mediaId is number
+            && data.mediaType is string && (data.mediaType == 'movie' || data.mediaType == 'tv');
+    }
+
+    /**
+     * Validates the schema for a UserContinueWatching item.
+     * @param data The incoming request resource data.
+     */
+    function isValidContinueWatchingItem(data) {
+        return data.userId is string
+            && data.lastWatched is timestamp
+            && data.media is map;
+    }
 
     // -------------------------------------------------------------------------
     // Public, Read-Only Collections (for non-admins)
@@ -90,7 +128,7 @@ service cloud.firestore {
      *              only writable by administrators.
      * @path        /movies/{movieId}
      * @allow       An authenticated user (create) a movie document. `auth: {uid: 'user_123'}`
-     * @deny        A regular user (create) a movie document. `auth: {uid: 'user_123'}`
+     * @deny        A regular user (create) a movie document. `auth: {uid- 'user_123'}`
      * @principle   Enforces admin-only writes for globally shared content.
      */
     match /movies/{movieId} {
@@ -104,7 +142,7 @@ service cloud.firestore {
      *              only writable by administrators.
      * @path        /tv_shows/{tvShowId}
      * @allow       An admin user (update) a TV show document. `auth: {uid: 'admin_abc'}`
-     * @deny        A regular user (delete) a TV show document. `auth: {uid: 'user_123'}`
+     * @deny        A regular user (delete) a TV show document. `auth: {uid- 'user_123'}`
      * @principle   Enforces admin-only writes for globally shared content.
      */
     match /tv_shows/{tvShowId} {
@@ -118,7 +156,7 @@ service cloud.firestore {
      *              only writable by administrators.
      * @path        /genres/{genreId}
      * @allow       An admin user (create) a genre document. `auth: {uid: 'admin_abc'}`
-     * @deny        A regular user (update) a genre document. `auth: {uid: 'user_123'}`
+     * @deny        A regular user (update) a genre document. `auth: {uid- 'user_123'}`
      * @principle   Enforces admin-only writes for globally shared content.
      */
     match /genres/{genreId} {
@@ -142,8 +180,12 @@ service cloud.firestore {
     match /users/{userId} {
       allow get: if isOwner(userId);
       allow list: if false;
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow create: if isOwner(userId)
+                    && request.resource.data.id == userId
+                    && isValidUser(request.resource.data);
+      allow update: if isExistingOwner(userId)
+                    && request.resource.data.id == resource.data.id
+                    && isValidUser(request.resource.data);
       allow delete: if isExistingOwner(userId);
 
       /**
@@ -156,8 +198,12 @@ service cloud.firestore {
        */
       match /watchlists/{watchlistItemId} {
         allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+        allow create: if isOwner(userId)
+                      && request.resource.data.userId == userId
+                      && isValidWatchlistItem(request.resource.data);
+        allow update: if isExistingOwner(userId)
+                      && request.resource.data.userId == resource.data.userId
+                      && isValidWatchlistItem(request.resource.data);
         allow delete: if isExistingOwner(userId);
       }
 
@@ -166,11 +212,17 @@ service cloud.firestore {
        * @path        /users/{userId}/continueWatching/{mediaId}
        * @allow       A user (write) to their own history. `auth: {uid: 'user_123'}` -> `/users/user_123/continueWatching/movie_456`
        * @deny        A user (read) another user's history. `auth: {uid: 'user_123'}` -> `/users/user_456/continueWatching`
-       * @principle   Enforces ownership for viewing history data.
+       * @principle   Enforces ownership for viewing history data and validates schema on write.
        */
       match /continueWatching/{mediaId} {
         allow get, list: if isOwner(userId);
-        allow write: if isOwner(userId) && request.resource.data.userId == userId;
+        allow create: if isOwner(userId)
+                      && request.resource.data.userId == userId
+                      && isValidContinueWatchingItem(request.resource.data);
+        allow update: if isExistingOwner(userId)
+                      && request.resource.data.userId == resource.data.userId
+                      && isValidContinueWatchingItem(request.resource.data);
+        allow delete: if isExistingOwner(userId);
       }
     }
 
@@ -188,11 +240,7 @@ service cloud.firestore {
      * @principle   Secures critical administrative data from any client-side tampering or inspection.
      */
     match /roles_admin/{userId} {
-      allow get: if false;
-      allow list: if false;
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+      allow read, write: if false;
     }
   }
 }
