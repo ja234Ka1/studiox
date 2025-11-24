@@ -18,8 +18,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useWatchlist } from "@/context/watchlist-provider";
 import { useUser } from "@/firebase";
 import { getRecommendations } from "@/ai/flows/recommendations";
-import { getMediaDetails, searchMedia } from "@/lib/tmdb";
-import type { MediaDetails as MediaDetailsType, Media } from "@/types/tmdb";
+import { getMediaDetails } from "@/lib/tmdb";
+import type { MediaDetails as MediaDetailsType } from "@/types/tmdb";
 import { Card } from "./ui/card";
 import { getTmdbImageUrl, cn } from "@/lib/utils";
 import { Button } from "./ui/button";
@@ -52,13 +52,16 @@ const itemVariants = {
 
 function RecommendationCard({ item }: { item: Recommendation }) {
     const router = useRouter();
-    const detailPath = `/media/${item.media_type}/${item.id}`;
-    const streamPath = `/stream/${item.media_type}/${item.id}${item.media_type === 'tv' ? '?s=1&e=1' : ''}`;
+  
+    const handleCardClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        router.push(`/media/${item.media_type}/${item.id}`);
+    };
   
     return (
-        <div className="relative group aspect-[16/9] w-full">
+        <div className="relative group aspect-[16/9] w-full" onClick={handleCardClick} style={{ cursor: 'pointer' }}>
             <Card className="h-full w-full overflow-hidden rounded-xl transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/20">
-                <Link href={detailPath} className="block h-full w-full rounded-xl overflow-hidden">
+                <div className="block h-full w-full rounded-xl overflow-hidden">
                     <Image
                         src={getTmdbImageUrl(item.backdrop_path, 'w500')}
                         alt={item.title || item.name || "Recommendation"}
@@ -67,18 +70,28 @@ function RecommendationCard({ item }: { item: Recommendation }) {
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
-                    {/* Subtle glow effect on hover */}
                     <div className="absolute -inset-px rounded-xl border-2 border-transparent transition-all duration-300 group-hover:border-primary/50" />
-                </Link>
+                </div>
                 
                 <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 flex gap-2">
-                    <Button size="icon" variant="secondary" className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20" asChild>
-                        <Link href={detailPath}>
+                    <Button
+                        size="icon"
+                        variant="secondary"
+                        className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20"
+                        asChild
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <Link href={`/media/${item.media_type}/${item.id}`}>
                             <Info className="w-5 h-5" />
                         </Link>
                     </Button>
-                    <Button size="icon" className="h-9 w-9 rounded-full button-bg-pan" asChild>
-                        <Link href={streamPath}>
+                    <Button
+                        size="icon"
+                        className="h-9 w-9 rounded-full button-bg-pan"
+                        asChild
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <Link href={`/stream/${item.media_type}/${item.id}${item.media_type === 'tv' ? '?s=1&e=1' : ''}`}>
                             <PlayCircle className="w-5 h-5" />
                         </Link>
                     </Button>
@@ -96,88 +109,86 @@ function RecommendationCard({ item }: { item: Recommendation }) {
     );
 }
 
+const MemoizedRecommendationCard = React.memo(RecommendationCard);
+
 
 export default function ForYouCarousel() {
   const { user } = useUser();
   const { watchlist, isLoading: isWatchlistLoading } = useWatchlist();
   const [recommendations, setRecommendations] = React.useState<Recommendation[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
-  const hasFetched = React.useRef(false);
+  const [error, setError] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
-    if (!user || user.isAnonymous || isWatchlistLoading || watchlist.length < 2 || hasFetched.current) {
+  const fetchRecommendations = React.useCallback(async () => {
+    if (isWatchlistLoading || watchlist.length < 2) {
+      setRecommendations([]);
       return;
     }
 
-    const fetchRecommendations = async () => {
-      hasFetched.current = true;
-      setIsLoading(true);
+    setIsLoading(true);
+    setError(null);
 
-      try {
-        const watchlistPayload = watchlist.map(item => ({
-            id: Number(item.id),
-            title: item.title,
-            name: item.name,
-            media_type: item.media_type
-        }));
+    try {
+      const watchlistPayload = watchlist.map(item => ({
+        id: Number(item.id),
+        title: item.title,
+        name: item.name,
+        media_type: item.media_type
+      }));
 
-        const aiResult = await getRecommendations({ watchlist: watchlistPayload });
+      const aiResult = await getRecommendations({ watchlist: watchlistPayload });
+      
+      if (aiResult?.recommendations?.length > 0) {
+        const detailPromises = aiResult.recommendations.map(async (rec) => {
+          try {
+            const details = await getMediaDetails(rec.id, rec.media_type);
+            if (details.backdrop_path) {
+              return { ...details, reason: rec.reason, media_type: rec.media_type };
+            }
+          } catch (e) {
+            console.error(`Error fetching details for recommended item ID: ${rec.id}`, e);
+          }
+          return null;
+        });
+
+        const settledDetails = await Promise.all(detailPromises);
+        const successfulDetails = settledDetails.filter((d): d is Recommendation => d !== null);
+
+        const finalRecommendations = successfulDetails.reduce((acc, current) => {
+          const isInWatchlist = watchlist.some(item => item.id === current.id);
+          const isAlreadyAdded = acc.some(item => item.id === current.id);
+          if (!isInWatchlist && !isAlreadyAdded) {
+            acc.push(current);
+          }
+          return acc;
+        }, [] as Recommendation[]);
         
-        if (aiResult?.recommendations?.length > 0) {
-            // Use Promise.all for parallel fetching
-            const detailPromises = aiResult.recommendations.map(async (rec) => {
-              try {
-                // First search to find the correct media type if not provided
-                const searchResults = await searchMedia(rec.title, 1, 1);
-                const topResult = searchResults.results[0];
-                if (!topResult) return null;
-
-                const details = await getMediaDetails(topResult.id, topResult.media_type as 'movie' | 'tv');
-                if (details.backdrop_path) {
-                  return {
-                    ...details,
-                    reason: rec.reason,
-                    media_type: topResult.media_type
-                  };
-                }
-              } catch (e) {
-                console.error(`Error fetching details for recommended item: ${rec.title}`, e);
-              }
-              return null;
-            });
-    
-            const settledDetails = await Promise.all(detailPromises);
-            const successfulDetails = settledDetails.filter((d): d is Recommendation => d !== null);
-
-            // Filter out duplicates and items already in the watchlist
-            const finalRecommendations = successfulDetails.reduce((acc, current) => {
-              const isInWatchlist = watchlist.some(item => item.id === current.id);
-              const isAlreadyAdded = acc.some(item => item.id === current.id);
-              if (!isInWatchlist && !isAlreadyAdded) {
-                acc.push(current);
-              }
-              return acc;
-            }, [] as Recommendation[]);
-            
-            setRecommendations(finalRecommendations.slice(0, 10));
-        }
-
-      } catch (error) {
-        console.error("Failed to fetch AI recommendations:", error);
-      } finally {
-        setIsLoading(false);
+        setRecommendations(finalRecommendations.slice(0, 10));
+      } else {
+        setRecommendations([]);
       }
-    };
 
-    fetchRecommendations();
-  }, [user, watchlist, isWatchlistLoading]);
+    } catch (error) {
+      console.error("Failed to fetch AI recommendations:", error);
+      setError("Could not load recommendations at this time.");
+      setRecommendations([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [watchlist, isWatchlistLoading]);
 
-  // Don't render anything if user is not logged in, watchlist is empty, or still loading watchlist
+  React.useEffect(() => {
+    if (user && !user.isAnonymous) {
+        fetchRecommendations();
+    }
+  }, [user, fetchRecommendations]);
+
+  // Conditions to not render the component at all
   if (isWatchlistLoading || !user || user.isAnonymous || watchlist.length < 2) {
     return null;
   }
   
-  // Show loading skeleton only when actively fetching AI recs
+  // Loading state skeleton
   if (isLoading) {
     return (
         <section className="text-left w-full group">
@@ -198,9 +209,23 @@ export default function ForYouCarousel() {
     );
   }
 
-  // If no recommendations were generated, render nothing
+  // Graceful handling of no recommendations or errors
   if (recommendations.length === 0) {
-      return null;
+      return (
+        <section className="text-left w-full group px-4 md:px-8">
+             <div className="flex items-center gap-3 mb-4">
+                <h2 className="text-2xl font-bold">For You</h2>
+            </div>
+            <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted bg-muted/20 p-8 text-center h-48">
+                <p className="text-lg font-semibold text-foreground">
+                    {error ? error : "Thinking of new recommendations..."}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                    {error ? "Please try again later." : "Add more to your watchlist to improve suggestions."}
+                </p>
+            </div>
+        </section>
+      )
   }
 
 
@@ -234,7 +259,7 @@ export default function ForYouCarousel() {
               className="basis-5/6 sm:basis-2/3 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4 pr-2"
             >
               <motion.div layout variants={itemVariants}>
-                <RecommendationCard item={item} />
+                <MemoizedRecommendationCard item={item} />
               </motion.div>
             </CarouselItem>
           ))}
@@ -245,3 +270,5 @@ export default function ForYouCarousel() {
     </motion.section>
   );
 }
+
+    
