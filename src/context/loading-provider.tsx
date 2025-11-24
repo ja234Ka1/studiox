@@ -22,10 +22,8 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
     if (force) {
         setIsLoading(false);
     } else {
-        // Allow time for exit animation before setting state to false
-        setTimeout(() => {
-            setIsLoading(false);
-        }, 1000); 
+        // Setting state directly without timeout on stop
+        setIsLoading(false);
     }
   }, []);
 
