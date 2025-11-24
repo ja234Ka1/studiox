@@ -167,12 +167,12 @@ export default function StreamPage() {
     getStreamUrl();
   }, [streamSource, mediaType, id, season, episode, animeEpisodeId]);
 
-  if (mediaType !== "tv" && mediaType !== "movie") {
+  if (mediaType !== "tv" && mediaType !== "movie" && mediaType !== 'anime') {
     notFound();
   }
 
   // Allow string IDs for anime
-  if (mediaType !== 'tv' && mediaType !== 'movie') {
+  if (mediaType !== 'tv' && mediaType !== 'movie' && mediaType !== 'anime') {
       const numericId = parseInt(id, 10);
       if (isNaN(numericId)) {
         notFound();

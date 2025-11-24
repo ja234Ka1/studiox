@@ -27,6 +27,9 @@ export interface AnimeDetails {
 }
 
 export interface EpisodeSource {
+    headers: {
+        Referer: string;
+    },
     sources: {
         url: string;
         isM3U8: boolean;

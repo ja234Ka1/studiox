@@ -22,7 +22,7 @@ async function fetcher<T>(path: string, params: Record<string, string> = {}): Pr
 
 export async function getPopularAnime(page: number = 1): Promise<SearchResult[]> {
     try {
-        return await fetcher<SearchResult[]>(`/popular/${page}`);
+        return await fetcher<SearchResult[]>(`/popular`, { page: String(page) });
     } catch (error) {
         return [];
     }
@@ -30,7 +30,7 @@ export async function getPopularAnime(page: number = 1): Promise<SearchResult[]>
 
 export async function getTopAiringAnime(page: number = 1): Promise<SearchResult[]> {
     try {
-        return await fetcher<SearchResult[]>(`/top-airing`);
+        return await fetcher<SearchResult[]>(`/top-airing`, { page: String(page) });
     } catch (error) {
         return [];
     }
@@ -38,7 +38,7 @@ export async function getTopAiringAnime(page: number = 1): Promise<SearchResult[
 
 export async function getAnimeMovies(page: number = 1): Promise<SearchResult[]> {
     try {
-        return await fetcher<SearchResult[]>(`/movies/${page}`);
+        return await fetcher<SearchResult[]>(`/movies`, { page: String(page) });
     } catch (error) {
         return [];
     }
