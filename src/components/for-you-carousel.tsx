@@ -106,7 +106,7 @@ export default function ForYouCarousel() {
 
       try {
         const watchlistPayload = watchlist.map(item => ({
-            id: item.id,
+            id: Number(item.id),
             title: item.title,
             name: item.name,
             media_type: item.media_type
