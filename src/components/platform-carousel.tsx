@@ -30,9 +30,9 @@ export default function PlatformCarousel() {
     );
 
   return (
-    <section className="py-16">
+    <section className="py-12">
         <div className="container mx-auto px-4 md:px-8">
-            <h2 className="text-3xl font-bold text-center text-white mb-10" style={{ textShadow: '0 2px 10px hsla(var(--foreground), 0.1)'}}>
+            <h2 className="text-3xl font-bold text-center text-foreground mb-12" style={{ textShadow: '0 2px 15px hsla(var(--foreground), 0.15)'}}>
                 All Your Favorite Platforms In One Place
             </h2>
             <Carousel
@@ -44,11 +44,11 @@ export default function PlatformCarousel() {
                 plugins={[plugin.current]}
                 className="w-full"
             >
-                <CarouselContent className="-ml-4">
+                <CarouselContent className="-ml-8">
                 {platforms.map((platform, index) => (
                     <CarouselItem
                         key={index}
-                        className="basis-1/3 sm:basis-1/4 md:basis-1/6 lg:basis-1/8"
+                        className="basis-1/2 sm:basis-1/3 md:basis-1/5 lg:basis-1/6 pl-8"
                     >
                         <div className="p-1">
                             <div className="group relative flex h-24 items-center justify-center rounded-lg border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-all duration-300 hover:border-primary/50 hover:bg-white/10">
