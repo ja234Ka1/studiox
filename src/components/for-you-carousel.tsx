@@ -51,61 +51,63 @@ const itemVariants = {
 };
 
 function RecommendationCard({ item }: { item: Recommendation }) {
-    const router = useRouter();
-  
-    const handleCardClick = (e: React.MouseEvent) => {
-        e.preventDefault();
-        router.push(`/media/${item.media_type}/${item.id}`);
-    };
-  
     return (
-        <div className="relative group aspect-[16/9] w-full" onClick={handleCardClick} style={{ cursor: 'pointer' }}>
-            <Card className="h-full w-full overflow-hidden rounded-xl transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/20">
-                <div className="block h-full w-full rounded-xl overflow-hidden">
-                    <Image
-                        src={getTmdbImageUrl(item.backdrop_path, 'w500')}
-                        alt={item.title || item.name || "Recommendation"}
-                        fill
-                        sizes="(max-width: 768px) 80vw, (max-width: 1200px) 40vw, 30vw"
-                        className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
-                    <div className="absolute -inset-px rounded-xl border-2 border-transparent transition-all duration-300 group-hover:border-primary/50" />
-                </div>
-                
-                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 flex gap-2">
-                    <Button
-                        size="icon"
-                        variant="secondary"
-                        className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20"
-                        asChild
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <Link href={`/media/${item.media_type}/${item.id}`}>
-                            <Info className="w-5 h-5" />
-                        </Link>
-                    </Button>
-                    <Button
-                        size="icon"
-                        className="h-9 w-9 rounded-full button-bg-pan"
-                        asChild
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <Link href={`/stream/${item.media_type}/${item.id}${item.media_type === 'tv' ? '?s=1&e=1' : ''}`}>
-                            <PlayCircle className="w-5 h-5" />
-                        </Link>
-                    </Button>
-                </div>
+        <Card className="relative group aspect-video w-full overflow-hidden rounded-xl border-border/20 transition-all duration-300 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/20">
+            <Link href={`/media/${item.media_type}/${item.id}`} className="absolute inset-0 z-10">
+                <span className="sr-only">View details for {item.title || item.name}</span>
+            </Link>
+            
+            <motion.div 
+                className="h-full w-full"
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 400, damping: 20 }}
+            >
+                <Image
+                    src={getTmdbImageUrl(item.backdrop_path, 'w500')}
+                    alt={item.title || item.name || "Recommendation"}
+                    fill
+                    sizes="(max-width: 768px) 80vw, (max-width: 1200px) 40vw, 30vw"
+                    className="object-cover"
+                />
+            </motion.div>
 
-                <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                    <h3 className="font-bold truncate text-base">{item.title || item.name}</h3>
-                    <p className="text-xs text-primary flex items-center gap-1.5 mt-1">
-                        <Sparkles className="w-3.5 h-3.5" />
-                        <span>{item.reason}</span>
-                    </p>
-                </div>
-            </Card>
-        </div>
+            {/* Animated Gradient Border on Hover */}
+            <div className="absolute -inset-px rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                <div className="absolute inset-0 rounded-xl button-bg-pan" style={{ backgroundSize: '400% 400%', animation: 'gradient 6s ease infinite' }}></div>
+            </div>
+
+            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent" />
+
+            <div className="absolute top-3 right-3 z-20 flex gap-2">
+                <Button
+                    size="icon"
+                    variant="secondary"
+                    className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm opacity-0 transition-all duration-300 hover:bg-white/20 group-hover:opacity-100"
+                    asChild
+                >
+                    <Link href={`/media/${item.media_type}/${item.id}`}>
+                        <Info className="w-5 h-5" />
+                    </Link>
+                </Button>
+                <Button
+                    size="icon"
+                    className="h-9 w-9 rounded-full bg-primary/80 backdrop-blur-sm opacity-0 transition-all duration-300 hover:bg-primary group-hover:opacity-100"
+                    asChild
+                >
+                    <Link href={`/stream/${item.media_type}/${item.id}${item.media_type === 'tv' ? '?s=1&e=1' : ''}`}>
+                        <PlayCircle className="w-5 h-5" />
+                    </Link>
+                </Button>
+            </div>
+
+            <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                <h3 className="font-bold truncate text-base">{item.title || item.name}</h3>
+                <p className="text-sm text-primary flex items-center gap-1.5 mt-1 filter-glow">
+                    <Sparkles className="w-4 h-4" />
+                    <span className='font-medium'>{item.reason}</span>
+                </p>
+            </div>
+        </Card>
     );
 }
 
@@ -181,11 +183,15 @@ export default function ForYouCarousel() {
     if (user && !user.isAnonymous) {
         fetchRecommendations();
     }
-  }, [user, fetchRecommendations]);
+  }, [user, watchlist, fetchRecommendations]);
 
   // Conditions to not render the component at all
-  if (isWatchlistLoading || !user || user.isAnonymous || watchlist.length < 2) {
+  if (isWatchlistLoading) {
     return null;
+  }
+  
+  if (!user || user.isAnonymous || watchlist.length < 2) {
+      return null;
   }
   
   // Loading state skeleton
@@ -270,5 +276,3 @@ export default function ForYouCarousel() {
     </motion.section>
   );
 }
-
-    
