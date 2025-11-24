@@ -53,7 +53,7 @@ Do not recommend items that are already in the user's watchlist.
 
 User's Watchlist:
 {{#each watchlist}}
-- {{title or name}} ({{media_type}})
+- {{#if title}}{{title}}{{else}}{{name}}{{/if}} ({{media_type}})
 {{/each}}
 `,
 });
