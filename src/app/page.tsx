@@ -31,7 +31,6 @@ const categoriesConfig = [
   { title: "Top Rated Movies", fetcher: () => getTopRated("movie") },
   { title: "Popular TV Shows", fetcher: () => getPopular("tv") },
   { title: "Top Rated TV Shows", fetcher: () => getTopRated("tv") },
-  { title: "Anime", fetcher: () => getDiscover("tv", { with_genres: '16', with_origin_country: 'JP' }) },
   { title: "K-Drama", fetcher: () => getDiscover("tv", { with_origin_country: 'KR' }) },
   { title: "Hindi Cinema", fetcher: () => getDiscover("movie", { with_original_language: 'hi' }) },
 ];

@@ -17,7 +17,6 @@ import Link from "next/link";
 const navItems = [
   { href: "/tv-shows", label: "Shows", icon: Tv },
   { href: "/movies", label: "Movies", icon: Film },
-  { href: "/anime", label: "Anime", icon: Tv },
   { href: "/watchlist", label: "Watchlist", icon: ListVideo },
   { href: "/chat", label: "Chat", icon: MessageCircle },
 ];
