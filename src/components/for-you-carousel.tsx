@@ -57,34 +57,42 @@ function RecommendationCard({ item }: { item: Recommendation }) {
         e.stopPropagation();
         router.push(path);
     };
-
+    
     return (
-        <motion.div 
-          className="w-full"
-          variants={{
-            rest: { scale: 1 },
-            hover: { scale: 1.05 },
-          }}
-          transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+        <motion.div
+            className="w-full group"
+            whileHover="hover"
+            initial="rest"
+            animate="rest"
+            variants={{
+                rest: { scale: 1 },
+                hover: { scale: 1.05 },
+            }}
+            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
         >
             <Card
-                className="relative aspect-video w-full cursor-pointer overflow-hidden rounded-xl border-border/20 shadow-lg group/card"
+                className="relative aspect-video w-full cursor-pointer overflow-hidden rounded-xl border-border/20 shadow-lg"
                 onClick={(e) => handleNavigation(e, `/media/${item.media_type}/${item.id}`)}
             >
-                <Image
-                    src={getTmdbImageUrl(item.backdrop_path, 'w500')}
-                    alt={item.title || item.name || "Recommendation"}
-                    fill
-                    sizes="(max-width: 768px) 80vw, (max-width: 1200px) 40vw, 30vw"
-                    className="object-cover transition-transform duration-300 group-hover/card:scale-110"
-                />
+                <div className="absolute inset-0 z-0">
+                    <Image
+                        src={getTmdbImageUrl(item.backdrop_path, 'w500')}
+                        alt={item.title || item.name || "Recommendation"}
+                        fill
+                        sizes="(max-width: 768px) 80vw, (max-width: 1200px) 40vw, 30vw"
+                        className="object-cover transition-transform duration-300 group-hover:scale-110"
+                    />
+                </div>
                 <div 
                     className="absolute inset-0 z-10 bg-gradient-to-t from-black/90 via-black/50 to-transparent transition-opacity duration-300"
                 />
                 
-                <div 
-                  className="pointer-events-none absolute -inset-px rounded-xl border-2 border-transparent opacity-0 transition-all duration-300 group-hover/card:opacity-100 group-hover/card:border-primary"
-                  style={{ filter: 'drop-shadow(0 0 12px hsl(var(--primary) / 0.8))' }}
+                <motion.div 
+                  className="pointer-events-none absolute -inset-px rounded-xl border-2 border-transparent opacity-0 transition-all duration-300 group-hover:opacity-100"
+                  style={{ 
+                    filter: 'drop-shadow(0 0 12px hsl(var(--primary) / 0.8))',
+                    borderColor: 'hsl(var(--primary))'
+                   }}
                 />
 
                 <div className="absolute inset-0 z-20 flex flex-col justify-end p-4 text-white">
@@ -95,7 +103,7 @@ function RecommendationCard({ item }: { item: Recommendation }) {
                     </p>
                 </div>
 
-                <div className="absolute inset-0 z-30 flex items-center justify-center gap-4 opacity-0 transition-all duration-300 group-hover/card:opacity-100">
+                <div className="absolute inset-0 z-30 flex items-center justify-center gap-4 opacity-0 transition-all duration-300 group-hover:opacity-100">
                     <Button
                         size="icon"
                         variant="secondary"
@@ -149,7 +157,7 @@ export default function ForYouCarousel() {
             id: typeof item.id === 'string' ? parseInt(item.id, 10) : item.id,
             title: item.title,
             name: item.name,
-            media_type: originalItem.media_type, // Use media_type from the original watchlist item
+            media_type: originalItem.media_type,
             genres: item.genres?.map(g => g.name) || [],
             original_language: (item as any)?.original_language || 'en',
           };
