@@ -51,49 +51,49 @@ const itemVariants = {
 };
 
 function RecommendationCard({ item }: { item: Recommendation }) {
-  const router = useRouter();
-  const detailPath = `/media/${item.media_type}/${item.id}`;
-  const streamPath = `/stream/${item.media_type}/${item.id}${item.media_type === 'tv' ? '?s=1&e=1' : ''}`;
+    const router = useRouter();
+    const detailPath = `/media/${item.media_type}/${item.id}`;
+    const streamPath = `/stream/${item.media_type}/${item.id}${item.media_type === 'tv' ? '?s=1&e=1' : ''}`;
   
-  return (
-    <div className="relative group aspect-[16/9] w-full">
-        <Card className="h-full w-full overflow-hidden rounded-xl transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/20">
-            <Link href={detailPath} className="block h-full w-full">
-                <Image
-                    src={getTmdbImageUrl(item.backdrop_path, 'w500')}
-                    alt={item.title || item.name || "Recommendation"}
-                    fill
-                    sizes="(max-width: 768px) 80vw, (max-width: 1200px) 40vw, 30vw"
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
-                 {/* Subtle glow effect on hover */}
-                <div className="absolute -inset-px rounded-xl border-2 border-transparent transition-all duration-300 group-hover:border-primary/50" />
-            </Link>
-            
-            <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 flex gap-2">
-                <Button size="icon" variant="secondary" className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20" asChild>
-                    <Link href={detailPath}>
-                        <Info className="w-5 h-5" />
-                    </Link>
-                </Button>
-                <Button size="icon" className="h-9 w-9 rounded-full button-bg-pan" asChild>
-                    <Link href={streamPath}>
-                        <PlayCircle className="w-5 h-5" />
-                    </Link>
-                </Button>
-            </div>
+    return (
+        <div className="relative group aspect-[16/9] w-full">
+            <Card className="h-full w-full overflow-hidden rounded-xl transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/20">
+                <Link href={detailPath} className="block h-full w-full rounded-xl overflow-hidden">
+                    <Image
+                        src={getTmdbImageUrl(item.backdrop_path, 'w500')}
+                        alt={item.title || item.name || "Recommendation"}
+                        fill
+                        sizes="(max-width: 768px) 80vw, (max-width: 1200px) 40vw, 30vw"
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
+                    {/* Subtle glow effect on hover */}
+                    <div className="absolute -inset-px rounded-xl border-2 border-transparent transition-all duration-300 group-hover:border-primary/50" />
+                </Link>
+                
+                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 flex gap-2">
+                    <Button size="icon" variant="secondary" className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20" asChild>
+                        <Link href={detailPath}>
+                            <Info className="w-5 h-5" />
+                        </Link>
+                    </Button>
+                    <Button size="icon" className="h-9 w-9 rounded-full button-bg-pan" asChild>
+                        <Link href={streamPath}>
+                            <PlayCircle className="w-5 h-5" />
+                        </Link>
+                    </Button>
+                </div>
 
-            <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                <h3 className="font-bold truncate text-base">{item.title || item.name}</h3>
-                <p className="text-xs text-primary flex items-center gap-1.5 mt-1">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>{item.reason}</span>
-                </p>
-            </div>
-        </Card>
-    </div>
-  );
+                <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                    <h3 className="font-bold truncate text-base">{item.title || item.name}</h3>
+                    <p className="text-xs text-primary flex items-center gap-1.5 mt-1">
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>{item.reason}</span>
+                    </p>
+                </div>
+            </Card>
+        </div>
+    );
 }
 
 
@@ -124,20 +124,24 @@ export default function ForYouCarousel() {
         const aiResult = await getRecommendations({ watchlist: watchlistPayload });
         
         if (aiResult?.recommendations?.length > 0) {
-            const validatedRecommendations: Recommendation[] = [];
             // Use Promise.all for parallel fetching
             const detailPromises = aiResult.recommendations.map(async (rec) => {
               try {
-                const details = await getMediaDetails(rec.id, rec.media_type);
+                // First search to find the correct media type if not provided
+                const searchResults = await searchMedia(rec.title, 1, 1);
+                const topResult = searchResults.results[0];
+                if (!topResult) return null;
+
+                const details = await getMediaDetails(topResult.id, topResult.media_type as 'movie' | 'tv');
                 if (details.backdrop_path) {
                   return {
                     ...details,
                     reason: rec.reason,
-                    media_type: rec.media_type
+                    media_type: topResult.media_type
                   };
                 }
               } catch (e) {
-                console.error(`Error fetching details for recommended item: ${rec.id}`, e);
+                console.error(`Error fetching details for recommended item: ${rec.title}`, e);
               }
               return null;
             });
