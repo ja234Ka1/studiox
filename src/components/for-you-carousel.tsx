@@ -59,44 +59,46 @@ function RecommendationCard({ item }: { item: Recommendation }) {
     };
 
     return (
-        <div 
+        <motion.div
             className="group/card relative aspect-video w-full cursor-pointer"
             onClick={(e) => handleNavigation(e, `/media/${item.media_type}/${item.id}`)}
+            whileHover={{ scale: 1.05, zIndex: 20 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+
         >
-            <motion.div
-                className="relative h-full w-full"
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            <Card
+                className="h-full w-full overflow-hidden rounded-xl border-border/20 shadow-lg"
             >
-                <Card
-                    className="h-full w-full overflow-hidden rounded-xl border-border/20 shadow-lg"
-                >
-                    <Image
-                        src={getTmdbImageUrl(item.backdrop_path, 'w500')}
-                        alt={item.title || item.name || "Recommendation"}
-                        fill
-                        sizes="(max-width: 768px) 80vw, (max-width: 1200px) 40vw, 30vw"
-                        className="object-cover"
-                    />
-                    <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
-                    <div className="absolute inset-0 z-20 flex flex-col justify-end p-4 text-white">
-                        <h3 className="text-lg font-bold leading-tight drop-shadow-md">{item.title || item.name}</h3>
-                        <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-primary drop-shadow-md filter-glow">
-                            <Sparkles className="h-4 w-4" />
-                            <span>{item.reason}</span>
-                        </p>
-                    </div>
-                </Card>
-            </motion.div>
+                <Image
+                    src={getTmdbImageUrl(item.backdrop_path, 'w500')}
+                    alt={item.title || item.name || "Recommendation"}
+                    fill
+                    sizes="(max-width: 768px) 80vw, (max-width: 1200px) 40vw, 30vw"
+                    className="object-cover"
+                />
+                <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
+                <div className="absolute inset-0 z-20 flex flex-col justify-end p-4 text-white">
+                    <h3 className="text-lg font-bold leading-tight drop-shadow-md">{item.title || item.name}</h3>
+                    <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-primary drop-shadow-md filter-glow">
+                        <Sparkles className="h-4 w-4" />
+                        <span>{item.reason}</span>
+                    </p>
+                </div>
+                 {/* Animated border/glow effect */}
+                <div className="pointer-events-none absolute -inset-0.5 rounded-xl border-2 border-transparent opacity-0 transition-opacity duration-300 group-hover/card:opacity-100 group-hover/card:filter-glow"
+                     style={{ borderColor: 'hsl(var(--primary))' }}
+                />
+            </Card>
+           
             <div className="absolute inset-0 z-30 flex items-center justify-center gap-4 opacity-0 transition-all duration-300 group-hover/card:opacity-100">
                 <Button
                     asChild
                     size="icon"
                     variant="secondary"
                     className="h-12 w-12 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20"
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => handleNavigation(e, `/media/${item.media_type}/${item.id}`)}
                 >
-                    <a href={`/media/${item.media_type}/${item.id}`} onClick={(e) => handleNavigation(e, `/media/${item.media_type}/${item.id}`)}>
+                    <a>
                         <Info className="h-6 w-6" />
                         <span className="sr-only">More Info</span>
                     </a>
@@ -105,17 +107,15 @@ function RecommendationCard({ item }: { item: Recommendation }) {
                     asChild
                     size="icon"
                     className="h-16 w-16 rounded-full bg-primary/80 backdrop-blur-sm hover:bg-primary"
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => handleNavigation(e, `/stream/${item.media_type}/${item.id}${item.media_type === 'tv' ? '?s=1&e=1' : ''}`)}
                 >
-                     <a href={`/stream/${item.media_type}/${item.id}${item.media_type === 'tv' ? '?s=1&e=1' : ''}`} onClick={(e) => handleNavigation(e, `/stream/${item.media_type}/${item.id}${item.media_type === 'tv' ? '?s=1&e=1' : ''}`)}>
+                     <a>
                         <PlayCircle className="h-8 w-8" />
                         <span className="sr-only">Play</span>
                     </a>
                 </Button>
             </div>
-            {/* Animated border */}
-            <div className="pointer-events-none absolute -inset-0.5 rounded-xl border-2 border-transparent opacity-0 transition-opacity duration-300 group-hover/card:opacity-100 group-hover/card:[box-shadow:0_0_20px_2px_hsl(var(--primary))]" />
-        </div>
+        </motion.div>
     );
 }
 const MemoizedRecommendationCard = React.memo(RecommendationCard);
@@ -128,8 +128,8 @@ export default function ForYouCarousel() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
-  const fetchRecommendations = React.useCallback(async () => {
-    if (watchlist.length < 2) {
+  const fetchRecommendations = React.useCallback(async (currentWatchlist: MediaDetailsType[]) => {
+    if (currentWatchlist.length < 2) {
       setRecommendations([]);
       return;
     }
@@ -139,19 +139,18 @@ export default function ForYouCarousel() {
 
     try {
       const fullWatchlistDetails = await Promise.all(
-        watchlist.map(item => getMediaDetails(item.id, item.media_type as 'movie' | 'tv'))
+        currentWatchlist.map(item => getMediaDetails(item.id, item.media_type as 'movie' | 'tv'))
       );
 
       const watchlistPayload: RecommendationsInput = {
-        watchlist: watchlist.map(item => {
-            const details = fullWatchlistDetails.find(d => d.id === item.id);
+        watchlist: fullWatchlistDetails.map(item => {
             return {
                 id: typeof item.id === 'string' ? parseInt(item.id, 10) : item.id,
                 title: item.title,
                 name: item.name,
                 media_type: item.media_type,
-                genres: details?.genres.map(g => g.name) || [],
-                original_language: (details as any)?.original_language || 'en',
+                genres: item?.genres?.map(g => g.name) || [],
+                original_language: (item as any)?.original_language || 'en',
             };
         })
       };
@@ -175,7 +174,7 @@ export default function ForYouCarousel() {
         const successfulDetails = settledDetails.filter((d): d is Recommendation => d !== null);
 
         const finalRecommendations = successfulDetails.reduce((acc, current) => {
-          const isInWatchlist = watchlist.some(item => item.id === current.id);
+          const isInWatchlist = currentWatchlist.some(item => item.id === current.id);
           const isAlreadyAdded = acc.some(item => item.id === current.id);
           if (!isInWatchlist && !isAlreadyAdded) {
             acc.push(current);
@@ -195,11 +194,11 @@ export default function ForYouCarousel() {
     } finally {
       setIsLoading(false);
     }
-  }, [watchlist]);
+  }, []);
 
   React.useEffect(() => {
     if (user && !user.isAnonymous && !isWatchlistLoading && watchlist.length > 0) {
-        fetchRecommendations();
+        fetchRecommendations(watchlist);
     }
   }, [user, isWatchlistLoading, watchlist, fetchRecommendations]);
 

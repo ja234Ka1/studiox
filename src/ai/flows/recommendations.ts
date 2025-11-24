@@ -64,7 +64,7 @@ Your goal is to provide 10 personalized recommendations based on the user's watc
 Analyze the genres, language, actors, and themes present in the user's watchlist below.
 Based on this analysis, suggest 10 new movies or TV shows that they are likely to enjoy.
 
-**CRITICAL INSTRUCTION:** Your recommendations MUST perfectly match the predominant genres and original languages of the items in the user's watchlist. For example, if the user watches Japanese-language horror movies, you MUST recommend other Japanese-language horror movies.
+**CRITICAL INSTRUCTION:** Your recommendations MUST perfectly match the predominant genres and original languages of the items in the user's watchlist. For example, if the user mostly watches Japanese-language horror movies, you MUST recommend other Japanese-language horror movies. Prioritize matching both language and genre.
 
 For each recommendation, provide a short, exciting reason (no more than 15 words) explaining why it's a good fit. For example, "Because you liked The Matrix, you'll love the mind-bending sci-fi in this."
 
