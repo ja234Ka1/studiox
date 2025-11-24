@@ -16,7 +16,6 @@ import { useEffect, useState } from "react";
 import dynamic from 'next/dynamic';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Hero } from "@/components/hero";
-import { AnimeQuote } from "@/components/anime-quote";
 
 
 interface Category {
@@ -141,8 +140,6 @@ export default function Home() {
               <MediaCarousel title="Trending This Week" items={heroItems} />
             )}
             
-            <AnimeQuote />
-
             {categories.slice(0, 2).map((category) => (
               category.title !== 'Trending Movies Today' && <MediaCarousel key={category.title} title={category.title} items={category.items} />
             ))}
