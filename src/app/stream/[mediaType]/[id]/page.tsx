@@ -88,17 +88,16 @@ export default function StreamPage() {
              };
         }
 
-        // Handle 'Prime' source (vidfast)
-        const primeOrigin = sourceConfig.Prime.origin;
-        if (typeof primeOrigin === 'string' ? origin === primeOrigin : primeOrigin.includes(origin)) {
+        const sourceDetails = sourceConfig[streamSource] || sourceConfig['Prime'];
+        const sourceOrigin = sourceDetails.origin;
+        if (typeof sourceOrigin === 'string' ? origin === sourceOrigin : sourceOrigin.includes(origin)) {
             let payload;
             if (data.type === 'PLAYER_EVENT' && data.data) {
                 payload = { ...data.data, lastWatched: Date.now(), mediaType };
                 updatePlayerState(data.data.playing, payload);
-                dispatchProgressEvent(progressKey, payload);
             } else if (data.type === 'MEDIA_DATA' && data.data) {
                 payload = { ...data.data, mediaType };
-                 // Assume not playing on initial data load
+                // Assume not playing on initial data load
                 updatePlayerState(false, payload);
                 dispatchProgressEvent(progressKey, payload);
             }
@@ -131,7 +130,7 @@ export default function StreamPage() {
         dispatchProgressEvent(progressKey, finalData);
       }
     };
-  }, [id, mediaType, season, episode, progressKey]);
+  }, [id, mediaType, season, episode, progressKey, streamSource]);
   
   useEffect(() => {
       const getStreamUrl = async () => {
@@ -172,9 +171,12 @@ export default function StreamPage() {
     notFound();
   }
 
-  const numericId = parseInt(id, 10);
-  if (isNaN(numericId)) {
-    notFound();
+  // Allow string IDs for anime
+  if (mediaType !== 'tv' && mediaType !== 'movie') {
+      const numericId = parseInt(id, 10);
+      if (isNaN(numericId)) {
+        notFound();
+      }
   }
   
   const renderPlayer = () => {

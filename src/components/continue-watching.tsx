@@ -76,22 +76,15 @@ const normalizeProgressData = (key: string, rawData: any): NormalizedProgress | 
         mediaType: mediaType,
     };
 
-    // Detect 'Elite' source structure (vidify)
-    if ('currentTime' in rawData && 'duration' in rawData && 'lastWatched' in rawData && 'watched_percentage' in rawData) {
-        normalized.currentTime = rawData.currentTime;
-        normalized.duration = rawData.duration;
-        normalized.lastWatched = rawData.lastWatched;
-        normalized.season = rawData.season;
-        normalized.episode = rawData.episode;
-    }
     // Detect 'Prime' source structure (vidfast) from PLAYER_EVENT
-    else if ('event' in rawData && 'currentTime' in rawData && 'duration' in rawData) {
+    if ('event' in rawData && 'currentTime' in rawData && 'duration' in rawData) {
         normalized.currentTime = rawData.currentTime;
         normalized.duration = rawData.duration;
         normalized.lastWatched = rawData.lastWatched || Date.now();
         normalized.season = rawData.season;
         normalized.episode = rawData.episode;
     }
+    // This part can be extended for other sources
     else {
         return null; // Unrecognized format
     }
