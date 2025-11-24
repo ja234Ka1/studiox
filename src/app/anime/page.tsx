@@ -1,12 +1,33 @@
 
 import MediaCarousel from "@/components/media-carousel";
-import { getDiscover } from "@/lib/tmdb";
+import { getTopAiringAnime, getPopularAnime, getAnimeMovies } from "@/lib/anime";
+import type { SearchResult } from "@/types/anime";
+import type { Media } from "@/types/tmdb";
+
+// Adapter function to convert Anime API search result to TMDB Media type
+const adaptAnimeToMedia = (anime: SearchResult): Media => ({
+    id: parseInt(anime.animeId.split('-').pop() || '0', 10), // Risky, but works for gogoanime IDs
+    name: anime.animeTitle,
+    poster_path: anime.animeImg,
+    backdrop_path: null, // Anime API doesn't provide this
+    overview: `Released: ${anime.releasedDate}`, // No overview in search results
+    media_type: "tv", // Assuming all are TV shows for simplicity
+    release_date: anime.releasedDate,
+    first_air_date: anime.releasedDate,
+    vote_average: 0, // No rating in search results
+    genre_ids: [],
+    popularity: 0,
+});
+
 
 export default async function AnimePage() {
-    const popularAnime = await getDiscover("tv", { with_genres: '16', sort_by: 'popularity.desc', with_origin_country: 'JP' });
-    const topRatedAnime = await getDiscover("tv", { with_genres: '16', sort_by: 'vote_average.desc', 'vote_count.gte': '1000', with_origin_country: 'JP' });
-    const newAnime = await getDiscover("tv", { with_genres: '16', 'first_air_date.gte': new Date().getFullYear().toString(), with_origin_country: 'JP' });
-    
+    const topAiring = await getTopAiringAnime();
+    const popularAnime = await getPopularAnime();
+    const animeMovies = await getAnimeMovies();
+
+    const adaptedTopAiring = topAiring.map(adaptAnimeToMedia);
+    const adaptedPopular = popularAnime.map(adaptAnimeToMedia);
+    const adaptedMovies = animeMovies.map(adaptAnimeToMedia);
 
   return (
     <div className="container px-4 md:px-8 lg:px-16 space-y-12 py-12 pb-24 mx-auto">
@@ -17,11 +38,10 @@ export default async function AnimePage() {
             </p>
         </header>
         <div className="space-y-12">
-            {popularAnime.length > 0 && <MediaCarousel title="Popular Anime" items={popularAnime} />}
-            {topRatedAnime.length > 0 && <MediaCarousel title="Top Rated Anime" items={topRatedAnime} />}
-            {newAnime.length > 0 && <MediaCarousel title="New This Year" items={newAnime} />}
+            {adaptedTopAiring.length > 0 && <MediaCarousel title="Top Airing" items={adaptedTopAiring} />}
+            {adaptedPopular.length > 0 && <MediaCarousel title="Popular Anime" items={adaptedPopular} />}
+            {adaptedMovies.length > 0 && <MediaCarousel title="Anime Movies" items={adaptedMovies} />}
         </div>
     </div>
   );
 }
-

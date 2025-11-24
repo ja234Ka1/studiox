@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTheme, type StreamSource } from "@/context/theme-provider";
+import { getEpisodeStream } from "@/lib/anime";
 
 const vidfastOrigins = [
     'https://vidfast.pro',
@@ -25,6 +26,11 @@ const sourceConfig: Record<string, { movie?: string, tv?: string, origin: string
         tv: 'https://vidfast.pro/tv/{id}/{season}/{episode}',
         origin: vidfastOrigins,
     },
+    Anime: {
+        // This source is handled by a different logic
+        tv: 'special-case-anime',
+        origin: [],
+    }
 }
 
 /**
@@ -57,10 +63,12 @@ export default function StreamPage() {
   
   const { mediaType, id } = params;
   const playerStateRef = useRef<PlayerState | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   
   const season = searchParams.get('s');
   const episode = searchParams.get('e');
   const progressKey = `progress_${mediaType}_${id}`;
+  const animeEpisodeId = searchParams.get('ep'); // For anime episodes
 
   useEffect(() => {
     setIsClient(true);
@@ -128,21 +136,37 @@ export default function StreamPage() {
   useEffect(() => {
       const getStreamUrl = async () => {
         setIsLoadingUrl(true);
+        setStreamUrl(null);
+        
         const sourceDetails = sourceConfig[streamSource] || sourceConfig['Prime'];
-        let urlTemplate: string | undefined;
-
-        if (mediaType === 'tv') {
-            urlTemplate = sourceDetails.tv;
-            if(urlTemplate) setStreamUrl(urlTemplate.replace('{id}', id).replace('{season}', season || '1').replace('{episode}', episode || '1'));
+        
+        if (streamSource === 'Anime' && animeEpisodeId) {
+            try {
+                const animeStream = await getEpisodeStream(animeEpisodeId);
+                const defaultSource = animeStream.sources.find(s => s.quality === 'default') || animeStream.sources[0];
+                if (defaultSource) {
+                    setStreamUrl(defaultSource.url);
+                } else {
+                    console.error("No stream source found for anime episode");
+                }
+            } catch (error) {
+                console.error("Failed to fetch anime stream URL:", error);
+            }
         } else {
-            urlTemplate = sourceDetails.movie;
-            if(urlTemplate) setStreamUrl(urlTemplate.replace('{id}', id));
+            let urlTemplate: string | undefined;
+            if (mediaType === 'tv') {
+                urlTemplate = sourceDetails.tv;
+                if(urlTemplate) setStreamUrl(urlTemplate.replace('{id}', id).replace('{season}', season || '1').replace('{episode}', episode || '1'));
+            } else {
+                urlTemplate = sourceDetails.movie;
+                if(urlTemplate) setStreamUrl(urlTemplate.replace('{id}', id));
+            }
         }
 
         setIsLoadingUrl(false);
     }
     getStreamUrl();
-  }, [streamSource, mediaType, id, season, episode]);
+  }, [streamSource, mediaType, id, season, episode, animeEpisodeId]);
 
   if (mediaType !== "tv" && mediaType !== "movie") {
     notFound();
@@ -168,6 +192,18 @@ export default function StreamPage() {
                 Could not load video source.
             </div>
           )
+      }
+
+      if (streamSource === 'Anime') {
+        return (
+            <video
+                ref={videoRef}
+                src={streamUrl}
+                controls
+                autoPlay
+                className="w-full h-full border-0"
+            />
+        )
       }
 
       return (

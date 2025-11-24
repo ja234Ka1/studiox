@@ -5,6 +5,7 @@ import { useState, useEffect, forwardRef } from 'react';
 import Image from 'next/image';
 import { getSeasonDetails } from '@/lib/tmdb';
 import type { SeasonDetails, Episode } from '@/types/tmdb';
+import type { Episode as AnimeEpisode } from '@/types/anime';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { PlayCircle, Loader2 } from 'lucide-react';
@@ -16,11 +17,13 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 interface EpisodeSelectorProps {
   showId: number;
-  numberOfSeasons: number;
+  numberOfSeasons?: number;
   title: string;
+  animeId?: string;
+  animeEpisodes?: AnimeEpisode[];
 }
 
-const EpisodeListItem = forwardRef<HTMLDivElement, { episode: Episode; showId: number; seasonNumber: number; }>(
+const TmdbEpisodeListItem = forwardRef<HTMLDivElement, { episode: Episode; showId: number; seasonNumber: number; }>(
     ({ episode, showId, seasonNumber }, ref) => {
     
     const streamPath = `/stream/tv/${showId}?s=${seasonNumber}&e=${episode.episode_number}`;
@@ -54,15 +57,39 @@ const EpisodeListItem = forwardRef<HTMLDivElement, { episode: Episode; showId: n
         </div>
     );
 });
-EpisodeListItem.displayName = "EpisodeListItem";
+TmdbEpisodeListItem.displayName = "TmdbEpisodeListItem";
+
+const AnimeEpisodeListItem = forwardRef<HTMLDivElement, { episode: AnimeEpisode; animeId: string }>(
+    ({ episode, animeId }, ref) => {
+
+    const streamPath = `/stream/tv/${animeId}?ep=${episode.episodeId}`;
+
+    return (
+        <div ref={ref} className="flex gap-4 p-4 rounded-lg hover:bg-muted/50 transition-colors">
+            <div className="flex-grow">
+                <h4 className="font-semibold mb-1">Episode {episode.episodeNum}</h4>
+                <Button size="sm" asChild>
+                    <Link href={streamPath}>
+                        <PlayCircle className="mr-2 h-4 w-4" />
+                        Watch Episode
+                    </Link>
+                </Button>
+            </div>
+        </div>
+    );
+});
+AnimeEpisodeListItem.displayName = "AnimeEpisodeListItem";
 
 
-export function EpisodeSelector({ showId, numberOfSeasons, title }: EpisodeSelectorProps) {
+export function EpisodeSelector({ showId, numberOfSeasons, title, animeId, animeEpisodes }: EpisodeSelectorProps) {
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [seasonDetails, setSeasonDetails] = useState<SeasonDetails | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    // Only fetch for TMDB shows
+    if (!numberOfSeasons) return;
+
     const fetchSeasonDetails = async () => {
       if (!selectedSeason) return;
       setIsLoading(true);
@@ -77,7 +104,32 @@ export function EpisodeSelector({ showId, numberOfSeasons, title }: EpisodeSelec
       }
     };
     fetchSeasonDetails();
-  }, [selectedSeason, showId]);
+  }, [selectedSeason, showId, numberOfSeasons]);
+
+  if (animeId && animeEpisodes) {
+    return (
+        <Card className="bg-muted/30 overflow-hidden">
+            <CardHeader>
+                <CardTitle>Episodes</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <ScrollArea className="h-[400px] pr-4">
+                        <div className="space-y-2">
+                        {animeEpisodes.map(episode => (
+                            <AnimeEpisodeListItem
+                                key={episode.episodeId}
+                                episode={episode}
+                                animeId={animeId}
+                            />
+                        ))}
+                    </div>
+                </ScrollArea>
+            </CardContent>
+        </Card>
+    )
+  }
+
+  if (!numberOfSeasons) return null;
 
   const seasons = Array.from({ length: numberOfSeasons }, (_, i) => i + 1);
   const episodes = seasonDetails?.episodes || [];
@@ -128,7 +180,7 @@ export function EpisodeSelector({ showId, numberOfSeasons, title }: EpisodeSelec
                                 <ScrollArea className="h-[400px] pr-4">
                                      <div className="space-y-2">
                                         {episodes.map(episode => (
-                                            <EpisodeListItem 
+                                            <TmdbEpisodeListItem 
                                                 key={episode.id}
                                                 episode={episode} 
                                                 showId={showId}

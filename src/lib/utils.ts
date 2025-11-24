@@ -14,6 +14,11 @@ type TmdbImageSize = "w500" | "original";
 type StreamedImageType = "badge" | "poster" | "proxy";
 
 export function getTmdbImageUrl(path: string | null | undefined, size: TmdbImageSize = "w500"): string {
+  // If path is a full URL (from anime API), use it directly
+  if (path?.startsWith('http')) {
+    return path;
+  }
+  
   if (path) {
     let finalSize = size;
     // Check if data saver is enabled from localStorage

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Check, Crown, Gem, Shield, Sparkles, X } from "lucide-react";
+import { Check, Crown, Gem, Shield, Sparkles, X, Tv } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { type StreamSource } from "@/context/theme-provider";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,13 @@ const sources: { id: StreamSource; name: string; description: string; icon: Reac
     description: "The default source, recommended by Willow.",
     icon: <Crown className="w-6 h-6" />,
     recommended: true,
+  },
+  {
+    id: "Anime",
+    name: "Anime",
+    description: "A dedicated source for watching anime.",
+    icon: <Tv className="w-6 h-6" />,
+    recommended: false,
   },
 ];
 

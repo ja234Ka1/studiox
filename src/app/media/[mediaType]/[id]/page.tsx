@@ -2,16 +2,18 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { getMediaDetails } from "@/lib/tmdb";
+import { getAnimeDetails } from "@/lib/anime";
 import type { MediaType } from "@/types/tmdb";
 import { Star } from "lucide-react";
 import MediaCarousel from "@/components/media-carousel";
 import { DetailPageHero } from "@/components/detail-page-hero";
 import { EpisodeSelector } from "@/components/episode-selector";
 import { CastSection } from "@/components/cast-section";
+import type { AnimeDetails } from "@/types/anime";
 
 interface MediaDetailsPageProps {
     params?: {
-        mediaType: MediaType;
+        mediaType: MediaType | 'anime';
         id: string;
     }
 }
@@ -22,20 +24,46 @@ export default async function MediaDetailsPage({ params }: MediaDetailsPageProps
   }
   const { mediaType, id } = params;
   
-  if (mediaType !== "movie" && mediaType !== "tv") {
-    notFound();
-  }
-  const numericId = parseInt(id, 10);
-  if (isNaN(numericId)) {
+  if (mediaType !== "movie" && mediaType !== "tv" && mediaType !== "anime") {
     notFound();
   }
 
   let item;
-  try {
-    item = await getMediaDetails(numericId, mediaType);
-  } catch (error) {
-    console.error("Failed to fetch media details:", error);
-    notFound();
+  let animeItem: AnimeDetails | null = null;
+
+  if (mediaType === 'anime') {
+    // For anime, we need to construct a TMDB-like object for the hero
+    try {
+        animeItem = await getAnimeDetails(id);
+        item = {
+            id: parseInt(id.split('-').pop() || '0', 10),
+            name: animeItem.animeTitle,
+            overview: animeItem.synopsis,
+            backdrop_path: null, // No backdrop from this API
+            poster_path: animeItem.animeImg,
+            genres: animeItem.genres.map(g => ({ id: 0, name: g })),
+            vote_average: 0,
+            first_air_date: animeItem.releasedDate,
+            credits: { cast: [], crew: [] },
+            recommendations: { results: [] },
+            videos: { results: [] },
+            media_type: 'tv', // Treat as TV for hero
+        };
+    } catch (error) {
+        console.error("Failed to fetch anime details:", error);
+        notFound();
+    }
+  } else {
+    const numericId = parseInt(id, 10);
+    if (isNaN(numericId)) {
+        notFound();
+    }
+    try {
+        item = await getMediaDetails(numericId, mediaType);
+    } catch (error) {
+        console.error("Failed to fetch media details:", error);
+        notFound();
+    }
   }
   
   if (!item) {
@@ -43,7 +71,7 @@ export default async function MediaDetailsPage({ params }: MediaDetailsPageProps
   }
 
   // Manually add media_type to the item object, as it's not in the API response for details
-  const itemWithMediaType = { ...item, media_type: mediaType };
+  const itemWithMediaType = { ...item, media_type: item.media_type || mediaType };
 
   const director = item.credits.crew.find(
     (person) => person.job === "Director"
@@ -66,7 +94,7 @@ export default async function MediaDetailsPage({ params }: MediaDetailsPageProps
                 <p className="font-semibold">Rating</p>
                 <p className="flex items-center justify-center gap-2 text-muted-foreground">
                   <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-                  {item.vote_average.toFixed(1)} / 10
+                  {item.vote_average > 0 ? `${item.vote_average.toFixed(1)} / 10` : 'N/A'}
                 </p>
               </div>
               {director && (
@@ -99,6 +127,15 @@ export default async function MediaDetailsPage({ params }: MediaDetailsPageProps
                 showId={item.id} 
                 numberOfSeasons={item.number_of_seasons} 
                 title={item.name || item.title || ''}
+            />
+        )}
+        
+        {animeItem && (
+            <EpisodeSelector 
+                showId={0} // Not needed for anime source
+                title={animeItem.animeTitle}
+                animeEpisodes={animeItem.episodesList}
+                animeId={id}
             />
         )}
 

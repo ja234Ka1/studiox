@@ -44,7 +44,12 @@ export function MediaCard({ item }: MediaCardProps) {
   const posterUrl = item.poster_path ? getTmdbImageUrl(item.poster_path, 'w500') : fallbackImage?.imageUrl;
   
   const title = item.title || item.name;
-  const detailPath = `/media/${item.media_type}/${item.id}`;
+  
+  // Handle anime IDs which are strings
+  const mediaId = typeof item.id === 'string' ? item.id : String(item.id);
+  const mediaTypeForPath = item.media_type === 'tv' && item.poster_path?.includes('gogocdn') ? 'anime' : item.media_type;
+  const detailPath = `/media/${mediaTypeForPath}/${mediaId}`;
+
   const year = item.release_date || item.first_air_date ? new Date(item.release_date || item.first_air_date!).getFullYear() : 'N/A';
 
   const handleToggleWatchlist = async (e: React.MouseEvent) => {
@@ -77,6 +82,7 @@ export function MediaCard({ item }: MediaCardProps) {
           sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
+          unoptimized={!!item.poster_path?.includes('gogocdn')} // Don't optimize external non-tmdb images
         />
       </Link>
 
@@ -91,11 +97,15 @@ export function MediaCard({ item }: MediaCardProps) {
           >
             <motion.h3 variants={itemVariants} className="text-white font-bold text-base truncate w-full mb-1">{title}</motion.h3>
             <motion.div variants={itemVariants} className="flex items-center text-xs text-muted-foreground mb-3 gap-2">
-              <div className="flex items-center gap-1 text-amber-400">
-                <Star className="w-3 h-3 fill-current"/>
-                <span>{item.vote_average.toFixed(1)}</span>
-              </div>
-              <span>•</span>
+              {item.vote_average > 0 && (
+                <>
+                  <div className="flex items-center gap-1 text-amber-400">
+                    <Star className="w-3 h-3 fill-current"/>
+                    <span>{item.vote_average.toFixed(1)}</span>
+                  </div>
+                  <span>•</span>
+                </>
+              )}
               <span>{year}</span>
             </motion.div>
             <motion.div variants={itemVariants} className="flex items-center gap-2">
