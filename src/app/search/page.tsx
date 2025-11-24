@@ -13,36 +13,20 @@ import { Input } from '@/components/ui/input';
 import { Search as SearchIcon, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
+import Link from 'next/link';
 
 const genres = [
-  { id: 28, name: 'Action', type: 'movie', popular: true },
-  { id: 10759, name: 'Action & Adventure', type: 'tv' },
-  { id: 12, name: 'Adventure', type: 'movie' },
-  { id: 16, name: 'Animation', type: 'all' },
-  { id: 35, name: 'Comedy', type: 'all', popular: true },
-  { id: 80, name: 'Crime', type: 'all' },
-  { id: 99, name: 'Documentary', type: 'all' },
-  { id: 18, name: 'Drama', type: 'all', popular: true },
-  { id: 10751, name: 'Family', type: 'all' },
-  { id: 14, name: 'Fantasy', type: 'movie' },
-  { id: 36, name: 'History', type: 'all' },
-  { id: 27, name: 'Horror', type: 'movie' },
-  { id: 10762, name: 'Kids', type: 'tv' },
-  { id: 10402, name: 'Music', type: 'all' },
-  { id: 9648, name: 'Mystery', type: 'all' },
-  { id: 10763, name: 'News', type: 'tv' },
-  { id: 10764, name: 'Reality', type: 'tv' },
-  { id: 10749, name: 'Romance', type: 'movie' },
-  { id: 10765, name: 'Sci-Fi & Fantasy', type: 'tv', popular: true },
-  { id: 878, name: 'Science Fiction', type: 'movie', popular: true },
-  { id: 10766, name: 'Soap', type: 'tv' },
-  { id: 10767, name: 'Talk', type: 'tv' },
-  { id: 53, name: 'Thriller', type: 'movie' },
-  { id: 10770, name: 'TV Movie', type: 'movie' },
-  { id: 10752, name: 'War', type: 'movie' },
-  { id: 10768, name: 'War & Politics', type: 'tv' },
-  { id: 37, name: 'Western', type: 'movie' },
+  { id: 28, name: 'Action', type: 'movie', image: 'https://images.unsplash.com/photo-1521714161819-15534968fc5f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80' },
+  { id: 35, name: 'Comedy', type: 'all', image: 'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80' },
+  { id: 878, name: 'Sci-Fi', type: 'movie', image: 'https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1771&q=80' },
+  { id: 27, name: 'Horror', type: 'movie', image: 'https://images.unsplash.com/photo-1595843494255-7d5a3a411a7c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80' },
+  { id: 10749, name: 'Romance', type: 'movie', image: 'https://images.unsplash.com/photo-1502422552936-7c381c8153c8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80' },
+  { id: 16, name: 'Animation', type: 'all', image: 'https://images.unsplash.com/photo-1620912189837-55c9b3a3524b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80' },
+  { id: 99, name: 'Documentary', type: 'all', image: 'https://images.unsplash.com/photo-1526243741027-444d633d7365?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1771&q=80' },
+  { id: 18, name: 'Drama', type: 'all', image: 'https://images.unsplash.com/photo-1601625946892-205e4a50d24f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1849&q=80' },
 ];
+
 
 const unique = (arr: Media[]) => {
     const seen = new Set();
@@ -54,6 +38,27 @@ const unique = (arr: Media[]) => {
         seen.add(key);
         return true;
     });
+};
+
+const GenreCard = ({ genre }: { genre: typeof genres[0] }) => {
+  const pathname = usePathname();
+  const url = `${pathname}?genre=${genre.id}&genreType=${genre.type}&genreName=${encodeURIComponent(genre.name)}`;
+
+  return (
+    <motion.div whileHover={{ y: -5 }} className="w-full">
+      <Link href={url} className="group block relative w-full h-40 rounded-lg overflow-hidden shadow-lg">
+        <Image
+          src={genre.image}
+          alt={`${genre.name} genre`}
+          fill
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+        <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
+        <h3 className="absolute bottom-4 left-4 text-white text-2xl font-bold text-shadow-primary">{genre.name}</h3>
+      </Link>
+    </motion.div>
+  );
 };
 
 
@@ -175,12 +180,6 @@ const SearchPage = () => {
     }
   };
 
-  const handleGenreClick = (genre: { id: number, name: string, type: 'movie' | 'tv' | 'all' }) => {
-    const newUrl = `${pathname}?genre=${genre.id}&genreType=${genre.type}&genreName=${encodeURIComponent(genre.name)}`;
-    router.push(newUrl);
-  };
-
-
   const loadMore = () => {
     const query = searchParams.get('q');
     const genreId = searchParams.get('genre');
@@ -247,9 +246,9 @@ const SearchPage = () => {
 
       {!isLoading && !hasQuery && (
         <div className="text-center pt-8">
-            <h2 className="text-xl font-semibold mb-6">Or discover by genre</h2>
+            <h2 className="text-xl font-semibold mb-6">Or explore popular genres</h2>
             <motion.div 
-                className="flex flex-wrap justify-center gap-3"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
                 initial="hidden"
                 animate="visible"
                 variants={{
@@ -260,24 +259,11 @@ const SearchPage = () => {
                     <motion.div
                         key={genre.id + genre.type}
                         variants={{
-                            hidden: { opacity: 0, scale: 0.8 },
+                            hidden: { opacity: 0, scale: 0.9 },
                             visible: { opacity: 1, scale: 1 }
                         }}
-                        whileHover={{ scale: 1.1 }}
-                        transition={{ type: 'spring', stiffness: 300 }}
                     >
-                        <Button 
-                            variant={genre.popular ? "secondary" : "outline"}
-                            className={cn(
-                                "rounded-full transition-all duration-300",
-                                genre.popular 
-                                    ? "font-semibold"
-                                    : "border-muted-foreground/30 hover:bg-accent/10 hover:border-accent hover:text-accent"
-                            )}
-                            onClick={() => handleGenreClick(genre)}
-                        >
-                            {genre.name}
-                        </Button>
+                        <GenreCard genre={genre} />
                     </motion.div>
                 ))}
             </motion.div>
