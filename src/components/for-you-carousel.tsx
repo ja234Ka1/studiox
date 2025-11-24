@@ -51,16 +51,22 @@ const itemVariants = {
 };
 
 function RecommendationCard({ item }: { item: Recommendation }) {
+    const router = useRouter();
+
+    const handleNavigation = (e: React.MouseEvent, path: string) => {
+        e.stopPropagation(); // Stop event from bubbling up
+        router.push(path);
+    };
+
     return (
-        <Card className="relative group aspect-video w-full overflow-hidden rounded-xl border-border/20 transition-all duration-300 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/20">
-            <Link href={`/media/${item.media_type}/${item.id}`} className="absolute inset-0 z-10">
-                <span className="sr-only">View details for {item.title || item.name}</span>
-            </Link>
-            
-            <motion.div 
+        <Card
+            className="relative group/card aspect-video w-full overflow-hidden rounded-xl border-border/20 cursor-pointer"
+            onClick={(e) => handleNavigation(e, `/media/${item.media_type}/${item.id}`)}
+        >
+            <motion.div
                 className="h-full w-full"
                 whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             >
                 <Image
                     src={getTmdbImageUrl(item.backdrop_path, 'w500')}
@@ -72,40 +78,38 @@ function RecommendationCard({ item }: { item: Recommendation }) {
             </motion.div>
 
             {/* Animated Gradient Border on Hover */}
-            <div className="absolute -inset-px rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                <div className="absolute inset-0 rounded-xl button-bg-pan" style={{ backgroundSize: '400% 400%', animation: 'gradient 6s ease infinite' }}></div>
+            <div className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition-opacity duration-300 group-hover/card:opacity-100">
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary via-accent to-primary" style={{ backgroundSize: '200% 200%', animation: 'button-bg-pan 3s linear infinite' }}></div>
             </div>
 
-            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent" />
-
-            <div className="absolute top-3 right-3 z-20 flex gap-2">
-                <Button
-                    size="icon"
-                    variant="secondary"
-                    className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm opacity-0 transition-all duration-300 hover:bg-white/20 group-hover:opacity-100"
-                    asChild
-                >
-                    <Link href={`/media/${item.media_type}/${item.id}`}>
-                        <Info className="w-5 h-5" />
-                    </Link>
-                </Button>
-                <Button
-                    size="icon"
-                    className="h-9 w-9 rounded-full bg-primary/80 backdrop-blur-sm opacity-0 transition-all duration-300 hover:bg-primary group-hover:opacity-100"
-                    asChild
-                >
-                    <Link href={`/stream/${item.media_type}/${item.id}${item.media_type === 'tv' ? '?s=1&e=1' : ''}`}>
-                        <PlayCircle className="w-5 h-5" />
-                    </Link>
-                </Button>
-            </div>
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
 
             <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
                 <h3 className="font-bold truncate text-base">{item.title || item.name}</h3>
-                <p className="text-sm text-primary flex items-center gap-1.5 mt-1 filter-glow">
+                <p className="text-sm text-primary flex items-center gap-1.5 mt-1 filter-glow font-medium">
                     <Sparkles className="w-4 h-4" />
-                    <span className='font-medium'>{item.reason}</span>
+                    <span>{item.reason}</span>
                 </p>
+            </div>
+
+            <div className="absolute top-3 right-3 z-10 flex gap-2 opacity-0 transition-opacity duration-300 group-hover/card:opacity-100">
+                <Button
+                    size="icon"
+                    variant="secondary"
+                    className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20"
+                    onClick={(e) => handleNavigation(e, `/media/${item.media_type}/${item.id}`)}
+                >
+                    <Info className="w-5 h-5" />
+                    <span className="sr-only">More Info</span>
+                </Button>
+                <Button
+                    size="icon"
+                    className="h-9 w-9 rounded-full bg-primary/80 backdrop-blur-sm hover:bg-primary"
+                    onClick={(e) => handleNavigation(e, `/stream/${item.media_type}/${item.id}${item.media_type === 'tv' ? '?s=1&e=1' : ''}`)}
+                >
+                    <PlayCircle className="w-5 h-5" />
+                    <span className="sr-only">Play</span>
+                </Button>
             </div>
         </Card>
     );
@@ -131,6 +135,7 @@ export default function ForYouCarousel() {
     setError(null);
 
     try {
+      // Ensure all IDs are numbers before sending to the AI flow
       const watchlistPayload = watchlist.map(item => ({
         id: Number(item.id),
         title: item.title,
