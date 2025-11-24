@@ -54,9 +54,15 @@ export function MediaCard({ item }: MediaCardProps) {
   return (
      <div className="relative aspect-[2/3] w-full">
         <motion.div
-            whileHover={{ scale: 1.1, zIndex: 10 }}
+            whileHover="hover"
+            initial="rest"
+            animate="rest"
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
             className="absolute inset-0"
+            variants={{
+              rest: { scale: 1, zIndex: 10 },
+              hover: { scale: 1.2, zIndex: 20 },
+            }}
         >
             <div
                 className="relative h-full w-full group overflow-hidden rounded-md shadow-lg bg-muted cursor-pointer"

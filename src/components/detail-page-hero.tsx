@@ -120,7 +120,7 @@ export function DetailPageHero({ item }: DetailPageHeroProps) {
                 alt={title || "Hero backdrop"}
                 fill
                 priority
-                className="object-cover"
+                className="object-cover object-top"
                 />
           </motion.div>
         </AnimatePresence>

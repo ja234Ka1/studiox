@@ -41,7 +41,7 @@ export function FeaturedContent({ media, textPosition = 'right' }: FeaturedConte
           alt={title || 'Featured Content Backdrop'}
           fill
           priority
-          className="object-cover"
+          className="object-cover object-top"
         />
         <div
           className={cn(

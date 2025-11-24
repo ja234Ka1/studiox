@@ -177,7 +177,7 @@ export function Hero({ items }: HeroProps) {
               alt={activeItem.title || activeItem.name || "Hero backdrop"}
               fill
               priority
-              className="object-cover"
+              className="object-cover object-top"
             />
           </motion.div>
         </motion.div>
