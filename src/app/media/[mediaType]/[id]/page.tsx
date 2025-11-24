@@ -1,5 +1,4 @@
 
-
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { getMediaDetails } from "@/lib/tmdb";
@@ -10,12 +9,14 @@ import { DetailPageHero } from "@/components/detail-page-hero";
 import { EpisodeSelector } from "@/components/episode-selector";
 import { CastSection } from "@/components/cast-section";
 
-interface MediaDetailsPageParams {
+interface MediaDetailsPageProps {
+  params: {
     mediaType: MediaType;
     id: string;
+  };
 }
 
-export default async function MediaDetailsPage({ params }: { params: MediaDetailsPageParams }) {
+export default async function MediaDetailsPage({ params }: MediaDetailsPageProps) {
   const { mediaType, id } = params;
   
   if (mediaType !== "movie" && mediaType !== "tv") {
