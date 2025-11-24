@@ -46,7 +46,7 @@ function toInternalMedia(anime: AniWatchMedia): Media {
 
 export async function getTrendingAnime(): Promise<Media[]> {
     try {
-        const data = await fetchAniWatch<AniWatchAPIResponse<AniWatchMedia>>('/anime/trending');
+        const data = await fetchAniWatch<AniWatchAPIResponse<AniWatchMedia>>('/anime/top-airing');
         return data.results.map(toInternalMedia);
     } catch (error) {
         console.error("Failed to get trending anime:", error);
@@ -56,7 +56,7 @@ export async function getTrendingAnime(): Promise<Media[]> {
 
 export async function getPopularAnime(): Promise<Media[]> {
     try {
-        const data = await fetchAniWatch<AniWatchAPIResponse<AniWatchMedia>>('/anime/popular');
+        const data = await fetchAniWatch<AniWatchAPIResponse<AniWatchMedia>>('/anime/most-popular');
         return data.results.map(toInternalMedia);
     } catch (error) {
         console.error("Failed to get popular anime:", error);
@@ -77,7 +77,7 @@ export async function getAnimeDetails(id: string): Promise<AniWatchDetails> {
 export async function getEpisodeSources(episodeId: string) {
     try {
         const data = await fetchAniWatch<any>(`/anime/episode-srcs`, { id: episodeId });
-        return data;
+        return data.sources;
     } catch (error) {
         console.error(`Failed to get sources for episode ID ${episodeId}:`, error);
         throw error;
