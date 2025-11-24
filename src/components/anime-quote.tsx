@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -41,7 +42,7 @@ export function AnimeQuote() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('https://animechan.xyz/api/random');
+      const response = await fetch('https://animechan.dev/api/random');
       if (!response.ok) {
         throw new Error('Failed to fetch quote from Animechan API.');
       }
