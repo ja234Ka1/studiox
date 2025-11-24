@@ -26,13 +26,13 @@ const platforms = [
 
 export default function PlatformCarousel() {
     const plugin = React.useRef(
-        Autoplay({ delay: 1000, stopOnInteraction: false, stopOnHover: false })
+        Autoplay({ delay: 2000, stopOnInteraction: false, stopOnHover: false })
     );
 
   return (
     <section className="py-16">
         <div className="container mx-auto px-4 md:px-8">
-            <h2 className="text-3xl font-bold text-center text-foreground mb-12" style={{ textShadow: '0 2px 10px hsla(var(--foreground), 0.1)'}}>
+            <h2 className="text-3xl font-bold text-center text-foreground mb-12" style={{ textShadow: '0 2px 4px hsla(var(--foreground), 0.05)'}}>
                 All Your Favorite Platforms In One Place
             </h2>
             <Carousel
@@ -44,14 +44,14 @@ export default function PlatformCarousel() {
                 plugins={[plugin.current]}
                 className="w-full"
             >
-                <CarouselContent className="-ml-8">
+                <CarouselContent className="-ml-4 md:-ml-8">
                 {platforms.map((platform, index) => (
                     <CarouselItem
                         key={index}
-                        className="basis-1/2 sm:basis-1/3 md:basis-1/5 lg:basis-[15%] pl-8"
+                        className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-[15%] pl-4 md:pl-8"
                     >
-                        <div className="p-2">
-                            <div className="group relative flex h-24 items-center justify-center rounded-lg border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-all duration-300 hover:border-primary/50 hover:bg-white/10">
+                        <div className="p-1 md:p-2">
+                            <div className="group relative flex h-20 md:h-24 items-center justify-center rounded-lg border border-white/10 bg-white/5 p-4 md:p-6 backdrop-blur-sm transition-all duration-300 hover:border-primary/50 hover:bg-white/10">
                                 <Image
                                     src={platform.logo}
                                     alt={platform.name}

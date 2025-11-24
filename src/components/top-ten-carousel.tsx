@@ -64,15 +64,17 @@ export function TopTenCarousel() {
 
   if (isLoading) {
     return (
-        <div className="container mx-auto px-4 md:px-8 space-y-6">
-            <Skeleton className="h-20 w-1/2" />
-            <div className="flex gap-4 overflow-hidden">
-                {Array.from({length: 5}).map((_, i) => (
-                    <div key={i} className="flex items-center">
-                        <Skeleton className="h-[200px] w-[100px] bg-transparent" />
-                        <Skeleton className="w-[200px] aspect-[2/3]" />
-                    </div>
-                ))}
+        <div className="w-full overflow-hidden">
+            <div className="container mx-auto px-4 md:px-8 space-y-6">
+                <Skeleton className="h-20 w-1/2" />
+                <div className="flex gap-4">
+                    {Array.from({length: 5}).map((_, i) => (
+                        <div key={i} className="flex items-center flex-shrink-0">
+                            <Skeleton className="h-[200px] w-[60px] md:w-[100px] bg-transparent" />
+                            <Skeleton className="w-[130px] sm:w-[160px] md:w-[200px] aspect-[2/3]" />
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     )
@@ -91,7 +93,7 @@ export function TopTenCarousel() {
       variants={carouselVariants}
     >
         <motion.div 
-            className="mb-6 px-4 md:px-8"
+            className="mb-6 container px-4 md:px-8 xl:px-12"
             variants={itemVariants}
         >
           <div className="flex items-center justify-start gap-x-2 sm:gap-x-4">
@@ -112,8 +114,8 @@ export function TopTenCarousel() {
           loop: true,
         }}
         plugins={[autoplayPlugin.current]}
-        onMouseEnter={() => autoplayPlugin.current && autoplayPlugin.current.stop()}
-        onMouseLeave={() => autoplayPlugin.current && autoplayPlugin.current.play()}
+        onMouseEnter={() => autoplayPlugin.current?.stop()}
+        onMouseLeave={() => autoplayPlugin.current?.play()}
         className="w-full"
       >
         <CarouselContent className="-ml-4">
@@ -127,13 +129,13 @@ export function TopTenCarousel() {
                 className="flex items-center group/item transition-transform duration-300 ease-in-out"
               >
                 <span 
-                  className="text-[120px] sm:text-[160px] md:text-[200px] font-black text-transparent group-hover/item:text-primary transition-all duration-300 ease-in-out group-hover/item:scale-110" 
+                  className="text-[120px] sm:text-[160px] md:text-[200px] xl:text-[220px] 2xl:text-[240px] font-black text-transparent group-hover/item:text-primary transition-all duration-300 ease-in-out group-hover/item:scale-110" 
                   style={{ WebkitTextStroke: '3px hsl(var(--foreground) / 0.1)', textShadow: '0 0 15px hsl(var(--foreground) / 0.1)' }}
                 >
                     {index + 1}
                 </span>
                 <div className={cn(
-                  "w-[130px] sm:w-[160px] md:w-[200px] z-10 transition-transform duration-300 ease-in-out group-hover/item:scale-110 -ml-8 sm:-ml-10 md:-ml-12"
+                  "w-[130px] sm:w-[160px] md:w-[200px] xl:w-[220px] 2xl:w-[240px] z-10 transition-transform duration-300 ease-in-out group-hover/item:scale-110 -ml-8 sm:-ml-10 md:-ml-12 xl:-ml-14 2xl:-ml-16"
                 )}>
                     <MediaCard item={item} />
                 </div>
