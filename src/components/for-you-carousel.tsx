@@ -60,13 +60,10 @@ function RecommendationCard({ item }: { item: Recommendation }) {
     };
 
     return (
-        <div className="group/card relative aspect-video w-full cursor-pointer overflow-hidden rounded-xl">
-            <Link href={`/media/${item.media_type}/${item.id}`} className="absolute inset-0 z-10">
-                <span className="sr-only">View details for {item.title || item.name}</span>
-            </Link>
-            
+        <div className="group/card relative aspect-video w-full cursor-pointer">
             <Card
-                className="h-full w-full overflow-hidden border-border/20 shadow-lg"
+                className="h-full w-full overflow-hidden rounded-xl border-border/20 shadow-lg"
+                onClick={(e) => handleNavigation(e, `/media/${item.media_type}/${item.id}`)}
             >
                 <motion.div
                     className="absolute inset-0 z-0"
@@ -151,14 +148,13 @@ export default function ForYouCarousel() {
       );
 
       const watchlistPayload: RecommendationsInput = {
-        watchlist: fullWatchlistDetails.map(item => ({
+        watchlist: fullWatchlistDetails.map((item, index) => ({
           id: Number(item.id),
           title: item.title,
           name: item.name,
-          media_type: item.media_type,
+          media_type: watchlist[index].media_type, // Use media_type from the original watchlist item
           genres: item.genres.map(g => g.name),
-          // @ts-ignore original_language is not on MediaDetails but is often present
-          original_language: item.original_language || 'en',
+          original_language: (item as any).original_language || 'en',
         }))
       };
 
@@ -204,10 +200,10 @@ export default function ForYouCarousel() {
   }, [watchlist]);
 
   React.useEffect(() => {
-    if (user && !user.isAnonymous && !isWatchlistLoading) {
+    if (user && !user.isAnonymous && !isWatchlistLoading && watchlist.length > 1) {
         fetchRecommendations();
     }
-  }, [user, isWatchlistLoading, fetchRecommendations]);
+  }, [user, isWatchlistLoading, watchlist, fetchRecommendations]);
 
   // Conditions to not render the component at all
   if (isWatchlistLoading) {
@@ -301,3 +297,5 @@ export default function ForYouCarousel() {
     </motion.section>
   );
 }
+
+    
