@@ -16,13 +16,6 @@ const sources: { id: StreamSource; name: string; description: string; icon: Reac
     icon: <Crown className="w-6 h-6" />,
     recommended: true,
   },
-  {
-    id: "Anime",
-    name: "Anime",
-    description: "A dedicated source for watching anime.",
-    icon: <Tv className="w-6 h-6" />,
-    recommended: false,
-  },
 ];
 
 interface StreamSourceDialogProps {

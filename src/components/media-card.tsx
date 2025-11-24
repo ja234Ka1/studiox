@@ -46,8 +46,8 @@ export function MediaCard({ item }: MediaCardProps) {
   const title = item.title || item.name;
   
   // Handle anime IDs which are strings
-  const mediaId = typeof item.id === 'string' ? item.id : String(item.id);
-  const mediaTypeForPath = item.media_type === 'tv' && item.poster_path?.includes('gogocdn') ? 'anime' : item.media_type;
+  const mediaId = String(item.id);
+  const mediaTypeForPath = item.media_type;
   const detailPath = `/media/${mediaTypeForPath}/${mediaId}`;
 
   const year = item.release_date || item.first_air_date ? new Date(item.release_date || item.first_air_date!).getFullYear() : 'N/A';
@@ -82,7 +82,6 @@ export function MediaCard({ item }: MediaCardProps) {
           sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           data-ai-hint={!item.poster_path ? fallbackImage?.imageHint : undefined}
-          unoptimized={!!item.poster_path?.includes('gogocdn')} // Don't optimize external non-tmdb images
         />
       </Link>
 
