@@ -60,14 +60,14 @@ function RecommendationCard({ item }: { item: Recommendation }) {
 
     return (
         <motion.div
-            className="group/card relative aspect-video w-full cursor-pointer"
-            onClick={(e) => handleNavigation(e, `/media/${item.media_type}/${item.id}`)}
+            className="relative aspect-video w-full cursor-pointer"
             whileHover={{ scale: 1.05, zIndex: 20 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            onClick={(e) => handleNavigation(e, `/media/${item.media_type}/${item.id}`)}
 
         >
             <Card
-                className="h-full w-full overflow-hidden rounded-xl border-border/20 shadow-lg"
+                className="h-full w-full overflow-hidden rounded-xl border-border/20 shadow-lg group/card"
             >
                 <Image
                     src={getTmdbImageUrl(item.backdrop_path, 'w500')}
@@ -84,37 +84,37 @@ function RecommendationCard({ item }: { item: Recommendation }) {
                         <span>{item.reason}</span>
                     </p>
                 </div>
-                 {/* Animated border/glow effect */}
-                <div className="pointer-events-none absolute -inset-0.5 rounded-xl border-2 border-transparent opacity-0 transition-opacity duration-300 group-hover/card:opacity-100 group-hover/card:filter-glow"
-                     style={{ borderColor: 'hsl(var(--primary))' }}
+                <div 
+                  className="pointer-events-none absolute inset-0 rounded-xl border-2 border-transparent opacity-0 transition-opacity duration-300 group-hover/card:opacity-100" 
+                  style={{ filter: 'drop-shadow(0 0 8px hsl(var(--primary)))' }}
                 />
+
+                <div className="absolute inset-0 z-30 flex items-center justify-center gap-4 opacity-0 transition-all duration-300 group-hover/card:opacity-100">
+                    <Button
+                        asChild
+                        size="icon"
+                        variant="secondary"
+                        className="h-12 w-12 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20"
+                        onClick={(e) => handleNavigation(e, `/media/${item.media_type}/${item.id}`)}
+                    >
+                        <a>
+                            <Info className="h-6 w-6" />
+                            <span className="sr-only">More Info</span>
+                        </a>
+                    </Button>
+                    <Button
+                        asChild
+                        size="icon"
+                        className="h-16 w-16 rounded-full bg-primary/80 backdrop-blur-sm hover:bg-primary"
+                        onClick={(e) => handleNavigation(e, `/stream/${item.media_type}/${item.id}${item.media_type === 'tv' ? '?s=1&e=1' : ''}`)}
+                    >
+                         <a>
+                            <PlayCircle className="h-8 w-8" />
+                            <span className="sr-only">Play</span>
+                        </a>
+                    </Button>
+                </div>
             </Card>
-           
-            <div className="absolute inset-0 z-30 flex items-center justify-center gap-4 opacity-0 transition-all duration-300 group-hover/card:opacity-100">
-                <Button
-                    asChild
-                    size="icon"
-                    variant="secondary"
-                    className="h-12 w-12 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20"
-                    onClick={(e) => handleNavigation(e, `/media/${item.media_type}/${item.id}`)}
-                >
-                    <a>
-                        <Info className="h-6 w-6" />
-                        <span className="sr-only">More Info</span>
-                    </a>
-                </Button>
-                <Button
-                    asChild
-                    size="icon"
-                    className="h-16 w-16 rounded-full bg-primary/80 backdrop-blur-sm hover:bg-primary"
-                    onClick={(e) => handleNavigation(e, `/stream/${item.media_type}/${item.id}${item.media_type === 'tv' ? '?s=1&e=1' : ''}`)}
-                >
-                     <a>
-                        <PlayCircle className="h-8 w-8" />
-                        <span className="sr-only">Play</span>
-                    </a>
-                </Button>
-            </div>
         </motion.div>
     );
 }
@@ -143,16 +143,14 @@ export default function ForYouCarousel() {
       );
 
       const watchlistPayload: RecommendationsInput = {
-        watchlist: fullWatchlistDetails.map(item => {
-            return {
-                id: typeof item.id === 'string' ? parseInt(item.id, 10) : item.id,
-                title: item.title,
-                name: item.name,
-                media_type: item.media_type,
-                genres: item?.genres?.map(g => g.name) || [],
-                original_language: (item as any)?.original_language || 'en',
-            };
-        })
+        watchlist: fullWatchlistDetails.map(item => ({
+            id: typeof item.id === 'string' ? parseInt(item.id, 10) : item.id,
+            title: item.title,
+            name: item.name,
+            media_type: item.media_type,
+            genres: item.genres?.map(g => g.name) || [],
+            original_language: (item as any)?.original_language || 'en',
+        })),
       };
       
       const aiResult = await getRecommendations(watchlistPayload);
