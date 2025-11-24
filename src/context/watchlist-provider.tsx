@@ -81,21 +81,26 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
   }, [optimisticWatchlist]);
 
   const addToWatchlist = useCallback(async (item: Media) => {
-    if (isInWatchlist(item.id)) {
+    const numericId = typeof item.id === 'string' ? parseInt(item.id, 10) : item.id;
+    if (isNaN(numericId)) return; // Don't add if ID is invalid
+
+    if (isInWatchlist(numericId)) {
       showNotification(item, 'exists');
       return;
     }
+    
+    const itemWithNumericId = { ...item, id: numericId };
 
-    let fullItem = item;
+    let fullItem = itemWithNumericId;
     // If it's a TV show, fetch full details to get episode count
     if (item.media_type === 'tv') {
         try {
-            const details = await getMediaDetails(item.id, 'tv');
-            const watchData = { id: item.id, lastKnownEpisodeCount: details.number_of_episodes || 0 };
+            const details = await getMediaDetails(numericId, 'tv');
+            const watchData = { id: numericId, lastKnownEpisodeCount: details.number_of_episodes || 0 };
             
             // Save to TV watch data storage
             const currentData = JSON.parse(localStorage.getItem(WATCH_DATA_KEY) || '[]');
-            const existingIndex = currentData.findIndex((d: {id: number}) => d.id === item.id);
+            const existingIndex = currentData.findIndex((d: {id: number}) => d.id === numericId);
             if (existingIndex > -1) {
                 currentData[existingIndex] = watchData;
             } else {
@@ -104,7 +109,7 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
             localStorage.setItem(WATCH_DATA_KEY, JSON.stringify(currentData));
             window.dispatchEvent(new CustomEvent('willow-storage-change', { detail: { key: WATCH_DATA_KEY } }));
 
-            fullItem = { ...item, ...details };
+            fullItem = { ...itemWithNumericId, ...details };
 
         } catch (error) {
             console.error("Could not fetch TV details on add to watchlist", error);
@@ -114,7 +119,7 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
 
     // Optimistically update UI
     setOptimisticWatchlist(prev => [fullItem, ...prev]);
-    showNotification(item, 'added');
+    showNotification(fullItem, 'added');
     
     // Persist change in the background
     writeToWatchlist(fullItem);

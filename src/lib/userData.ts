@@ -25,7 +25,12 @@ export const getLocalWatchlist = (): Media[] => {
   if (typeof window === "undefined") return [];
   try {
     const watchlistJson = localStorage.getItem(WATCHLIST_KEY);
-    return watchlistJson ? JSON.parse(watchlistJson) : [];
+    const parsed = watchlistJson ? JSON.parse(watchlistJson) : [];
+    // Ensure all IDs are numbers
+    return parsed.map((item: Media & { id: string | number }) => ({
+      ...item,
+      id: typeof item.id === 'string' ? parseInt(item.id, 10) : item.id,
+    })).filter((item: Media) => !isNaN(item.id));
   } catch (error) {
     console.error("Error reading watchlist from localStorage:", error);
     return [];
