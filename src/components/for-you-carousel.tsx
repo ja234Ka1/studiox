@@ -4,6 +4,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from 'next/navigation';
 import { motion } from "framer-motion";
 import { Sparkles, Loader2, Info, PlayCircle } from "lucide-react";
 import {
@@ -17,7 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useWatchlist } from "@/context/watchlist-provider";
 import { useUser } from "@/firebase";
 import { getRecommendations } from "@/ai/flows/recommendations";
-import { getMediaDetails } from "@/lib/tmdb";
+import { getMediaDetails, searchMedia } from "@/lib/tmdb";
 import type { MediaDetails as MediaDetailsType, Media } from "@/types/tmdb";
 import { Card, CardContent } from "./ui/card";
 import { getTmdbImageUrl } from "@/lib/utils";
@@ -50,39 +51,41 @@ const itemVariants = {
 };
 
 function RecommendationCard({ item }: { item: Recommendation }) {
+  const router = useRouter();
   const detailPath = `/media/${item.media_type}/${item.id}`;
   const streamPath = `/stream/${item.media_type}/${item.id}${item.media_type === 'tv' ? '?s=1&e=1' : ''}`;
   
   return (
     <div className="relative group aspect-[16/9] w-full">
-      <Link href={detailPath}>
-        <Card className="h-full overflow-hidden">
-          <Image
-            src={getTmdbImageUrl(item.backdrop_path, 'w500')}
-            alt={item.title || item.name || "Recommendation"}
-            fill
-            sizes="(max-width: 768px) 80vw, (max-width: 1200px) 40vw, 30vw"
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
-          
-          <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-            <Button size="icon" variant="ghost" className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm hover:bg-primary" asChild>
-                <Link href={streamPath} onClick={(e) => e.stopPropagation()}>
-                    <PlayCircle className="w-5 h-5" />
-                </Link>
-            </Button>
-          </div>
+      <Card 
+        className="h-full overflow-hidden cursor-pointer"
+        onClick={() => router.push(detailPath)}
+      >
+        <Image
+          src={getTmdbImageUrl(item.backdrop_path, 'w500')}
+          alt={item.title || item.name || "Recommendation"}
+          fill
+          sizes="(max-width: 768px) 80vw, (max-width: 1200px) 40vw, 30vw"
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
+        
+        <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+          <Button size="icon" variant="ghost" className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm hover:bg-primary" asChild>
+              <Link href={streamPath} onClick={(e) => e.stopPropagation()}>
+                  <PlayCircle className="w-5 h-5" />
+              </Link>
+          </Button>
+        </div>
 
-          <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-            <h3 className="font-bold truncate text-base">{item.title || item.name}</h3>
-            <p className="text-xs text-primary flex items-center gap-1.5 mt-1">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>{item.reason}</span>
-            </p>
-          </div>
-        </Card>
-      </Link>
+        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+          <h3 className="font-bold truncate text-base">{item.title || item.name}</h3>
+          <p className="text-xs text-primary flex items-center gap-1.5 mt-1">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>{item.reason}</span>
+          </p>
+        </div>
+      </Card>
     </div>
   );
 }
@@ -106,7 +109,7 @@ export default function ForYouCarousel() {
 
       try {
         const watchlistPayload = watchlist.map(item => ({
-            id: Number(item.id),
+            id: Number(item.id), // Ensure ID is a number
             title: item.title,
             name: item.name,
             media_type: item.media_type
@@ -115,11 +118,37 @@ export default function ForYouCarousel() {
         const aiResult = await getRecommendations({ watchlist: watchlistPayload });
         
         if (aiResult.recommendations.length > 0) {
-            const detailsPromises = aiResult.recommendations.map(rec => 
-                getMediaDetails(rec.id, rec.media_type).then(details => ({ ...details, reason: rec.reason }))
-            );
-            const fullDetails = await Promise.all(detailsPromises);
-            setRecommendations(fullDetails.filter(d => d.backdrop_path));
+            // Validate the AI's suggestions by searching for them.
+            const validatedRecommendations: Recommendation[] = [];
+
+            for (const rec of aiResult.recommendations) {
+                if (validatedRecommendations.length >= 10) break;
+
+                const searchResults = await searchMedia(rec.title, 1, 1);
+                const topResult = searchResults.results[0];
+
+                if (topResult) {
+                    // Avoid adding duplicates or items already in the watchlist
+                    const isInWatchlist = watchlist.some(item => item.id === topResult.id);
+                    const isAlreadyAdded = validatedRecommendations.some(item => item.id === topResult.id);
+
+                    if (!isInWatchlist && !isAlreadyAdded) {
+                        try {
+                            const details = await getMediaDetails(topResult.id, topResult.media_type as 'movie' | 'tv');
+                            if (details.backdrop_path) {
+                                validatedRecommendations.push({
+                                    ...details,
+                                    reason: rec.reason,
+                                    media_type: topResult.media_type as 'movie' | 'tv'
+                                });
+                            }
+                        } catch (e) {
+                            console.error(`Error fetching details for recommended item: ${topResult.id}`, e);
+                        }
+                    }
+                }
+            }
+            setRecommendations(validatedRecommendations);
         }
 
       } catch (error) {
