@@ -95,7 +95,7 @@ export function TopTenCarousel() {
             variants={itemVariants}
         >
           <div className="flex items-center justify-start gap-x-2 sm:gap-x-4">
-              <h2 className="text-7xl md:text-8xl font-black tracking-tighter flex items-center justify-center gap-x-1 sm:gap-x-2">
+              <h2 className="text-7xl md:text-8xl xl:text-9xl font-black tracking-tighter flex items-center justify-center gap-x-1 sm:gap-x-2">
                   <span className="text-transparent text-outline-primary text-glow">TOP</span>
                   <span className="text-primary text-glow">10</span>
               </h2>
@@ -116,24 +116,24 @@ export function TopTenCarousel() {
         onMouseLeave={() => autoplayPlugin.current && autoplayPlugin.current.play()}
         className="w-full"
       >
-        <CarouselContent className="-ml-4 sm:-ml-8">
+        <CarouselContent className="-ml-4">
           {mediaItems.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
-              className="pl-4 sm:pl-8 basis-auto"
+              className="pl-4 basis-auto"
             >
               <motion.div 
                 variants={itemVariants} 
                 className="flex items-center group/item transition-transform duration-300 ease-in-out"
               >
                 <span 
-                  className="text-[120px] sm:text-[160px] md:text-[200px] lg:text-[220px] xl:text-[240px] 2xl:text-[260px] font-black text-transparent group-hover/item:text-primary transition-all duration-300 ease-in-out group-hover/item:scale-110" 
+                  className="text-[120px] sm:text-[160px] md:text-[200px] font-black text-transparent group-hover/item:text-primary transition-all duration-300 ease-in-out group-hover/item:scale-110" 
                   style={{ WebkitTextStroke: '3px hsl(var(--foreground) / 0.1)', textShadow: '0 0 15px hsl(var(--foreground) / 0.1)' }}
                 >
                     {index + 1}
                 </span>
                 <div className={cn(
-                  "w-[130px] sm:w-[160px] md:w-[200px] lg:w-[220px] xl:w-[240px] 2xl:w-[260px] z-10 transition-transform duration-300 ease-in-out group-hover/item:scale-110 -ml-6 sm:-ml-8 md:-ml-12 lg:-ml-14 xl:-ml-16 2xl:-ml-20"
+                  "w-[130px] sm:w-[160px] md:w-[200px] z-10 transition-transform duration-300 ease-in-out group-hover/item:scale-110 -ml-8 sm:-ml-10 md:-ml-12"
                 )}>
                     <MediaCard item={item} />
                 </div>
