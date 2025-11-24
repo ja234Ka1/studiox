@@ -22,7 +22,6 @@ import type { MediaDetails as MediaDetailsType } from "@/types/tmdb";
 import { Card } from "./ui/card";
 import { getTmdbImageUrl, cn } from "@/lib/utils";
 import { Button } from "./ui/button";
-import Link from 'next/link';
 
 interface Recommendation extends MediaDetailsType {
   reason: string;
@@ -60,24 +59,13 @@ function RecommendationCard({ item }: { item: Recommendation }) {
     };
 
     return (
-        <motion.div
+        <div 
             className="group/card relative aspect-video w-full cursor-pointer"
-            whileHover="hover"
-            initial="rest"
-            animate="rest"
-            variants={{
-                rest: { zIndex: 10, filter: 'drop-shadow(0 0 0rem hsl(var(--primary) / 0))' },
-                hover: { zIndex: 50, filter: 'drop-shadow(0 0 1rem hsl(var(--primary) / 0.6))' },
-            }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             onClick={(e) => handleNavigation(e, `/media/${item.media_type}/${item.id}`)}
         >
             <motion.div
-                className="h-full w-full"
-                variants={{
-                    rest: { scale: 1 },
-                    hover: { scale: 1.05 },
-                }}
+                className="relative h-full w-full"
+                whileHover={{ scale: 1.05 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             >
                 <Card
@@ -100,32 +88,34 @@ function RecommendationCard({ item }: { item: Recommendation }) {
                     </div>
                 </Card>
             </motion.div>
-            <div className="absolute right-3 top-3 z-30 flex scale-90 gap-2 opacity-0 transition-all duration-300 group-hover/card:scale-100 group-hover/card:opacity-100">
+            <div className="absolute inset-0 z-30 flex items-center justify-center gap-4 opacity-0 transition-all duration-300 group-hover/card:opacity-100">
                 <Button
                     asChild
                     size="icon"
                     variant="secondary"
-                    className="h-10 w-10 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20"
+                    className="h-12 w-12 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <Link href={`/media/${item.media_type}/${item.id}`}>
-                        <Info className="h-5 w-5" />
+                    <a href={`/media/${item.media_type}/${item.id}`} onClick={(e) => handleNavigation(e, `/media/${item.media_type}/${item.id}`)}>
+                        <Info className="h-6 w-6" />
                         <span className="sr-only">More Info</span>
-                    </Link>
+                    </a>
                 </Button>
                 <Button
                     asChild
                     size="icon"
-                    className="h-10 w-10 rounded-full bg-primary/80 backdrop-blur-sm hover:bg-primary"
+                    className="h-16 w-16 rounded-full bg-primary/80 backdrop-blur-sm hover:bg-primary"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <Link href={`/stream/${item.media_type}/${item.id}${item.media_type === 'tv' ? '?s=1&e=1' : ''}`}>
-                        <PlayCircle className="h-5 w-5" />
+                     <a href={`/stream/${item.media_type}/${item.id}${item.media_type === 'tv' ? '?s=1&e=1' : ''}`} onClick={(e) => handleNavigation(e, `/stream/${item.media_type}/${item.id}${item.media_type === 'tv' ? '?s=1&e=1' : ''}`)}>
+                        <PlayCircle className="h-8 w-8" />
                         <span className="sr-only">Play</span>
-                    </Link>
+                    </a>
                 </Button>
             </div>
-        </motion.div>
+            {/* Animated border */}
+            <div className="pointer-events-none absolute -inset-0.5 rounded-xl border-2 border-transparent opacity-0 transition-opacity duration-300 group-hover/card:opacity-100 group-hover/card:[box-shadow:0_0_20px_2px_hsl(var(--primary))]" />
+        </div>
     );
 }
 const MemoizedRecommendationCard = React.memo(RecommendationCard);
@@ -156,7 +146,7 @@ export default function ForYouCarousel() {
         watchlist: watchlist.map(item => {
             const details = fullWatchlistDetails.find(d => d.id === item.id);
             return {
-                id: item.id,
+                id: typeof item.id === 'string' ? parseInt(item.id, 10) : item.id,
                 title: item.title,
                 name: item.name,
                 media_type: item.media_type,
@@ -208,7 +198,7 @@ export default function ForYouCarousel() {
   }, [watchlist]);
 
   React.useEffect(() => {
-    if (user && !user.isAnonymous && !isWatchlistLoading) {
+    if (user && !user.isAnonymous && !isWatchlistLoading && watchlist.length > 0) {
         fetchRecommendations();
     }
   }, [user, isWatchlistLoading, watchlist, fetchRecommendations]);
