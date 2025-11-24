@@ -21,7 +21,7 @@ import { getRecommendations } from "@/ai/flows/recommendations";
 import { getMediaDetails, searchMedia } from "@/lib/tmdb";
 import type { MediaDetails as MediaDetailsType, Media } from "@/types/tmdb";
 import { Card } from "./ui/card";
-import { getTmdbImageUrl } from "@/lib/utils";
+import { getTmdbImageUrl, cn } from "@/lib/utils";
 import { Button } from "./ui/button";
 
 interface Recommendation extends MediaDetailsType {
@@ -57,39 +57,41 @@ function RecommendationCard({ item }: { item: Recommendation }) {
   
   return (
     <div className="relative group aspect-[16/9] w-full">
-      <Card className="h-full overflow-hidden">
-        <Link href={detailPath} className="block h-full w-full">
-          <Image
-            src={getTmdbImageUrl(item.backdrop_path, 'w500')}
-            alt={item.title || item.name || "Recommendation"}
-            fill
-            sizes="(max-width: 768px) 80vw, (max-width: 1200px) 40vw, 30vw"
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
-        </Link>
-        
-        <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 flex gap-2">
-            <Button size="icon" variant="ghost" className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20" asChild>
-                <Link href={detailPath}>
-                    <Info className="w-5 h-5" />
-                </Link>
-            </Button>
-            <Button size="icon" variant="ghost" className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm hover:bg-primary" asChild>
-                <Link href={streamPath}>
-                    <PlayCircle className="w-5 h-5" />
-                </Link>
-            </Button>
-        </div>
+        <Card className="h-full w-full overflow-hidden rounded-xl transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/20">
+            <Link href={detailPath} className="block h-full w-full">
+                <Image
+                    src={getTmdbImageUrl(item.backdrop_path, 'w500')}
+                    alt={item.title || item.name || "Recommendation"}
+                    fill
+                    sizes="(max-width: 768px) 80vw, (max-width: 1200px) 40vw, 30vw"
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
+                 {/* Subtle glow effect on hover */}
+                <div className="absolute -inset-px rounded-xl border-2 border-transparent transition-all duration-300 group-hover:border-primary/50" />
+            </Link>
+            
+            <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 flex gap-2">
+                <Button size="icon" variant="secondary" className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20" asChild>
+                    <Link href={detailPath}>
+                        <Info className="w-5 h-5" />
+                    </Link>
+                </Button>
+                <Button size="icon" className="h-9 w-9 rounded-full button-bg-pan" asChild>
+                    <Link href={streamPath}>
+                        <PlayCircle className="w-5 h-5" />
+                    </Link>
+                </Button>
+            </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-          <h3 className="font-bold truncate text-base">{item.title || item.name}</h3>
-          <p className="text-xs text-primary flex items-center gap-1.5 mt-1">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>{item.reason}</span>
-          </p>
-        </div>
-      </Card>
+            <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                <h3 className="font-bold truncate text-base">{item.title || item.name}</h3>
+                <p className="text-xs text-primary flex items-center gap-1.5 mt-1">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>{item.reason}</span>
+                </p>
+            </div>
+        </Card>
     </div>
   );
 }
@@ -123,26 +125,37 @@ export default function ForYouCarousel() {
         
         if (aiResult?.recommendations?.length > 0) {
             const validatedRecommendations: Recommendation[] = [];
-            for (const rec of aiResult.recommendations) {
-                if (validatedRecommendations.length >= 10) break;
-                try {
-                    const details = await getMediaDetails(rec.id, rec.media_type);
-                    if (details.backdrop_path) {
-                        const isInWatchlist = watchlist.some(item => item.id === details.id);
-                        const isAlreadyAdded = validatedRecommendations.some(item => item.id === details.id);
-                        if (!isInWatchlist && !isAlreadyAdded) {
-                            validatedRecommendations.push({
-                                ...details,
-                                reason: rec.reason,
-                                media_type: rec.media_type
-                            });
-                        }
-                    }
-                } catch (e) {
-                    console.error(`Error fetching details for recommended item: ${rec.id}`, e);
+            // Use Promise.all for parallel fetching
+            const detailPromises = aiResult.recommendations.map(async (rec) => {
+              try {
+                const details = await getMediaDetails(rec.id, rec.media_type);
+                if (details.backdrop_path) {
+                  return {
+                    ...details,
+                    reason: rec.reason,
+                    media_type: rec.media_type
+                  };
                 }
-            }
-            setRecommendations(validatedRecommendations);
+              } catch (e) {
+                console.error(`Error fetching details for recommended item: ${rec.id}`, e);
+              }
+              return null;
+            });
+    
+            const settledDetails = await Promise.all(detailPromises);
+            const successfulDetails = settledDetails.filter((d): d is Recommendation => d !== null);
+
+            // Filter out duplicates and items already in the watchlist
+            const finalRecommendations = successfulDetails.reduce((acc, current) => {
+              const isInWatchlist = watchlist.some(item => item.id === current.id);
+              const isAlreadyAdded = acc.some(item => item.id === current.id);
+              if (!isInWatchlist && !isAlreadyAdded) {
+                acc.push(current);
+              }
+              return acc;
+            }, [] as Recommendation[]);
+            
+            setRecommendations(finalRecommendations.slice(0, 10));
         }
 
       } catch (error) {
@@ -172,7 +185,7 @@ export default function ForYouCarousel() {
                 <CarouselContent className="-ml-2 px-8">
                     {Array.from({ length: 4 }).map((_, i) => (
                         <CarouselItem key={i} className="basis-5/6 sm:basis-2/3 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4 pr-2">
-                             <Skeleton className="aspect-video w-full" />
+                             <Skeleton className="aspect-video w-full rounded-xl" />
                         </CarouselItem>
                     ))}
                 </CarouselContent>
