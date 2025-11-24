@@ -51,86 +51,85 @@ const itemVariants = {
 };
 
 function RecommendationCard({ item }: { item: Recommendation }) {
-    const router = useRouter();
+  const router = useRouter();
 
-    const handleNavigation = (e: React.MouseEvent, path: string) => {
-        e.preventDefault();
-        e.stopPropagation();
-        router.push(path);
-    };
+  const handleNavigation = (e: React.MouseEvent, path: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push(path);
+  };
+  
+  return (
+      <motion.div
+          className="group/card relative aspect-video w-full cursor-pointer"
+          whileHover={{ scale: 1.05, zIndex: 50 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          onClick={(e) => handleNavigation(e, `/media/${item.media_type}/${item.id}`)}
+      >
+          <Card
+              className="h-full w-full overflow-hidden rounded-xl border-border/20 shadow-lg transition-all duration-300 group-hover/card:shadow-2xl"
+          >
+              <div
+                  className="absolute inset-0 z-0 transition-transform duration-300 group-hover/card:scale-110"
+              >
+                  <Image
+                      src={getTmdbImageUrl(item.backdrop_path, 'w500')}
+                      alt={item.title || item.name || "Recommendation"}
+                      fill
+                      sizes="(max-width: 768px) 80vw, (max-width: 1200px) 40vw, 30vw"
+                      className="object-cover"
+                  />
+              </div>
 
-    return (
-        <motion.div
-            className="group/card relative aspect-video w-full cursor-pointer"
-            whileHover={{ scale: 1.05, zIndex: 50 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            style={{ perspective: '800px' }}
-        >
-            <motion.div
-                 className="h-full w-full"
-                 style={{ transformStyle: 'preserve-3d' }}
-                 whileHover={{ rotateX: 10, rotateY: -15 }}
-            >
-                <Card
-                    className="h-full w-full overflow-hidden rounded-xl border-border/20 shadow-lg"
-                    onClick={(e) => handleNavigation(e, `/media/${item.media_type}/${item.id}`)}
-                >
-                    <div
-                        className="absolute inset-0 z-0"
-                    >
-                        <Image
-                            src={getTmdbImageUrl(item.backdrop_path, 'w500')}
-                            alt={item.title || item.name || "Recommendation"}
-                            fill
-                            sizes="(max-width: 768px) 80vw, (max-width: 1200px) 40vw, 30vw"
-                            className="object-cover"
-                        />
-                    </div>
+              <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
 
-                    <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
-
-                    <div className="absolute inset-0 z-20 flex flex-col justify-end p-4 text-white">
-                        <h3 className="text-lg font-bold leading-tight drop-shadow-md">{item.title || item.name}</h3>
-                        <p className="mt-1 flex items-center gap-1.5 text-base font-medium text-primary drop-shadow-md filter-glow">
-                            <Sparkles className="h-5 w-5" />
-                            <span>{item.reason}</span>
-                        </p>
-                    </div>
-                </Card>
-
-                <div className="absolute right-3 top-3 z-30 flex scale-90 gap-2 opacity-0 transition-all duration-300 group-hover/card:scale-100 group-hover/card:opacity-100">
-                    <Button
-                        asChild
-                        size="icon"
-                        variant="secondary"
-                        className="h-10 w-10 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20"
-                    >
-                        <Link href={`/media/${item.media_type}/${item.id}`}>
-                            <Info className="h-5 w-5" />
-                            <span className="sr-only">More Info</span>
-                        </Link>
-                    </Button>
-                    <Button
-                        asChild
-                        size="icon"
-                        className="h-10 w-10 rounded-full bg-primary/80 backdrop-blur-sm hover:bg-primary"
-                    >
-                        <Link href={`/stream/${item.media_type}/${item.id}${item.media_type === 'tv' ? '?s=1&e=1' : ''}`}>
-                            <PlayCircle className="h-5 w-5" />
-                            <span className="sr-only">Play</span>
-                        </Link>
-                    </Button>
-                </div>
-                
-                <div className="pointer-events-none absolute -inset-px z-40 rounded-xl opacity-0 transition-opacity duration-300 group-hover/card:opacity-100 group-hover/card:animate-[button-bg-pan_3s_linear_infinite]"
-                    style={{ 
-                        backgroundImage: 'linear-gradient(to right, hsl(var(--primary)_/_.5), hsl(var(--accent)_/_.5), hsl(var(--primary)_/_.5))',
-                        backgroundSize: '200% 200%'
-                    }}
-                />
-            </motion.div>
-        </motion.div>
-    );
+              <div className="absolute inset-0 z-20 flex flex-col justify-end p-4 text-white">
+                  <h3 className="text-lg font-bold leading-tight drop-shadow-md">{item.title || item.name}</h3>
+                  <p className="mt-1 flex items-center gap-1.5 text-base font-medium text-primary drop-shadow-md filter-glow">
+                      <Sparkles className="h-5 w-5" />
+                      <span>{item.reason}</span>
+                  </p>
+              </div>
+          </Card>
+          <div className="absolute right-3 top-3 z-30 flex scale-90 gap-2 opacity-0 transition-all duration-300 group-hover/card:scale-100 group-hover/card:opacity-100">
+              <Button
+                  asChild
+                  size="icon"
+                  variant="secondary"
+                  className="h-10 w-10 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20"
+              >
+                  <Link href={`/media/${item.media_type}/${item.id}`}>
+                      <Info className="h-5 w-5" />
+                      <span className="sr-only">More Info</span>
+                  </Link>
+              </Button>
+              <Button
+                  asChild
+                  size="icon"
+                  className="h-10 w-10 rounded-full bg-primary/80 backdrop-blur-sm hover:bg-primary"
+              >
+                  <Link href={`/stream/${item.media_type}/${item.id}${item.media_type === 'tv' ? '?s=1&e=1' : ''}`}>
+                      <PlayCircle className="h-5 w-5" />
+                      <span className="sr-only">Play</span>
+                  </Link>
+              </Button>
+          </div>
+          
+          <div className="pointer-events-none absolute -inset-px z-40 rounded-xl opacity-0 transition-opacity duration-300 group-hover/card:opacity-100"
+              style={{ 
+                  filter: 'drop-shadow(0 0 1rem hsl(var(--primary) / 0.6))'
+              }}
+          >
+              <div 
+                  className="absolute -inset-px rounded-xl opacity-0 transition-opacity duration-300 group-hover/card:opacity-100 group-hover/card:animate-[button-bg-pan_3s_linear_infinite]"
+                  style={{
+                      backgroundImage: 'linear-gradient(to right, hsl(var(--primary)_/_.5), hsl(var(--accent)_/_.5), hsl(var(--primary)_/_.5))',
+                      backgroundSize: '200% 200%'
+                  }}
+              />
+          </div>
+      </motion.div>
+  );
 }
 const MemoizedRecommendationCard = React.memo(RecommendationCard);
 
@@ -166,7 +165,7 @@ export default function ForYouCarousel() {
           original_language: (item as any).original_language || 'en',
         }))
       };
-
+      
       const aiResult = await getRecommendations(watchlistPayload);
       
       if (aiResult?.recommendations?.length > 0) {
