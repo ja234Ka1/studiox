@@ -59,7 +59,7 @@ export default function RootLayout({
         <meta name="description" content="A sophisticated, ultra-luxurious content discovery experience." />
         <title>Willow</title>
       </head>
-      <body className={cn("antialiased font-sans", inter.variable)}>
+      <body className={cn("antialiased font-sans overflow-x-hidden", inter.variable)}>
         <AppProviders>
           <ThemedBodyContent>
             {children}

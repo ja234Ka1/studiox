@@ -158,7 +158,7 @@ const CarouselContent = React.forwardRef<
   const { carouselRef, orientation } = useCarousel()
 
   return (
-    <div ref={carouselRef} className="overflow-visible py-4">
+    <div ref={carouselRef} className="overflow-hidden py-4">
       <div
         ref={ref}
         className={cn(
@@ -166,6 +166,7 @@ const CarouselContent = React.forwardRef<
           orientation === "horizontal" ? "" : "-mt-4 flex-col",
           className
         )}
+        style={{ backfaceVisibility: 'hidden' }}
         {...props}
       />
     </div>
