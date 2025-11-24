@@ -45,19 +45,57 @@ const GenreCard = ({ genre }: { genre: typeof genres[0] }) => {
   const url = `${pathname}?genre=${genre.id}&genreType=${genre.type}&genreName=${encodeURIComponent(genre.name)}`;
 
   return (
-    <motion.div whileHover={{ y: -5 }} className="w-full">
-      <Link href={url} className="group block relative w-full h-40 rounded-lg overflow-hidden shadow-lg">
-        <Image
-          src={genre.image}
-          alt={`${genre.name} genre`}
-          fill
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-        />
+    <Link href={url} className="group block relative w-full h-40 rounded-lg overflow-hidden shadow-lg">
+      <motion.div whileHover="hover" initial="rest" animate="rest" className="relative w-full h-full">
+        <motion.div 
+            className="absolute inset-0"
+            variants={{
+                rest: { scale: 1 },
+                hover: { scale: 1.1 },
+            }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+        >
+            <Image
+              src={genre.image}
+              alt={`${genre.name} genre`}
+              fill
+              className="object-cover"
+            />
+        </motion.div>
+        
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-        <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
-        <h3 className="absolute bottom-4 left-4 text-white text-2xl font-bold text-shadow-primary">{genre.name}</h3>
-      </Link>
-    </motion.div>
+        <motion.div 
+            className="absolute inset-0 bg-black/40 transition-colors"
+            variants={{
+                rest: { opacity: 0.5 },
+                hover: { opacity: 0.2 },
+            }}
+        />
+        
+        {/* Glow effect */}
+        <motion.div 
+          className="absolute -inset-px rounded-lg border-2 border-transparent transition-all duration-300" 
+          variants={{
+            rest: { borderColor: 'rgba(0,0,0,0)'},
+            hover: { 
+                borderColor: 'hsl(var(--primary))',
+                boxShadow: '0 0 15px hsl(var(--primary) / 0.5)',
+            }
+          }}
+        />
+
+        <motion.h3 
+          className="absolute bottom-4 left-4 text-white text-2xl font-bold text-shadow-primary"
+          variants={{
+            rest: { y: 0 },
+            hover: { y: -8 },
+          }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+        >
+          {genre.name}
+        </motion.h3>
+      </motion.div>
+    </Link>
   );
 };
 
@@ -282,5 +320,3 @@ const SearchPage = () => {
 };
 
 export default SearchPage;
-
-    
