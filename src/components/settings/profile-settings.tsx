@@ -7,7 +7,6 @@ import * as z from "zod"
 import React, { useEffect, useState } from "react"
 import { updateProfile } from "firebase/auth"
 import Image from "next/image"
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -49,6 +48,7 @@ const profileFormSchema = z.object({
       required_error: "Please select an email to display.",
     })
     .email(),
+  photoURL: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
 })
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>
@@ -58,8 +58,6 @@ export function ProfileSettings() {
   const auth = useAuth()
   const { toast } = useToast();
 
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
   const form = useForm<ProfileFormValues>({
@@ -67,30 +65,22 @@ export function ProfileSettings() {
     defaultValues: {
       username: "",
       email: "",
+      photoURL: "",
     },
     mode: "onChange",
   })
   
+  const photoURLValue = form.watch("photoURL");
+
   useEffect(() => {
     if (user) {
       form.reset({
         username: user.displayName || "",
         email: user.email || "",
+        photoURL: user.photoURL || "",
       });
-      if (user.photoURL) {
-        setAvatarPreview(user.photoURL);
-      }
     }
   }, [user, form]);
-
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setAvatarFile(file);
-      setAvatarPreview(URL.createObjectURL(file));
-      form.markAsDirty();
-    }
-  };
 
   async function onSubmit(data: ProfileFormValues) {
     if (!auth?.currentUser) {
@@ -105,21 +95,9 @@ export function ProfileSettings() {
     setIsUploading(true);
 
     try {
-      let photoURL = auth.currentUser.photoURL;
-
-      // If a new avatar file was selected, upload it
-      if (avatarFile) {
-        const storage = getStorage();
-        const filePath = `profile-pictures/${auth.currentUser.uid}/${avatarFile.name}`;
-        const fileRef = storageRef(storage, filePath);
-        const uploadResult = await uploadBytes(fileRef, avatarFile);
-        photoURL = await getDownloadURL(uploadResult.ref);
-      }
-      
-      // Update display name and photo URL
       await updateProfile(auth.currentUser, {
         displayName: data.username,
-        photoURL: photoURL,
+        photoURL: data.photoURL,
       });
 
       toast({
@@ -127,7 +105,6 @@ export function ProfileSettings() {
         description: "Your profile has been successfully updated.",
       });
       form.reset(data); // Reset form state to pristine
-      setAvatarFile(null); // Clear selected file
 
     } catch (error: any) {
       console.error("Error updating profile:", error);
@@ -142,7 +119,6 @@ export function ProfileSettings() {
   }
 
   const isFormSubmitting = form.formState.isSubmitting || isUploading;
-  const isFormDirty = form.formState.isDirty || !!avatarFile;
 
   return (
     <Form {...form}>
@@ -156,18 +132,12 @@ export function ProfileSettings() {
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="flex flex-col items-center space-y-4">
-                    <div className="relative group">
-                        <Avatar className="h-24 w-24">
-                            {avatarPreview && <AvatarImage src={avatarPreview} alt="Avatar preview" />}
-                            <AvatarFallback className="text-3xl">
-                                {(user?.displayName || user?.email || '').charAt(0).toUpperCase()}
-                            </AvatarFallback>
-                        </Avatar>
-                        <label htmlFor="avatar-upload" className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                            <Camera className="h-8 w-8 text-white" />
-                        </label>
-                        <Input id="avatar-upload" type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
-                    </div>
+                    <Avatar className="h-24 w-24">
+                        <AvatarImage src={photoURLValue || user?.photoURL || undefined} alt="Avatar preview" />
+                        <AvatarFallback className="text-3xl">
+                            {(user?.displayName || user?.email || '').charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                    </Avatar>
                 </div>
 
               <FormField
@@ -179,6 +149,22 @@ export function ProfileSettings() {
                     <FormControl>
                       <Input placeholder="Your username" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="photoURL"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Avatar URL</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://example.com/avatar.png" {...field} />
+                    </FormControl>
+                     <FormDescription className="text-xs">
+                      Paste a URL to an image for your profile picture.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -201,7 +187,7 @@ export function ProfileSettings() {
               />
             </CardContent>
             <CardFooter className="border-t px-6 py-4">
-                <Button type="submit" disabled={!isFormDirty || isFormSubmitting}>
+                <Button type="submit" disabled={!form.formState.isDirty || isFormSubmitting}>
                     {isFormSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {isFormSubmitting ? "Saving..." : "Save"}
                 </Button>

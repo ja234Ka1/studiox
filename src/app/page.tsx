@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import dynamic from 'next/dynamic';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Hero } from "@/components/hero";
+import ForYouCarousel from "@/components/for-you-carousel";
 
 
 interface Category {
@@ -108,7 +109,7 @@ export default function Home() {
                 src={heroFallbackImage.imageUrl}
                 alt="Fallback hero image"
                 fill
-                className="object-cover"
+                className="object-cover object-top"
                 data-ai-hint={heroFallbackImage.imageHint}
                 priority
               />
@@ -133,6 +134,8 @@ export default function Home() {
         {!isLoading && !error && (
           <div className="space-y-16">
             <ContinueWatching />
+
+            <ForYouCarousel />
             
             <TopTenCarousel />
 
