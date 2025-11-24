@@ -10,9 +10,10 @@ import LoadingLink from "./loading-link";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { AuthButton } from "./auth-button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from "@/components/ui/sheet";
 import { StreamSourceDialog } from "./stream-source-dialog";
 import Link from "next/link";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 const navItems = [
   { href: "/tv-shows", label: "Shows", icon: Tv },
@@ -64,6 +65,14 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="pr-0">
+              <SheetHeader>
+                  <VisuallyHidden>
+                    <SheetTitle>Main Menu</SheetTitle>
+                    <SheetDescription>
+                      This is the main navigation menu for the application.
+                    </SheetDescription>
+                  </VisuallyHidden>
+              </SheetHeader>
               <LoadingLink href="/" className="mr-6 flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
                 <Image src="https://upload.wikimedia.org/wikipedia/commons/7/7a/A-symmetrical-silhouette-of-a-tree-with-many-branches-and-leaves-cutouts-png.svg" alt="Willow logo" width={40} height={40} className="h-10 w-10 filter-glow" />
                 <span className="font-bold sm:inline-block text-2xl">Willow</span>
