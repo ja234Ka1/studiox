@@ -67,13 +67,13 @@ export default function MediaCarousel({ title, items }: MediaCarouselProps) {
         }}
         className="w-full"
       >
-        <CarouselContent className="-ml-2">
+        <CarouselContent className="-ml-2 px-8 py-8">
           {items.map((item, index) => (
             <CarouselItem
               key={`${item.id}-${index}`}
               className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 pl-4 pr-2"
             >
-              <motion.div variants={itemVariants} className="py-4">
+              <motion.div variants={itemVariants} className="h-full">
                 <MediaCard item={item} />
               </motion.div>
             </CarouselItem>
