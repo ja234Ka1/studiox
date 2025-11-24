@@ -4,7 +4,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { useRouter } from 'next/navigation';
-import { motion } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { Sparkles, Loader2, Info, PlayCircle } from "lucide-react";
 import {
   Carousel,
@@ -18,7 +18,7 @@ import { useWatchlist } from "@/context/watchlist-provider";
 import { useUser } from "@/firebase";
 import { getRecommendations, type RecommendationsInput } from "@/ai/flows/recommendations";
 import { getMediaDetails } from "@/lib/tmdb";
-import type { MediaDetails as MediaDetailsType } from "@/types/tmdb";
+import type { Media, MediaDetails as MediaDetailsType } from "@/types/tmdb";
 import { Card } from "./ui/card";
 import { getTmdbImageUrl, cn } from "@/lib/utils";
 import { Button } from "./ui/button";
@@ -59,59 +59,59 @@ function RecommendationCard({ item }: { item: Recommendation }) {
     };
 
     return (
-        <motion.div
-            className="relative aspect-video w-full cursor-pointer"
-            whileHover={{ scale: 1.05, zIndex: 20 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            onClick={(e) => handleNavigation(e, `/media/${item.media_type}/${item.id}`)}
-
+        <motion.div 
+          className="w-full"
+          variants={{
+            rest: { scale: 1 },
+            hover: { scale: 1.05 },
+          }}
+          transition={{ type: 'spring', stiffness: 400, damping: 20 }}
         >
             <Card
-                className="h-full w-full overflow-hidden rounded-xl border-border/20 shadow-lg group/card"
+                className="relative aspect-video w-full cursor-pointer overflow-hidden rounded-xl border-border/20 shadow-lg group/card"
+                onClick={(e) => handleNavigation(e, `/media/${item.media_type}/${item.id}`)}
             >
                 <Image
                     src={getTmdbImageUrl(item.backdrop_path, 'w500')}
                     alt={item.title || item.name || "Recommendation"}
                     fill
                     sizes="(max-width: 768px) 80vw, (max-width: 1200px) 40vw, 30vw"
-                    className="object-cover"
+                    className="object-cover transition-transform duration-300 group-hover/card:scale-110"
                 />
-                <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
+                <div 
+                    className="absolute inset-0 z-10 bg-gradient-to-t from-black/90 via-black/50 to-transparent transition-opacity duration-300"
+                />
+                
+                <div 
+                  className="pointer-events-none absolute -inset-px rounded-xl border-2 border-transparent opacity-0 transition-all duration-300 group-hover/card:opacity-100 group-hover/card:border-primary"
+                  style={{ filter: 'drop-shadow(0 0 12px hsl(var(--primary) / 0.8))' }}
+                />
+
                 <div className="absolute inset-0 z-20 flex flex-col justify-end p-4 text-white">
                     <h3 className="text-lg font-bold leading-tight drop-shadow-md">{item.title || item.name}</h3>
-                    <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-primary drop-shadow-md filter-glow">
-                        <Sparkles className="h-4 w-4" />
+                     <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-primary drop-shadow-md">
+                        <Sparkles className="h-4 w-4 filter-glow" />
                         <span>{item.reason}</span>
                     </p>
                 </div>
-                <div 
-                  className="pointer-events-none absolute inset-0 rounded-xl border-2 border-transparent opacity-0 transition-opacity duration-300 group-hover/card:opacity-100" 
-                  style={{ filter: 'drop-shadow(0 0 8px hsl(var(--primary)))' }}
-                />
 
                 <div className="absolute inset-0 z-30 flex items-center justify-center gap-4 opacity-0 transition-all duration-300 group-hover/card:opacity-100">
                     <Button
-                        asChild
                         size="icon"
                         variant="secondary"
                         className="h-12 w-12 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20"
                         onClick={(e) => handleNavigation(e, `/media/${item.media_type}/${item.id}`)}
                     >
-                        <a>
-                            <Info className="h-6 w-6" />
-                            <span className="sr-only">More Info</span>
-                        </a>
+                        <Info className="h-6 w-6" />
+                        <span className="sr-only">More Info</span>
                     </Button>
                     <Button
-                        asChild
                         size="icon"
                         className="h-16 w-16 rounded-full bg-primary/80 backdrop-blur-sm hover:bg-primary"
                         onClick={(e) => handleNavigation(e, `/stream/${item.media_type}/${item.id}${item.media_type === 'tv' ? '?s=1&e=1' : ''}`)}
                     >
-                         <a>
-                            <PlayCircle className="h-8 w-8" />
-                            <span className="sr-only">Play</span>
-                        </a>
+                        <PlayCircle className="h-8 w-8" />
+                        <span className="sr-only">Play</span>
                     </Button>
                 </div>
             </Card>
@@ -128,7 +128,7 @@ export default function ForYouCarousel() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
-  const fetchRecommendations = React.useCallback(async (currentWatchlist: MediaDetailsType[]) => {
+  const fetchRecommendations = React.useCallback(async (currentWatchlist: Media[]) => {
     if (currentWatchlist.length < 2) {
       setRecommendations([]);
       return;
@@ -143,14 +143,17 @@ export default function ForYouCarousel() {
       );
 
       const watchlistPayload: RecommendationsInput = {
-        watchlist: fullWatchlistDetails.map(item => ({
+        watchlist: fullWatchlistDetails.map((item, index) => {
+          const originalItem = currentWatchlist[index];
+          return {
             id: typeof item.id === 'string' ? parseInt(item.id, 10) : item.id,
             title: item.title,
             name: item.name,
-            media_type: item.media_type,
+            media_type: originalItem.media_type, // Use media_type from the original watchlist item
             genres: item.genres?.map(g => g.name) || [],
             original_language: (item as any)?.original_language || 'en',
-        })),
+          };
+        }),
       };
       
       const aiResult = await getRecommendations(watchlistPayload);
