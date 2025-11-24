@@ -20,7 +20,7 @@ import { useUser } from "@/firebase";
 import { getRecommendations } from "@/ai/flows/recommendations";
 import { getMediaDetails, searchMedia } from "@/lib/tmdb";
 import type { MediaDetails as MediaDetailsType, Media } from "@/types/tmdb";
-import { Card, CardContent } from "./ui/card";
+import { Card } from "./ui/card";
 import { getTmdbImageUrl } from "@/lib/utils";
 import { Button } from "./ui/button";
 
@@ -57,25 +57,29 @@ function RecommendationCard({ item }: { item: Recommendation }) {
   
   return (
     <div className="relative group aspect-[16/9] w-full">
-      <Card 
-        className="h-full overflow-hidden cursor-pointer"
-        onClick={() => router.push(detailPath)}
-      >
-        <Image
-          src={getTmdbImageUrl(item.backdrop_path, 'w500')}
-          alt={item.title || item.name || "Recommendation"}
-          fill
-          sizes="(max-width: 768px) 80vw, (max-width: 1200px) 40vw, 30vw"
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
+      <Card className="h-full overflow-hidden">
+        <Link href={detailPath} className="block h-full w-full">
+          <Image
+            src={getTmdbImageUrl(item.backdrop_path, 'w500')}
+            alt={item.title || item.name || "Recommendation"}
+            fill
+            sizes="(max-width: 768px) 80vw, (max-width: 1200px) 40vw, 30vw"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
+        </Link>
         
-        <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-          <Button size="icon" variant="ghost" className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm hover:bg-primary" asChild>
-              <Link href={streamPath} onClick={(e) => e.stopPropagation()}>
-                  <PlayCircle className="w-5 h-5" />
-              </Link>
-          </Button>
+        <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 flex gap-2">
+            <Button size="icon" variant="ghost" className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20" asChild>
+                <Link href={detailPath}>
+                    <Info className="w-5 h-5" />
+                </Link>
+            </Button>
+            <Button size="icon" variant="ghost" className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm hover:bg-primary" asChild>
+                <Link href={streamPath}>
+                    <PlayCircle className="w-5 h-5" />
+                </Link>
+            </Button>
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
@@ -109,7 +113,7 @@ export default function ForYouCarousel() {
 
       try {
         const watchlistPayload = watchlist.map(item => ({
-            id: Number(item.id), // Ensure ID is a number
+            id: Number(item.id),
             title: item.title,
             name: item.name,
             media_type: item.media_type
@@ -117,35 +121,25 @@ export default function ForYouCarousel() {
 
         const aiResult = await getRecommendations({ watchlist: watchlistPayload });
         
-        if (aiResult.recommendations.length > 0) {
-            // Validate the AI's suggestions by searching for them.
+        if (aiResult?.recommendations?.length > 0) {
             const validatedRecommendations: Recommendation[] = [];
-
             for (const rec of aiResult.recommendations) {
                 if (validatedRecommendations.length >= 10) break;
-
-                const searchResults = await searchMedia(rec.title, 1, 1);
-                const topResult = searchResults.results[0];
-
-                if (topResult) {
-                    // Avoid adding duplicates or items already in the watchlist
-                    const isInWatchlist = watchlist.some(item => item.id === topResult.id);
-                    const isAlreadyAdded = validatedRecommendations.some(item => item.id === topResult.id);
-
-                    if (!isInWatchlist && !isAlreadyAdded) {
-                        try {
-                            const details = await getMediaDetails(topResult.id, topResult.media_type as 'movie' | 'tv');
-                            if (details.backdrop_path) {
-                                validatedRecommendations.push({
-                                    ...details,
-                                    reason: rec.reason,
-                                    media_type: topResult.media_type as 'movie' | 'tv'
-                                });
-                            }
-                        } catch (e) {
-                            console.error(`Error fetching details for recommended item: ${topResult.id}`, e);
+                try {
+                    const details = await getMediaDetails(rec.id, rec.media_type);
+                    if (details.backdrop_path) {
+                        const isInWatchlist = watchlist.some(item => item.id === details.id);
+                        const isAlreadyAdded = validatedRecommendations.some(item => item.id === details.id);
+                        if (!isInWatchlist && !isAlreadyAdded) {
+                            validatedRecommendations.push({
+                                ...details,
+                                reason: rec.reason,
+                                media_type: rec.media_type
+                            });
                         }
                     }
+                } catch (e) {
+                    console.error(`Error fetching details for recommended item: ${rec.id}`, e);
                 }
             }
             setRecommendations(validatedRecommendations);
