@@ -4,8 +4,8 @@
 import * as React from "react";
 import Image from "next/image";
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from "framer-motion";
-import { Sparkles, Loader2, Info, PlayCircle } from "lucide-react";
+import { motion } from "framer-motion";
+import { Sparkles, Loader2, Info, PlayCircle, Bookmark, BookmarkCheck } from "lucide-react";
 import {
   Carousel,
   CarouselContent,
@@ -51,7 +51,25 @@ const itemVariants = {
 
 function RecommendationCard({ item }: { item: Recommendation }) {
     const router = useRouter();
+    const { isInWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
+    const [isWatchlistLoading, setIsWatchlistLoading] = React.useState(false);
+    const onWatchlist = isInWatchlist(item.id);
 
+    React.useEffect(() => {
+        setIsWatchlistLoading(false);
+    }, [onWatchlist]);
+
+    const handleToggleWatchlist = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        e.preventDefault();
+        setIsWatchlistLoading(true);
+        if (onWatchlist) {
+            removeFromWatchlist(item.id);
+        } else {
+            addToWatchlist(item);
+        }
+    };
+    
     const handleNavigation = (e: React.MouseEvent, path: string) => {
         e.preventDefault();
         e.stopPropagation();
@@ -64,28 +82,26 @@ function RecommendationCard({ item }: { item: Recommendation }) {
             whileHover="hover"
             initial="rest"
             animate="rest"
-            variants={{
-                rest: { scale: 1 },
-                hover: { scale: 1.05 },
-            }}
-            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
         >
             <Card
                 className="relative aspect-video w-full cursor-pointer overflow-hidden rounded-xl border-border/20 shadow-lg"
                 onClick={(e) => handleNavigation(e, `/media/${item.media_type}/${item.id}`)}
             >
-                <div className="absolute inset-0 z-0">
+                <motion.div 
+                    className="absolute inset-0 z-0"
+                    variants={{ rest: { scale: 1 }, hover: { scale: 1.1 } }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                >
                     <Image
                         src={getTmdbImageUrl(item.backdrop_path, 'w500')}
                         alt={item.title || item.name || "Recommendation"}
                         fill
                         sizes="(max-width: 768px) 80vw, (max-width: 1200px) 40vw, 30vw"
-                        className="object-cover transition-transform duration-300 group-hover:scale-110"
+                        className="object-cover"
                     />
-                </div>
-                <div 
-                    className="absolute inset-0 z-10 bg-gradient-to-t from-black/90 via-black/50 to-transparent transition-opacity duration-300"
-                />
+                </motion.div>
+
+                <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/90 via-black/40 to-transparent transition-opacity duration-300" />
                 
                 <motion.div 
                   className="pointer-events-none absolute -inset-px rounded-xl border-2 border-transparent opacity-0 transition-all duration-300 group-hover:opacity-100"
@@ -96,32 +112,58 @@ function RecommendationCard({ item }: { item: Recommendation }) {
                 />
 
                 <div className="absolute inset-0 z-20 flex flex-col justify-end p-4 text-white">
-                    <h3 className="text-lg font-bold leading-tight drop-shadow-md">{item.title || item.name}</h3>
-                     <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-primary drop-shadow-md">
-                        <Sparkles className="h-4 w-4 filter-glow" />
-                        <span>{item.reason}</span>
-                    </p>
-                </div>
-
-                <div className="absolute inset-0 z-30 flex items-center justify-center gap-4 opacity-0 transition-all duration-300 group-hover:opacity-100">
-                    <Button
-                        size="icon"
-                        variant="secondary"
-                        className="h-12 w-12 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20"
-                        onClick={(e) => handleNavigation(e, `/media/${item.media_type}/${item.id}`)}
+                    <motion.div
+                        variants={{ rest: { y: 0 }, hover: { y: -50 } }}
+                        transition={{ type: 'spring', stiffness: 400, damping: 15 }}
                     >
-                        <Info className="h-6 w-6" />
-                        <span className="sr-only">More Info</span>
-                    </Button>
+                        <h3 className="text-lg font-bold leading-tight drop-shadow-md">{item.title || item.name}</h3>
+                        <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-primary drop-shadow-md">
+                            <Sparkles className="h-4 w-4 filter-glow" />
+                            <span>{item.reason}</span>
+                        </p>
+                    </motion.div>
+                </div>
+                
+                <motion.div 
+                    className="absolute bottom-4 left-4 right-4 z-30 flex items-center justify-between opacity-0"
+                    variants={{ rest: { opacity: 0 }, hover: { opacity: 1 } }}
+                    transition={{ duration: 0.3 }}
+                >
                     <Button
                         size="icon"
-                        className="h-16 w-16 rounded-full bg-primary/80 backdrop-blur-sm hover:bg-primary"
+                        className="h-10 w-10 rounded-full bg-primary/80 backdrop-blur-sm hover:bg-primary"
                         onClick={(e) => handleNavigation(e, `/stream/${item.media_type}/${item.id}${item.media_type === 'tv' ? '?s=1&e=1' : ''}`)}
                     >
-                        <PlayCircle className="h-8 w-8" />
+                        <PlayCircle className="h-5 w-5" />
                         <span className="sr-only">Play</span>
                     </Button>
-                </div>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            size="icon"
+                            variant="secondary"
+                            className="h-10 w-10 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20"
+                            onClick={(e) => handleNavigation(e, `/media/${item.media_type}/${item.id}`)}
+                        >
+                            <Info className="h-5 w-5" />
+                            <span className="sr-only">More Info</span>
+                        </Button>
+                        <Button 
+                            size="icon" 
+                            variant="secondary" 
+                            className="h-10 w-10 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20" 
+                            onClick={handleToggleWatchlist}
+                        >
+                            {isWatchlistLoading ? (
+                                <Loader2 className="animate-spin w-5 h-5" />
+                            ) : onWatchlist ? (
+                                <BookmarkCheck className="w-5 h-5 text-primary" />
+                            ) : (
+                                <Bookmark className="w-5 h-5" />
+                            )}
+                            <span className="sr-only">Add to watchlist</span>
+                        </Button>
+                    </div>
+                </motion.div>
             </Card>
         </motion.div>
     );
@@ -137,7 +179,7 @@ export default function ForYouCarousel() {
   const [error, setError] = React.useState<string | null>(null);
 
   const fetchRecommendations = React.useCallback(async (currentWatchlist: Media[]) => {
-    if (currentWatchlist.length < 2) {
+    if (currentWatchlist.length < 1) {
       setRecommendations([]);
       return;
     }
@@ -146,18 +188,23 @@ export default function ForYouCarousel() {
     setError(null);
 
     try {
-      const fullWatchlistDetails = await Promise.all(
-        currentWatchlist.map(item => getMediaDetails(item.id, item.media_type as 'movie' | 'tv'))
+      const fullWatchlistDetailsPromises = currentWatchlist.map(item =>
+        getMediaDetails(item.id, item.media_type as 'movie' | 'tv').then(details => ({
+          ...details,
+          // Ensure media_type from original item is preserved
+          media_type: item.media_type,
+        }))
       );
+      
+      const fullWatchlistDetails = await Promise.all(fullWatchlistDetailsPromises);
 
       const watchlistPayload: RecommendationsInput = {
-        watchlist: fullWatchlistDetails.map((item, index) => {
-          const originalItem = currentWatchlist[index];
+        watchlist: fullWatchlistDetails.map(item => {
           return {
             id: typeof item.id === 'string' ? parseInt(item.id, 10) : item.id,
             title: item.title,
             name: item.name,
-            media_type: originalItem.media_type,
+            media_type: item.media_type, // This is now guaranteed to be present
             genres: item.genres?.map(g => g.name) || [],
             original_language: (item as any)?.original_language || 'en',
           };
@@ -207,7 +254,10 @@ export default function ForYouCarousel() {
 
   React.useEffect(() => {
     if (user && !user.isAnonymous && !isWatchlistLoading && watchlist.length > 0) {
-        fetchRecommendations(watchlist);
+        const timeoutId = setTimeout(() => {
+            fetchRecommendations(watchlist);
+        }, 500); // Debounce to prevent rapid refetching
+        return () => clearTimeout(timeoutId);
     }
   }, [user, isWatchlistLoading, watchlist, fetchRecommendations]);
 
@@ -216,7 +266,7 @@ export default function ForYouCarousel() {
     return null;
   }
   
-  if (!user || user.isAnonymous || watchlist.length < 2) {
+  if (!user || user.isAnonymous || watchlist.length < 1) {
       return null;
   }
   
