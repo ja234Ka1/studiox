@@ -9,14 +9,14 @@ import { DetailPageHero } from "@/components/detail-page-hero";
 import { EpisodeSelector } from "@/components/episode-selector";
 import { CastSection } from "@/components/cast-section";
 
-interface MediaDetailsPageProps {
+interface PageProps {
   params: {
     mediaType: MediaType;
     id: string;
   };
 }
 
-export default async function MediaDetailsPage({ params }: MediaDetailsPageProps) {
+export default async function MediaDetailsPage({ params }: PageProps) {
   const { mediaType, id } = params;
   
   if (mediaType !== "movie" && mediaType !== "tv") {
